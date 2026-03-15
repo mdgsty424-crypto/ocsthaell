@@ -1,0 +1,240 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ===============================================================
+    // Assumed Data Model
+    // ===============================================================
+    //
+    // Collection: users
+    // Document ID: userId (matches auth.uid)
+    // Fields:
+    //   - email: string (required)
+    //   - role: string (required, 'admin')
+    //   - createdAt: timestamp (required, immutable)
+    //
+    // Collection: apps
+    // Document ID: auto-generated
+    // Fields:
+    //   - name: string (required, max 100 chars)
+    //   - description: string (required, max 500 chars)
+    //   - iconUrl: string (required, url)
+    //   - link: string (required, url)
+    //   - createdAt: timestamp (required, immutable)
+    //
+    // Collection: services
+    // Document ID: auto-generated
+    // Fields:
+    //   - title: string (required, max 100 chars)
+    //   - description: string (required, max 500 chars)
+    //   - iconName: string (required, max 50 chars)
+    //   - createdAt: timestamp (required, immutable)
+    //
+    // Collection: ads
+    // Document ID: auto-generated
+    // Fields:
+    //   - title: string (required, max 100 chars)
+    //   - imageUrl: string (required, url)
+    //   - link: string (required, url)
+    //   - position: string (required, in ['hero', 'section', 'sidebar'])
+    //   - active: boolean (required)
+    //   - createdAt: timestamp (required, immutable)
+    //
+    // Collection: stats
+    // Document ID: 'main'
+    // Fields:
+    //   - users: number (required, >= 0)
+    //   - apps: number (required, >= 0)
+    //   - downloads: number (required, >= 0)
+    //   - growth: number (required, >= 0)
+    //
+    // Collection: gallery
+    // Document ID: auto-generated
+    // Fields:
+    //   - title: string (required, max 100 chars)
+    //   - imageUrl: string (required, url)
+    //   - createdAt: timestamp (required, immutable)
+    //
+    // Collection: news
+    // Document ID: auto-generated
+    // Fields:
+    //   - title: string (required, max 200 chars)
+    //   - content: string (required, max 5000 chars)
+    //   - imageUrl: string (required, url)
+    //   - date: timestamp (required)
+    //   - createdAt: timestamp (required, immutable)
+    //
+    // Collection: team
+    // Document ID: auto-generated
+    // Fields:
+    //   - name: string (required, max 100 chars)
+    //   - role: string (required, max 100 chars)
+    //   - imageUrl: string (required, url)
+    //   - createdAt: timestamp (required, immutable)
+    //
+    // ===============================================================
+
+    // ===============================================================
+    // Helper Functions
+    // ===============================================================
+
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return isAuthenticated() &&
+        (exists(/databases/$(database)/documents/users/$(request.auth.uid)) && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin' ||
+          (request.auth.token.email == "mdgsty424@gmail.com" && request.auth.token.email_verified == true) ||
+          (request.auth.token.email == "info@ocsthael.com"));
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function hasOnlyAllowedFields(fields) {
+      return request.resource.data.keys().hasOnly(fields);
+    }
+
+    function isValidUrl(url) {
+      return url is string && (url.matches("^https://.*") || url.matches("^http://.*")) && url.size() < 1000;
+    }
+
+    function areImmutableFieldsUnchanged(fields) {
+      return !request.resource.data.diff(resource.data).affectedKeys().hasAny(fields);
+    }
+
+    // ===============================================================
+    // Domain Validators
+    // ===============================================================
+
+    function isValidUser() {
+      return hasOnlyAllowedFields(['email', 'role', 'createdAt']) &&
+             request.resource.data.email is string && request.resource.data.email.size() < 200 &&
+             request.resource.data.role == 'admin' &&
+             request.resource.data.createdAt is timestamp;
+    }
+
+    function isValidApp() {
+      return hasOnlyAllowedFields(['name', 'description', 'iconUrl', 'link', 'createdAt']) &&
+             request.resource.data.name is string && request.resource.data.name.size() > 0 && request.resource.data.name.size() <= 100 &&
+             request.resource.data.description is string && request.resource.data.description.size() <= 500 &&
+             isValidUrl(request.resource.data.iconUrl) &&
+             isValidUrl(request.resource.data.link) &&
+             request.resource.data.createdAt is timestamp;
+    }
+
+    function isValidService() {
+      return hasOnlyAllowedFields(['title', 'description', 'iconName', 'createdAt']) &&
+             request.resource.data.title is string && request.resource.data.title.size() > 0 && request.resource.data.title.size() <= 100 &&
+             request.resource.data.description is string && request.resource.data.description.size() <= 500 &&
+             request.resource.data.iconName is string && request.resource.data.iconName.size() <= 50 &&
+             request.resource.data.createdAt is timestamp;
+    }
+
+    function isValidAd() {
+      return hasOnlyAllowedFields(['title', 'imageUrl', 'link', 'position', 'active', 'createdAt']) &&
+             request.resource.data.title is string && request.resource.data.title.size() > 0 && request.resource.data.title.size() <= 100 &&
+             isValidUrl(request.resource.data.imageUrl) &&
+             isValidUrl(request.resource.data.link) &&
+             request.resource.data.position in ['hero', 'section', 'sidebar'] &&
+             request.resource.data.active is bool &&
+             request.resource.data.createdAt is timestamp;
+    }
+
+    function isValidStat() {
+      return hasOnlyAllowedFields(['users', 'apps', 'downloads', 'growth']) &&
+             request.resource.data.users is number && request.resource.data.users >= 0 &&
+             request.resource.data.apps is number && request.resource.data.apps >= 0 &&
+             request.resource.data.downloads is number && request.resource.data.downloads >= 0 &&
+             request.resource.data.growth is number && request.resource.data.growth >= 0;
+    }
+
+    function isValidGalleryImage() {
+      return hasOnlyAllowedFields(['title', 'imageUrl', 'createdAt']) &&
+             request.resource.data.title is string && request.resource.data.title.size() <= 100 &&
+             isValidUrl(request.resource.data.imageUrl) &&
+             request.resource.data.createdAt is timestamp;
+    }
+
+    function isValidNewsItem() {
+      return hasOnlyAllowedFields(['title', 'content', 'imageUrl', 'date', 'createdAt']) &&
+             request.resource.data.title is string && request.resource.data.title.size() > 0 && request.resource.data.title.size() <= 200 &&
+             request.resource.data.content is string && request.resource.data.content.size() <= 5000 &&
+             isValidUrl(request.resource.data.imageUrl) &&
+             request.resource.data.date is timestamp &&
+             request.resource.data.createdAt is timestamp;
+    }
+
+    function isValidTeamMember() {
+      return hasOnlyAllowedFields(['name', 'role', 'imageUrl', 'createdAt']) &&
+             request.resource.data.name is string && request.resource.data.name.size() > 0 && request.resource.data.name.size() <= 100 &&
+             request.resource.data.role is string && request.resource.data.role.size() <= 100 &&
+             isValidUrl(request.resource.data.imageUrl) &&
+             request.resource.data.createdAt is timestamp;
+    }
+
+    // ===============================================================
+    // Rules
+    // ===============================================================
+
+    match /users/{userId} {
+      // Only the user themselves can read their own data, or an admin
+      allow read: if isOwner(userId) || isAdmin();
+      allow create: if isAdmin() && isValidUser() && isOwner(userId);
+      allow update: if isAdmin() && isValidUser() && areImmutableFieldsUnchanged(['createdAt']);
+      allow delete: if isAdmin();
+    }
+
+    match /apps/{appId} {
+      allow read: if true;
+      allow create: if isAdmin() && isValidApp();
+      allow update: if isAdmin() && isValidApp() && areImmutableFieldsUnchanged(['createdAt']);
+      allow delete: if isAdmin();
+    }
+
+    match /services/{serviceId} {
+      allow read: if true;
+      allow create: if isAdmin() && isValidService();
+      allow update: if isAdmin() && isValidService() && areImmutableFieldsUnchanged(['createdAt']);
+      allow delete: if isAdmin();
+    }
+
+    match /ads/{adId} {
+      allow read: if true;
+      allow create: if isAdmin() && isValidAd();
+      allow update: if isAdmin() && isValidAd() && areImmutableFieldsUnchanged(['createdAt']);
+      allow delete: if isAdmin();
+    }
+
+    match /stats/main {
+      allow read: if true;
+      allow create: if isAdmin() && isValidStat();
+      allow update: if isAdmin() && isValidStat();
+      allow delete: if isAdmin();
+    }
+
+    match /gallery/{imageId} {
+      allow read: if true;
+      allow create: if isAdmin() && isValidGalleryImage();
+      allow update: if isAdmin() && isValidGalleryImage() && areImmutableFieldsUnchanged(['createdAt']);
+      allow delete: if isAdmin();
+    }
+
+    match /news/{newsId} {
+      allow read: if true;
+      allow create: if isAdmin() && isValidNewsItem();
+      allow update: if isAdmin() && isValidNewsItem() && areImmutableFieldsUnchanged(['createdAt']);
+      allow delete: if isAdmin();
+    }
+
+    match /team/{memberId} {
+      allow read: if true;
+      allow create: if isAdmin() && isValidTeamMember();
+      allow update: if isAdmin() && isValidTeamMember() && areImmutableFieldsUnchanged(['createdAt']);
+      allow delete: if isAdmin();
+    }
+  }
+}

@@ -1,0 +1,176 @@
+@import url("https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@300;400;500;600;700&display=swap");
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Outfit", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
+
+  --color-brand-dark: #05050a;
+  --color-brand-cyan: #00f0ff;
+  --color-brand-purple: #8a2be2;
+  --color-brand-blue: #3b82f6;
+  --color-brand-pink: #ec4899;
+  --color-brand-mango: #ffbe00;
+
+  --color-glass: rgba(255, 255, 255, 0.03);
+  --color-glass-border: rgba(255, 255, 255, 0.08);
+}
+
+body {
+  background-color: #ffffff;
+  color: #111827;
+  font-family: var(--font-sans);
+  overflow-x: hidden;
+  transition:
+    background-color 0.3s ease,
+    color 0.3s ease;
+}
+
+.glass-panel {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+}
+
+.text-gradient {
+  background: linear-gradient(
+    to right,
+    var(--color-brand-blue),
+    var(--color-brand-pink),
+    var(--color-brand-mango)
+  );
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.bg-gradient-brand {
+  background: linear-gradient(
+    135deg,
+    var(--color-brand-blue),
+    var(--color-brand-pink),
+    var(--color-brand-mango)
+  );
+}
+
+.glow-blue {
+  box-shadow: 0 0 20px rgba(59, 130, 246, 0.5);
+}
+
+.glow-pink {
+  box-shadow: 0 0 20px rgba(236, 72, 153, 0.5);
+}
+
+.glow-mango {
+  box-shadow: 0 0 20px rgba(255, 190, 0, 0.5);
+}
+
+@keyframes float {
+  0% { transform: translate(0, 0) rotate(0deg); }
+  33% { transform: translate(30px, -50px) rotate(120deg); }
+  66% { transform: translate(-20px, 20px) rotate(240deg); }
+  100% { transform: translate(0, 0) rotate(360deg); }
+}
+
+@keyframes liquid {
+  0% { border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%; }
+  50% { border-radius: 30% 60% 70% 40% / 50% 60% 30% 60%; }
+  100% { border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%; }
+}
+
+@keyframes star-pulse {
+  0%, 100% { transform: scale(1) rotate(0deg); opacity: 0.5; }
+  50% { transform: scale(1.2) rotate(180deg); opacity: 1; }
+}
+
+.animate-float {
+  animation: float 15s infinite linear;
+}
+
+.animate-liquid {
+  animation: liquid 8s infinite ease-in-out;
+}
+
+.animate-star {
+  animation: star-pulse 4s infinite ease-in-out;
+}
+
+@keyframes blob {
+  0% {
+    transform: translate(0px, 0px) scale(1);
+  }
+  33% {
+    transform: translate(30px, -50px) scale(1.1);
+  }
+  66% {
+    transform: translate(-20px, 20px) scale(0.9);
+  }
+  100% {
+    transform: translate(0px, 0px) scale(1);
+  }
+}
+
+@keyframes move-bg {
+  0% {
+    background-position: 0 0;
+  }
+  100% {
+    background-position: 100px 100px;
+  }
+}
+
+.animate-blob {
+  animation: blob 7s infinite;
+}
+
+.animation-delay-2000 {
+  animation-delay: 2s;
+}
+
+.animation-delay-4000 {
+  animation-delay: 4s;
+}
+
+/* Button Animations */
+.btn-anim-glow button,
+.btn-anim-glow a[class*="px-"],
+.btn-anim-glow a[class*="py-"] {
+  transition:
+    box-shadow 0.3s ease,
+    transform 0.3s ease;
+}
+.btn-anim-glow button:hover,
+.btn-anim-glow a[class*="px-"]:hover,
+.btn-anim-glow a[class*="py-"]:hover {
+  box-shadow: 0 0 20px var(--primary-color, #0047ff);
+}
+
+.btn-anim-pulse button,
+.btn-anim-pulse a[class*="px-"],
+.btn-anim-pulse a[class*="py-"] {
+  animation: pulse-btn 2s infinite;
+}
+@keyframes pulse-btn {
+  0% {
+    box-shadow: 0 0 0 0 rgba(0, 71, 255, 0.4);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(0, 71, 255, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(0, 71, 255, 0);
+  }
+}
+
+.btn-anim-bounce button,
+.btn-anim-bounce a[class*="px-"],
+.btn-anim-bounce a[class*="py-"] {
+  transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+.btn-anim-bounce button:hover,
+.btn-anim-bounce a[class*="px-"]:hover,
+.btn-anim-bounce a[class*="py-"]:hover {
+  transform: translateY(-4px) scale(1.05);
+}

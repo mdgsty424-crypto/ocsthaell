@@ -1,0 +1,136 @@
+{
+  "entities": {
+    "App": {
+      "title": "App",
+      "description": "An OCSTHAEL application",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string", "description": "Name of the app" },
+        "description": { "type": "string", "description": "Short description" },
+        "iconUrl": { "type": "string", "description": "URL to the app icon" },
+        "link": { "type": "string", "description": "Link to learn more or download" },
+        "createdAt": { "type": "timestamp" }
+      },
+      "required": ["name", "description", "iconUrl", "link", "createdAt"]
+    },
+    "Service": {
+      "title": "Service",
+      "description": "A service offered by OCSTHAEL",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "description": { "type": "string" },
+        "iconName": { "type": "string", "description": "Lucide icon name" },
+        "createdAt": { "type": "timestamp" }
+      },
+      "required": ["title", "description", "iconName", "createdAt"]
+    },
+    "Ad": {
+      "title": "Advertisement",
+      "description": "A banner or promotional ad",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "imageUrl": { "type": "string" },
+        "link": { "type": "string" },
+        "position": { "type": "string", "enum": ["hero", "section", "sidebar"] },
+        "active": { "type": "boolean" },
+        "createdAt": { "type": "timestamp" }
+      },
+      "required": ["title", "imageUrl", "link", "position", "active", "createdAt"]
+    },
+    "Stat": {
+      "title": "Statistic",
+      "description": "Company statistics",
+      "type": "object",
+      "properties": {
+        "users": { "type": "number" },
+        "apps": { "type": "number" },
+        "downloads": { "type": "number" },
+        "growth": { "type": "number" }
+      },
+      "required": ["users", "apps", "downloads", "growth"]
+    },
+    "GalleryImage": {
+      "title": "Gallery Image",
+      "description": "Image for the gallery",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "imageUrl": { "type": "string" },
+        "createdAt": { "type": "timestamp" }
+      },
+      "required": ["title", "imageUrl", "createdAt"]
+    },
+    "NewsItem": {
+      "title": "News Item",
+      "description": "News and updates",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "content": { "type": "string" },
+        "imageUrl": { "type": "string" },
+        "date": { "type": "timestamp" },
+        "createdAt": { "type": "timestamp" }
+      },
+      "required": ["title", "content", "imageUrl", "date", "createdAt"]
+    },
+    "TeamMember": {
+      "title": "Team Member",
+      "description": "A member of the OCSTHAEL team",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "role": { "type": "string" },
+        "imageUrl": { "type": "string" },
+        "createdAt": { "type": "timestamp" }
+      },
+      "required": ["name", "role", "imageUrl", "createdAt"]
+    },
+    "User": {
+      "title": "User",
+      "description": "Admin user",
+      "type": "object",
+      "properties": {
+        "email": { "type": "string" },
+        "role": { "type": "string", "enum": ["admin"] },
+        "createdAt": { "type": "timestamp" }
+      },
+      "required": ["email", "role", "createdAt"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": { "$ref": "#/entities/User" },
+      "description": "Collection of users"
+    },
+    "/apps/{appId}": {
+      "schema": { "$ref": "#/entities/App" },
+      "description": "Collection of apps"
+    },
+    "/services/{serviceId}": {
+      "schema": { "$ref": "#/entities/Service" },
+      "description": "Collection of services"
+    },
+    "/ads/{adId}": {
+      "schema": { "$ref": "#/entities/Ad" },
+      "description": "Collection of advertisements"
+    },
+    "/stats/main": {
+      "schema": { "$ref": "#/entities/Stat" },
+      "description": "Single document for main stats"
+    },
+    "/gallery/{imageId}": {
+      "schema": { "$ref": "#/entities/GalleryImage" },
+      "description": "Collection of gallery images"
+    },
+    "/news/{newsId}": {
+      "schema": { "$ref": "#/entities/NewsItem" },
+      "description": "Collection of news items"
+    },
+    "/team/{memberId}": {
+      "schema": { "$ref": "#/entities/TeamMember" },
+      "description": "Collection of team members"
+    }
+  }
+}
