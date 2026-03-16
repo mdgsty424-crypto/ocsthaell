@@ -1,17 +1,21 @@
 import { Link, useLocation } from 'react-router-dom';
 import { motion } from 'motion/react';
-import { Menu, X } from 'lucide-react';
+import { Menu, X, User } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { clsx } from 'clsx';
 import { doc, onSnapshot } from 'firebase/firestore';
 import { db } from '../firebase';
 import Logo from './Logo';
+import { useAuth } from '../context/AuthContext';
 
 const navLinks = [
   { name: 'Home', path: '/' },
   { name: 'About', path: '/about' },
   { name: 'Apps', path: '/apps' },
-  { name: 'Our Staff', path: '/team' },
+  { name: 'Services', path: '/services' },
+  { name: 'Our Team', path: '/team' },
+  { name: 'Our Staff', path: '/staff' },
+  { name: 'Members', path: '/members' },
   { name: 'Gallery', path: '/gallery' },
   { name: 'News', path: '/news' },
   { name: 'Contact', path: '/contact' },
@@ -22,6 +26,7 @@ export default function Navbar() {
   const location = useLocation();
   const [logoUrl, setLogoUrl] = useState<string | null>(null);
   const [isScrolled, setIsScrolled] = useState(false);
+  const { user, isAdmin } = useAuth();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -58,7 +63,7 @@ export default function Navbar() {
           </Link>
 
           {/* Desktop Nav */}
-          <div className="hidden md:flex items-center space-x-10">
+          <div className="hidden md:flex items-center space-x-4 lg:space-x-6">
             {navLinks.map((link) => (
               <Link
                 key={link.name}
@@ -75,9 +80,16 @@ export default function Navbar() {
                 )}></span>
               </Link>
             ))}
-            <Link to="/register" className="px-8 py-3 rounded-2xl bg-brand-blue text-white font-bold shadow-lg hover:bg-brand-blue/90 hover:-translate-y-0.5 transition-all active:scale-95">
-              Get Started
-            </Link>
+            {user ? (
+              <Link to={isAdmin ? "/admin/dashboard" : "/dashboard"} className="px-6 py-2.5 rounded-2xl bg-gray-100 text-gray-900 font-bold hover:bg-gray-200 transition-all flex items-center">
+                <User className="w-4 h-4 mr-2" />
+                Dashboard
+              </Link>
+            ) : (
+              <Link to="/register" className="px-8 py-3 rounded-2xl bg-brand-blue text-white font-bold shadow-lg hover:bg-brand-blue/90 hover:-translate-y-0.5 transition-all active:scale-95">
+                Get Started
+              </Link>
+            )}
           </div>
 
           {/* Mobile Menu Button */}
@@ -116,13 +128,24 @@ export default function Navbar() {
                 {link.name}
               </Link>
             ))}
-            <Link
-              to="/register"
-              onClick={() => setIsOpen(false)}
-              className="block px-4 py-4 rounded-2xl text-center text-base font-bold text-white bg-brand-blue shadow-lg"
-            >
-              Get Started
-            </Link>
+            {user ? (
+              <Link
+                to={isAdmin ? "/admin/dashboard" : "/dashboard"}
+                onClick={() => setIsOpen(false)}
+                className="block px-4 py-4 rounded-2xl text-center text-base font-bold text-gray-900 bg-gray-100 flex items-center justify-center"
+              >
+                <User className="w-5 h-5 mr-2" />
+                Dashboard
+              </Link>
+            ) : (
+              <Link
+                to="/register"
+                onClick={() => setIsOpen(false)}
+                className="block px-4 py-4 rounded-2xl text-center text-base font-bold text-white bg-brand-blue shadow-lg"
+              >
+                Get Started
+              </Link>
+            )}
           </div>
         </motion.div>
       )}

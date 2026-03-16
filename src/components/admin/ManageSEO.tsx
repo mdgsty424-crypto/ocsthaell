@@ -57,14 +57,14 @@ export default function ManageSEO() {
   return (
     <div className="space-y-8">
       <div className="flex justify-between items-center">
-        <h2 className="text-3xl font-display font-bold text-white flex items-center">
-          <Search className="w-8 h-8 mr-3 text-[#00ffcc]" />
+        <h2 className="text-3xl font-display font-bold text-brand-blue flex items-center">
+          <Search className="w-8 h-8 mr-3 text-brand-blue" />
           Script & SEO Control
         </h2>
         <button
           onClick={handleSave}
           disabled={loading}
-          className="flex items-center px-6 py-3 bg-gradient-to-r from-[#0047ff] to-[#00ffcc] text-black font-bold rounded-xl hover:shadow-[0_0_20px_rgba(0,255,204,0.4)] transition-all disabled:opacity-50"
+          className="flex items-center px-6 py-3 bg-gradient-brand text-white font-bold rounded-xl hover:shadow-lg transition-all disabled:opacity-50"
         >
           <Save className="w-5 h-5 mr-2" />
           {loading ? 'Saving...' : 'Save Changes'}
@@ -72,7 +72,7 @@ export default function ManageSEO() {
       </div>
 
       {message.text && (
-        <div className={`p-4 rounded-xl ${message.type === 'success' ? 'bg-green-500/20 text-green-400 border border-green-500/50' : 'bg-red-500/20 text-red-400 border border-red-500/50'}`}>
+        <div className={`p-4 rounded-xl ${message.type === 'success' ? 'bg-green-50 text-green-600 border border-green-200' : 'bg-red-50 text-red-600 border border-red-200'}`}>
           {message.text}
         </div>
       )}
@@ -81,42 +81,42 @@ export default function ManageSEO() {
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-[#0f131f] border border-white/10 rounded-2xl p-6"
+          className="bg-white border border-gray-100 shadow-sm rounded-2xl p-6"
         >
-          <h3 className="text-xl font-bold text-white mb-6 flex items-center">
+          <h3 className="text-xl font-bold text-gray-900 mb-6 flex items-center">
             <Globe className="w-5 h-5 mr-2 text-gray-400" /> Global SEO Meta Tags
           </h3>
           <div className="space-y-6">
             <div>
-              <label className="block text-sm font-medium text-gray-400 mb-2">Default Site Title</label>
+              <label className="block text-sm font-medium text-gray-600 mb-2">Default Site Title</label>
               <input
                 type="text"
                 name="siteTitle"
                 value={seoData.siteTitle}
                 onChange={handleChange}
-                className="w-full bg-black border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-[#00ffcc]"
+                className="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-gray-900 focus:outline-none focus:border-brand-blue"
                 placeholder="e.g., OCSTHAEL - Digital Ecosystem"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-400 mb-2">Meta Description</label>
+              <label className="block text-sm font-medium text-gray-600 mb-2">Meta Description</label>
               <textarea
                 name="metaDescription"
                 value={seoData.metaDescription}
                 onChange={handleChange}
                 rows={4}
-                className="w-full bg-black border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-[#00ffcc] resize-none"
+                className="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-gray-900 focus:outline-none focus:border-brand-blue resize-none"
                 placeholder="Brief description of the website for search engines..."
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-400 mb-2">Meta Keywords (Comma separated)</label>
+              <label className="block text-sm font-medium text-gray-600 mb-2">Meta Keywords (Comma separated)</label>
               <input
                 type="text"
                 name="metaKeywords"
                 value={seoData.metaKeywords}
                 onChange={handleChange}
-                className="w-full bg-black border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-[#00ffcc]"
+                className="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-gray-900 focus:outline-none focus:border-brand-blue"
                 placeholder="tech, ecosystem, social, chat"
               />
             </div>
@@ -127,52 +127,52 @@ export default function ManageSEO() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="bg-[#0f131f] border border-white/10 rounded-2xl p-6"
+          className="bg-white border border-gray-100 shadow-sm rounded-2xl p-6"
         >
-          <h3 className="text-xl font-bold text-white mb-6 flex items-center">
+          <h3 className="text-xl font-bold text-gray-900 mb-6 flex items-center">
             <Code className="w-5 h-5 mr-2 text-gray-400" /> Tracking & Custom Scripts
           </h3>
           <div className="space-y-6">
             <div>
-              <label className="block text-sm font-medium text-gray-400 mb-2">Google Analytics ID (e.g., G-XXXXXXXXXX)</label>
+              <label className="block text-sm font-medium text-gray-600 mb-2">Google Analytics ID (e.g., G-XXXXXXXXXX)</label>
               <input
                 type="text"
                 name="googleAnalyticsId"
                 value={seoData.googleAnalyticsId}
                 onChange={handleChange}
-                className="w-full bg-black border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-[#00ffcc] font-mono"
+                className="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-gray-900 focus:outline-none focus:border-brand-blue font-mono"
                 placeholder="G-"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-400 mb-2">Facebook Pixel ID</label>
+              <label className="block text-sm font-medium text-gray-600 mb-2">Facebook Pixel ID</label>
               <input
                 type="text"
                 name="facebookPixelId"
                 value={seoData.facebookPixelId}
                 onChange={handleChange}
-                className="w-full bg-black border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-[#00ffcc] font-mono"
+                className="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-gray-900 focus:outline-none focus:border-brand-blue font-mono"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-400 mb-2">Custom &lt;head&gt; Scripts</label>
+              <label className="block text-sm font-medium text-gray-600 mb-2">Custom &lt;head&gt; Scripts</label>
               <textarea
                 name="customHeadScript"
                 value={seoData.customHeadScript}
                 onChange={handleChange}
                 rows={4}
-                className="w-full bg-black border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-[#00ffcc] font-mono text-sm resize-none"
+                className="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-gray-900 focus:outline-none focus:border-brand-blue font-mono text-sm resize-none"
                 placeholder="<!-- Paste custom scripts here -->"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-400 mb-2">Custom &lt;body&gt; Scripts</label>
+              <label className="block text-sm font-medium text-gray-600 mb-2">Custom &lt;body&gt; Scripts</label>
               <textarea
                 name="customBodyScript"
                 value={seoData.customBodyScript}
                 onChange={handleChange}
                 rows={4}
-                className="w-full bg-black border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-[#00ffcc] font-mono text-sm resize-none"
+                className="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-gray-900 focus:outline-none focus:border-brand-blue font-mono text-sm resize-none"
                 placeholder="<!-- Paste custom scripts here -->"
               />
             </div>

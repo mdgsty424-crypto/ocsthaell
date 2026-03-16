@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { motion } from 'motion/react';
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword, signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
-import { auth } from '../firebase';
+import { auth, db } from '../firebase';
+import { doc, setDoc, getDoc, serverTimestamp } from 'firebase/firestore';
 import { useNavigate } from 'react-router-dom';
 import { Hexagon, Lock, Mail } from 'lucide-react';
 
@@ -18,12 +19,36 @@ export default function AdminLogin() {
     setLoading(true);
     setError('');
     try {
+      let userCredential;
       if (isSignUp) {
-        await createUserWithEmailAndPassword(auth, email, password);
+        userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        // Create user document
+        await setDoc(doc(db, 'users', userCredential.user.uid), {
+          email: userCredential.user.email,
+          role: 'user', // Default role
+          createdAt: serverTimestamp()
+        });
+        navigate('/dashboard');
       } else {
-        await signInWithEmailAndPassword(auth, email, password);
+        userCredential = await signInWithEmailAndPassword(auth, email, password);
+        // Ensure user document exists
+        const userDoc = await getDoc(doc(db, 'users', userCredential.user.uid));
+        if (!userDoc.exists()) {
+          await setDoc(doc(db, 'users', userCredential.user.uid), {
+            email: userCredential.user.email,
+            role: 'user',
+            createdAt: serverTimestamp()
+          });
+          navigate('/dashboard');
+        } else {
+          const role = userDoc.data().role;
+          if (role === 'admin' || userCredential.user.email === 'mdgsty424@gmail.com' || userCredential.user.email === 'info@ocsthael.com') {
+            navigate('/admin/dashboard');
+          } else {
+            navigate('/dashboard');
+          }
+        }
       }
-      navigate('/admin/dashboard');
     } catch (err: any) {
       if (err.code === 'auth/invalid-credential') {
         setError('Invalid email or password. If you don\'t have an account, please Sign Up first.');
@@ -43,8 +68,29 @@ export default function AdminLogin() {
     setError('');
     try {
       const provider = new GoogleAuthProvider();
-      await signInWithPopup(auth, provider);
-      navigate('/admin/dashboard');
+      const userCredential = await signInWithPopup(auth, provider);
+      
+      // Ensure user document exists
+      const userDoc = await getDoc(doc(db, 'users', userCredential.user.uid));
+      if (!userDoc.exists()) {
+        const userData: any = {
+          email: userCredential.user.email,
+          role: 'user',
+          createdAt: serverTimestamp()
+        };
+        if (userCredential.user.displayName) {
+          userData.displayName = userCredential.user.displayName;
+        }
+        await setDoc(doc(db, 'users', userCredential.user.uid), userData);
+        navigate('/dashboard');
+      } else {
+        const role = userDoc.data().role;
+        if (role === 'admin' || userCredential.user.email === 'mdgsty424@gmail.com' || userCredential.user.email === 'info@ocsthael.com') {
+          navigate('/admin/dashboard');
+        } else {
+          navigate('/dashboard');
+        }
+      }
     } catch (err: any) {
       setError(err.message || 'Failed to log in with Google');
       console.error(err);

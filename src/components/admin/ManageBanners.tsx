@@ -81,18 +81,18 @@ export default function ManageBanners() {
   return (
     <div>
       <div className="flex justify-between items-center mb-8">
-        <h2 className="text-3xl font-display font-bold text-gray-900">Manage Snap-Scroll Banners</h2>
+        <h2 className="text-3xl font-display font-bold text-brand-blue">Manage Snap-Scroll Banners</h2>
         <button
           onClick={() => { setCurrentBanner({ active: true, mediaType: 'image' }); setIsEditing(true); }}
-          className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+          className="flex items-center px-4 py-2 bg-brand-blue/10 text-brand-blue border border-brand-blue/50 rounded-lg hover:bg-brand-blue/20 transition-colors"
         >
           <Plus className="w-5 h-5 mr-2" /> Add Banner
         </button>
       </div>
 
       {isEditing && (
-        <div className="bg-white p-6 rounded-2xl mb-8 border border-gray-200 shadow-sm relative">
-          <button onClick={() => setIsEditing(false)} className="absolute top-4 right-4 text-gray-400 hover:text-gray-900">
+        <div className="glass-panel p-6 rounded-2xl mb-8 border border-gray-100 shadow-sm relative bg-white/80 backdrop-blur-md">
+          <button onClick={() => setIsEditing(false)} className="absolute top-4 right-4 text-gray-400 hover:text-gray-600">
             <X className="w-6 h-6" />
           </button>
           <h3 className="text-xl font-bold text-gray-900 mb-6">{currentBanner.id ? 'Edit Banner' : 'New Banner'}</h3>
@@ -104,7 +104,7 @@ export default function ManageBanners() {
                 required
                 value={currentBanner.title || ''}
                 onChange={e => setCurrentBanner({ ...currentBanner, title: e.target.value })}
-                className="w-full bg-gray-50 border border-gray-300 rounded-xl px-4 py-3 text-gray-900 focus:outline-none focus:border-blue-500 transition-colors"
+                className="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-gray-900 focus:outline-none focus:border-brand-blue transition-colors"
               />
             </div>
             
@@ -115,7 +115,7 @@ export default function ManageBanners() {
                 rows={3}
                 value={currentBanner.description || ''}
                 onChange={e => setCurrentBanner({ ...currentBanner, description: e.target.value })}
-                className="w-full bg-gray-50 border border-gray-300 rounded-xl px-4 py-3 text-gray-900 focus:outline-none focus:border-blue-500 transition-colors"
+                className="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-gray-900 focus:outline-none focus:border-brand-blue transition-colors"
               />
             </div>
 
@@ -125,7 +125,7 @@ export default function ManageBanners() {
                 <select
                   value={currentBanner.mediaType || 'image'}
                   onChange={e => setCurrentBanner({ ...currentBanner, mediaType: e.target.value as any })}
-                  className="w-full bg-gray-50 border border-gray-300 rounded-xl px-4 py-3 text-gray-900 focus:outline-none focus:border-blue-500 transition-colors appearance-none"
+                  className="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-gray-900 focus:outline-none focus:border-brand-blue transition-colors appearance-none"
                 >
                   <option value="image">Image</option>
                   <option value="video">Video</option>
@@ -139,7 +139,7 @@ export default function ManageBanners() {
                     onChange={e => setCurrentBanner({ ...currentBanner, active: e.target.checked })}
                     className="sr-only peer"
                   />
-                  <div className="w-11 h-6 bg-gray-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                  <div className="w-11 h-6 bg-gray-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-brand-blue"></div>
                   <span className="ml-3 text-sm font-medium text-gray-700">Active Status</span>
                 </label>
               </div>
@@ -158,7 +158,7 @@ export default function ManageBanners() {
                   type="url"
                   value={currentBanner.youtubeLink || ''}
                   onChange={e => setCurrentBanner({ ...currentBanner, youtubeLink: e.target.value })}
-                  className="w-full bg-gray-50 border border-gray-300 rounded-xl px-4 py-3 text-gray-900 focus:outline-none focus:border-blue-500 transition-colors"
+                  className="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-gray-900 focus:outline-none focus:border-brand-blue transition-colors"
                 />
               </div>
               <div>
@@ -167,13 +167,13 @@ export default function ManageBanners() {
                   type="url"
                   value={currentBanner.facebookLink || ''}
                   onChange={e => setCurrentBanner({ ...currentBanner, facebookLink: e.target.value })}
-                  className="w-full bg-gray-50 border border-gray-300 rounded-xl px-4 py-3 text-gray-900 focus:outline-none focus:border-blue-500 transition-colors"
+                  className="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-gray-900 focus:outline-none focus:border-brand-blue transition-colors"
                 />
               </div>
             </div>
 
             <div className="flex justify-end pt-4">
-              <button type="submit" className="px-6 py-3 bg-blue-600 text-white rounded-xl font-semibold hover:bg-blue-700 transition-all">
+              <button type="submit" className="px-6 py-3 bg-gradient-brand text-white rounded-xl font-semibold hover:shadow-lg transition-all">
                 Save Banner
               </button>
             </div>
@@ -183,12 +183,12 @@ export default function ManageBanners() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {banners.map(banner => (
-          <div key={banner.id} className="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm flex flex-col relative overflow-hidden">
+          <div key={banner.id} className="glass-panel p-6 rounded-2xl border border-gray-100 shadow-sm flex flex-col relative overflow-hidden bg-white">
             <div className="absolute top-4 right-4 flex space-x-2 z-10">
               <button onClick={() => toggleActive(banner.id, banner.active)} className={`p-2 rounded-full bg-white shadow ${banner.active ? 'text-green-500 hover:text-green-600' : 'text-gray-400 hover:text-gray-500'}`} title="Toggle Active">
                 {banner.active ? <CheckCircle className="w-5 h-5" /> : <XCircle className="w-5 h-5" />}
               </button>
-              <button onClick={() => { setCurrentBanner(banner); setIsEditing(true); }} className="p-2 rounded-full bg-white shadow text-gray-500 hover:text-blue-600">
+              <button onClick={() => { setCurrentBanner(banner); setIsEditing(true); }} className="p-2 rounded-full bg-white shadow text-gray-500 hover:text-brand-blue">
                 <Edit2 className="w-5 h-5" />
               </button>
               <button onClick={() => handleDelete(banner.id)} className="p-2 rounded-full bg-white shadow text-gray-500 hover:text-red-500">

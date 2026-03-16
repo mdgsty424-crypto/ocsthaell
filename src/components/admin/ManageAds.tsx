@@ -75,30 +75,30 @@ export default function ManageAds() {
   return (
     <div>
       <div className="flex justify-between items-center mb-8">
-        <h2 className="text-3xl font-display font-bold text-white">Manage Ads & Banners</h2>
+        <h2 className="text-3xl font-display font-bold text-brand-blue">Manage Ads & Banners</h2>
         <button
           onClick={() => { setCurrentAd({ active: true, position: 'hero' }); setIsEditing(true); }}
-          className="flex items-center px-4 py-2 bg-[#8A2BE2]/20 text-[#8A2BE2] border border-[#8A2BE2]/50 rounded-lg hover:bg-[#8A2BE2]/30 transition-colors"
+          className="flex items-center px-4 py-2 bg-brand-blue/10 text-brand-blue border border-brand-blue/50 rounded-lg hover:bg-brand-blue/20 transition-colors"
         >
           <Plus className="w-5 h-5 mr-2" /> Add Banner
         </button>
       </div>
 
       {isEditing && (
-        <div className="glass-panel p-6 rounded-2xl mb-8 border border-white/10 relative">
-          <button onClick={() => setIsEditing(false)} className="absolute top-4 right-4 text-gray-400 hover:text-white">
+        <div className="glass-panel p-6 rounded-2xl mb-8 border border-gray-100 shadow-sm relative bg-white/80 backdrop-blur-md">
+          <button onClick={() => setIsEditing(false)} className="absolute top-4 right-4 text-gray-400 hover:text-gray-600">
             <X className="w-6 h-6" />
           </button>
-          <h3 className="text-xl font-bold text-white mb-6">{currentAd.id ? 'Edit Banner' : 'New Banner'}</h3>
+          <h3 className="text-xl font-bold text-gray-900 mb-6">{currentAd.id ? 'Edit Banner' : 'New Banner'}</h3>
           <form onSubmit={handleSave} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-400 mb-1">Banner Title</label>
+              <label className="block text-sm font-medium text-gray-600 mb-1">Banner Title</label>
               <input
                 type="text"
                 required
                 value={currentAd.title || ''}
                 onChange={e => setCurrentAd({ ...currentAd, title: e.target.value })}
-                className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-[#00F0FF] transition-colors"
+                className="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-gray-900 focus:outline-none focus:border-brand-blue transition-colors"
               />
             </div>
             
@@ -109,23 +109,23 @@ export default function ManageAds() {
             />
 
             <div>
-              <label className="block text-sm font-medium text-gray-400 mb-1">Target Link URL</label>
+              <label className="block text-sm font-medium text-gray-600 mb-1">Target Link URL</label>
               <input
                 type="url"
                 required
                 value={currentAd.link || ''}
                 onChange={e => setCurrentAd({ ...currentAd, link: e.target.value })}
-                className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-[#00F0FF] transition-colors"
+                className="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-gray-900 focus:outline-none focus:border-brand-blue transition-colors"
               />
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-400 mb-1">Position</label>
+                <label className="block text-sm font-medium text-gray-600 mb-1">Position</label>
                 <select
                   value={currentAd.position || 'hero'}
                   onChange={e => setCurrentAd({ ...currentAd, position: e.target.value as any })}
-                  className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-[#00F0FF] transition-colors appearance-none"
+                  className="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-gray-900 focus:outline-none focus:border-brand-blue transition-colors appearance-none"
                 >
                   <option value="hero">Hero Slider</option>
                   <option value="section">Section Banner</option>
@@ -140,14 +140,14 @@ export default function ManageAds() {
                     onChange={e => setCurrentAd({ ...currentAd, active: e.target.checked })}
                     className="sr-only peer"
                   />
-                  <div className="w-11 h-6 bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#00F0FF]"></div>
-                  <span className="ml-3 text-sm font-medium text-gray-300">Active Status</span>
+                  <div className="w-11 h-6 bg-gray-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-brand-blue"></div>
+                  <span className="ml-3 text-sm font-medium text-gray-700">Active Status</span>
                 </label>
               </div>
             </div>
 
             <div className="flex justify-end pt-4">
-              <button type="submit" className="px-6 py-3 bg-gradient-brand text-white rounded-xl font-semibold hover:glow-purple transition-all">
+              <button type="submit" className="px-6 py-3 bg-gradient-brand text-white rounded-xl font-semibold hover:shadow-lg transition-all">
                 Save Banner
               </button>
             </div>
@@ -157,28 +157,28 @@ export default function ManageAds() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {ads.map(ad => (
-          <div key={ad.id} className="glass-panel p-6 rounded-2xl border border-white/10 flex flex-col relative overflow-hidden">
+          <div key={ad.id} className="glass-panel p-6 rounded-2xl border border-gray-100 shadow-sm flex flex-col relative overflow-hidden bg-white">
             <div className="absolute top-4 right-4 flex space-x-2 z-10">
-              <button onClick={() => toggleActive(ad.id, ad.active)} className={`p-2 rounded-full glass-panel ${ad.active ? 'text-green-400 hover:text-green-300' : 'text-gray-500 hover:text-gray-400'}`} title="Toggle Active">
+              <button onClick={() => toggleActive(ad.id, ad.active)} className={`p-2 rounded-full bg-white shadow ${ad.active ? 'text-green-500 hover:text-green-600' : 'text-gray-400 hover:text-gray-500'}`} title="Toggle Active">
                 {ad.active ? <CheckCircle className="w-5 h-5" /> : <XCircle className="w-5 h-5" />}
               </button>
-              <button onClick={() => { setCurrentAd(ad); setIsEditing(true); }} className="p-2 rounded-full glass-panel text-gray-400 hover:text-[#00F0FF]">
+              <button onClick={() => { setCurrentAd(ad); setIsEditing(true); }} className="p-2 rounded-full bg-white shadow text-gray-500 hover:text-brand-blue">
                 <Edit2 className="w-5 h-5" />
               </button>
-              <button onClick={() => handleDelete(ad.id)} className="p-2 rounded-full glass-panel text-gray-400 hover:text-red-400">
+              <button onClick={() => handleDelete(ad.id)} className="p-2 rounded-full bg-white shadow text-gray-500 hover:text-red-500">
                 <Trash2 className="w-5 h-5" />
               </button>
             </div>
             
-            <div className="aspect-video bg-black rounded-xl mb-4 overflow-hidden border border-white/10 relative">
+            <div className="aspect-video bg-gray-100 rounded-xl mb-4 overflow-hidden border border-gray-200 relative">
               <img src={ad.imageUrl} alt={ad.title} className="w-full h-full object-cover opacity-80" referrerPolicy="no-referrer" />
-              <div className="absolute bottom-2 left-2 px-2 py-1 bg-black/60 backdrop-blur-md rounded text-xs font-bold uppercase text-[#00F0FF]">
+              <div className="absolute bottom-2 left-2 px-2 py-1 bg-black/60 backdrop-blur-md rounded text-xs font-bold uppercase text-white">
                 {ad.position}
               </div>
             </div>
             
-            <h3 className="text-xl font-bold text-white mb-2">{ad.title}</h3>
-            <a href={ad.link} target="_blank" rel="noopener noreferrer" className="text-sm text-gray-400 hover:text-[#00F0FF] truncate">
+            <h3 className="text-xl font-bold text-gray-900 mb-2">{ad.title}</h3>
+            <a href={ad.link} target="_blank" rel="noopener noreferrer" className="text-sm text-brand-blue hover:underline truncate">
               {ad.link}
             </a>
           </div>

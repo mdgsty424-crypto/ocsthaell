@@ -230,7 +230,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Our Staff Section */}
+      {/* Our Team Section */}
       <section className="py-32 relative overflow-hidden bg-transparent text-gray-900">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="text-center mb-24">
@@ -240,7 +240,7 @@ export default function Home() {
               viewport={{ once: true }}
               className="text-5xl md:text-6xl font-display font-bold mb-6 text-brand-blue"
             >
-              Our Staff
+              Our Team
             </motion.h2>
           </div>
 

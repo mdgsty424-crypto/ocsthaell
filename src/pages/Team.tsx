@@ -32,7 +32,6 @@ export default function Team() {
   }, []);
 
   const executives = team.filter(m => m.type === 'Executive');
-  const generalMembers = team.filter(m => m.type !== 'Executive');
 
   return (
     <div className="pt-32 pb-24 min-h-screen bg-white text-gray-900 overflow-hidden relative">
@@ -64,9 +63,9 @@ export default function Team() {
           animate={{ opacity: 1, y: 0 }}
           className="text-center mb-20"
         >
-          <h1 className="text-5xl md:text-7xl font-display font-black mb-6 text-brand-blue">Our <span className="text-brand-pink">Staff</span></h1>
+          <h1 className="text-5xl md:text-7xl font-display font-black mb-6 text-brand-blue">Our <span className="text-brand-pink">Team</span></h1>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto font-medium">
-            Meet the visionaries and experts behind OCSTHAEL. A diverse group dedicated to building the future.
+            Meet the high-level leadership of OCSTHAEL. A diverse group dedicated to building the future.
           </p>
         </motion.div>
 
@@ -158,42 +157,9 @@ export default function Team() {
           </div>
         )}
 
-        {/* General Members Grid Section */}
-        {generalMembers.length > 0 && (
-          <div className="pt-20 border-t border-gray-100">
-            <h2 className="text-4xl font-display font-black mb-12 text-center text-brand-blue">Our <span className="text-brand-pink">Staff</span></h2>
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-12">
-              {generalMembers.map((member, index) => (
-                <motion.div
-                  key={member.id}
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  whileInView={{ opacity: 1, scale: 1 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: index * 0.05 }}
-                  className="text-center group"
-                >
-                  <div className="relative mb-6 mx-auto w-40 h-40 sm:w-48 sm:h-48">
-                    <div className="absolute inset-0 bg-gradient-brand rounded-full scale-105 opacity-0 group-hover:opacity-20 transition-opacity duration-500"></div>
-                    <div className="relative w-full h-full rounded-full overflow-hidden border-4 border-white shadow-lg group-hover:shadow-xl transition-all duration-500">
-                      <img 
-                        src={member.imageUrl || member.image} 
-                        alt={member.name} 
-                        className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700"
-                        referrerPolicy="no-referrer"
-                      />
-                    </div>
-                  </div>
-                  <h3 className="text-xl font-bold text-gray-900 mb-1 group-hover:text-brand-pink transition-colors">{member.name}</h3>
-                  <p className="text-sm font-bold text-brand-blue uppercase tracking-widest">{member.role}</p>
-                </motion.div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {team.length === 0 && (
+        {executives.length === 0 && (
           <div className="text-center text-gray-500 py-20">
-            <p className="text-xl">Team members will be displayed here soon.</p>
+            <p className="text-xl">Leadership team members will be displayed here soon.</p>
           </div>
         )}
       </div>

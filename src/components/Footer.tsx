@@ -166,7 +166,23 @@ export default function Footer() {
                   to="/team"
                   className="text-gray-600 hover:text-brand-blue transition-colors text-sm"
                 >
+                  Our Team
+                </Link>
+              </li>
+              <li>
+                <Link
+                  to="/staff"
+                  className="text-gray-600 hover:text-brand-blue transition-colors text-sm"
+                >
                   Our Staff
+                </Link>
+              </li>
+              <li>
+                <Link
+                  to="/members"
+                  className="text-gray-600 hover:text-brand-blue transition-colors text-sm"
+                >
+                  Members
                 </Link>
               </li>
               <li>

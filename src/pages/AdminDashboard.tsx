@@ -15,6 +15,7 @@ import ManageNews from '../components/admin/ManageNews';
 import ManageTeam from '../components/admin/ManageTeam';
 import ManageTheme from '../components/admin/ManageTheme';
 import ManageSEO from '../components/admin/ManageSEO';
+import ManageUsers from '../components/admin/ManageUsers';
 
 export default function AdminDashboard() {
   const { user } = useAuth();
@@ -37,6 +38,7 @@ export default function AdminDashboard() {
     { name: 'Gallery', path: '/admin/dashboard/gallery', icon: ImageIcon },
     { name: 'News', path: '/admin/dashboard/news', icon: Newspaper },
     { name: 'Our Staff', path: '/admin/dashboard/team', icon: Users },
+    { name: 'Users', path: '/admin/dashboard/users', icon: Users },
     { name: 'SEO & Scripts', path: '/admin/dashboard/seo', icon: Search },
   ];
 
@@ -102,6 +104,7 @@ export default function AdminDashboard() {
             <Route path="/gallery" element={<ManageGallery />} />
             <Route path="/news" element={<ManageNews />} />
             <Route path="/team" element={<ManageTeam />} />
+            <Route path="/users" element={<ManageUsers />} />
             <Route path="/seo" element={<ManageSEO />} />
           </Routes>
         </motion.div>

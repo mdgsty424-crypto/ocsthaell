@@ -3,8 +3,9 @@ import { motion, AnimatePresence } from 'motion/react';
 import { Camera, CheckCircle2, ChevronRight, Mail, Phone, ScanLine, ShieldCheck, Upload, User, Briefcase, Link as LinkIcon } from 'lucide-react';
 import Webcam from 'react-webcam';
 import Tesseract from 'tesseract.js';
-import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
-import { db } from '../firebase';
+import { collection, addDoc, serverTimestamp, setDoc, doc } from 'firebase/firestore';
+import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
+import { db, auth } from '../firebase';
 import { sendOTP, sendEmail, EMAIL_TEMPLATES } from '../services/emailService';
 
 export default function Register() {
@@ -12,6 +13,7 @@ export default function Register() {
   const [formData, setFormData] = useState({
     phone: '',
     email: '',
+    password: '',
     otp: '',
     fullName: '',
     nidNumber: '',
@@ -175,8 +177,31 @@ export default function Register() {
         imageUrl = await uploadToCloudinary(capturedImage);
       }
 
-      // Save to Firestore
+      // Create Firebase Auth User
+      const userCredential = await createUserWithEmailAndPassword(auth, formData.email, formData.password);
+      const user = userCredential.user;
+
+      // Update Auth Profile
+      await updateProfile(user, {
+        displayName: formData.fullName,
+        photoURL: imageUrl || null
+      });
+
+      // Save to Users Collection
+      await setDoc(doc(db, 'users', user.uid), {
+        email: formData.email,
+        role: 'user',
+        displayName: formData.fullName,
+        photoURL: imageUrl || null,
+        phone: formData.phone,
+        nidNumber: formData.nidNumber,
+        occupation: formData.occupation,
+        createdAt: serverTimestamp()
+      });
+
+      // Save to Registrations (Optional, keeping for existing logic)
       const docRef = await addDoc(collection(db, 'registrations'), {
+        uid: user.uid,
         fullName: formData.fullName,
         email: formData.email,
         phone: formData.phone,
@@ -187,7 +212,7 @@ export default function Register() {
         status: 'active'
       });
 
-      const uniqueLink = generateUniqueProfileLink(formData.fullName, docRef.id);
+      const uniqueLink = generateUniqueProfileLink(formData.fullName, user.uid);
       setProfileLink(uniqueLink);
 
       // Send Welcome Email
@@ -329,10 +354,11 @@ export default function Register() {
                 {!capturedImage ? (
                   <Webcam
                     audio={false}
-                    ref={webcamRef}
+                    ref={webcamRef as any}
                     screenshotFormat="image/jpeg"
                     className="w-full h-full object-cover"
                     videoConstraints={{ facingMode: "environment" }}
+                    {...({} as any)}
                   />
                 ) : (
                   <img src={capturedImage} alt="Captured NID" className="w-full h-full object-cover" />
@@ -420,6 +446,23 @@ export default function Register() {
                       value={formData.fullName}
                       onChange={handleInputChange}
                       required
+                      className="w-full bg-white border border-gray-200 rounded-xl py-3 pl-12 pr-4 text-gray-900 focus:outline-none focus:border-brand-blue focus:ring-1 focus:ring-brand-blue transition-all"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-600 mb-2">Password</label>
+                  <div className="relative">
+                    <ShieldCheck className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                    <input
+                      type="password"
+                      name="password"
+                      value={formData.password}
+                      onChange={handleInputChange}
+                      required
+                      minLength={6}
+                      placeholder="Create a password (min 6 chars)"
                       className="w-full bg-white border border-gray-200 rounded-xl py-3 pl-12 pr-4 text-gray-900 focus:outline-none focus:border-brand-blue focus:ring-1 focus:ring-brand-blue transition-all"
                     />
                   </div>

@@ -50,63 +50,63 @@ export default function ManageStats() {
   return (
     <div>
       <div className="flex justify-between items-center mb-8">
-        <h2 className="text-3xl font-display font-bold text-white">Manage Statistics</h2>
+        <h2 className="text-3xl font-display font-bold text-brand-blue">Manage Statistics</h2>
       </div>
 
-      <div className="glass-panel p-8 rounded-2xl border border-white/10 max-w-2xl">
+      <div className="glass-panel p-8 rounded-2xl border border-gray-100 shadow-sm max-w-2xl bg-white/80 backdrop-blur-md">
         <form onSubmit={handleSave} className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <label className="block text-sm font-medium text-gray-400 mb-2">Active Users</label>
+              <label className="block text-sm font-medium text-gray-600 mb-2">Active Users</label>
               <input
                 type="number"
                 required
                 min="0"
                 value={stats.users}
                 onChange={e => setStats({ ...stats, users: parseInt(e.target.value) || 0 })}
-                className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-[#00F0FF] transition-colors text-2xl font-bold"
+                className="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-gray-900 focus:outline-none focus:border-brand-blue transition-colors text-2xl font-bold"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-400 mb-2">Apps Deployed</label>
+              <label className="block text-sm font-medium text-gray-600 mb-2">Apps Deployed</label>
               <input
                 type="number"
                 required
                 min="0"
                 value={stats.apps}
                 onChange={e => setStats({ ...stats, apps: parseInt(e.target.value) || 0 })}
-                className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-[#00F0FF] transition-colors text-2xl font-bold"
+                className="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-gray-900 focus:outline-none focus:border-brand-blue transition-colors text-2xl font-bold"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-400 mb-2">Total Downloads (in Millions)</label>
+              <label className="block text-sm font-medium text-gray-600 mb-2">Total Downloads (in Millions)</label>
               <input
                 type="number"
                 required
                 min="0"
                 value={stats.downloads}
                 onChange={e => setStats({ ...stats, downloads: parseInt(e.target.value) || 0 })}
-                className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-[#00F0FF] transition-colors text-2xl font-bold"
+                className="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-gray-900 focus:outline-none focus:border-brand-blue transition-colors text-2xl font-bold"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-400 mb-2">YoY Growth (%)</label>
+              <label className="block text-sm font-medium text-gray-600 mb-2">YoY Growth (%)</label>
               <input
                 type="number"
                 required
                 min="0"
                 value={stats.growth}
                 onChange={e => setStats({ ...stats, growth: parseInt(e.target.value) || 0 })}
-                className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-[#00F0FF] transition-colors text-2xl font-bold"
+                className="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-gray-900 focus:outline-none focus:border-brand-blue transition-colors text-2xl font-bold"
               />
             </div>
           </div>
 
-          <div className="flex justify-end pt-6 border-t border-white/10">
+          <div className="flex justify-end pt-6 border-t border-gray-100">
             <button 
               type="submit" 
               disabled={saving}
-              className="flex items-center px-8 py-4 bg-gradient-brand text-white rounded-xl font-semibold hover:glow-purple transition-all disabled:opacity-50"
+              className="flex items-center px-8 py-4 bg-gradient-brand text-white rounded-xl font-semibold hover:shadow-lg transition-all disabled:opacity-50"
             >
               {saving ? (
                 <div className="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin mr-2"></div>

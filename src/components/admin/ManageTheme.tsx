@@ -162,14 +162,14 @@ export default function ManageTheme() {
   return (
     <div className="space-y-8">
       <div className="flex justify-between items-center">
-        <h2 className="text-3xl font-display font-bold text-white flex items-center">
-          <Palette className="w-8 h-8 mr-3 text-[#00ffcc]" />
+        <h2 className="text-3xl font-display font-bold text-brand-blue flex items-center">
+          <Palette className="w-8 h-8 mr-3 text-brand-blue" />
           Design & Theme Management
         </h2>
         <button
           onClick={handleSave}
           disabled={loading}
-          className="flex items-center px-6 py-3 bg-gradient-to-r from-[#0047ff] to-[#00ffcc] text-black font-bold rounded-xl hover:shadow-[0_0_20px_rgba(0,255,204,0.4)] transition-all disabled:opacity-50"
+          className="flex items-center px-6 py-3 bg-gradient-brand text-white font-bold rounded-xl hover:shadow-lg transition-all disabled:opacity-50"
         >
           <Save className="w-5 h-5 mr-2" />
           {loading ? "Saving..." : "Save Changes"}
@@ -178,7 +178,7 @@ export default function ManageTheme() {
 
       {message.text && (
         <div
-          className={`p-4 rounded-xl ${message.type === "success" ? "bg-green-500/20 text-green-400 border border-green-500/50" : "bg-red-500/20 text-red-400 border border-red-500/50"}`}
+          className={`p-4 rounded-xl ${message.type === "success" ? "bg-green-50 text-green-600 border border-green-200" : "bg-red-50 text-red-600 border border-red-200"}`}
         >
           {message.text}
         </div>
@@ -189,14 +189,14 @@ export default function ManageTheme() {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="md:col-span-2 bg-[#0f131f] border border-white/10 rounded-2xl p-6"
+          className="md:col-span-2 bg-white border border-gray-100 shadow-sm rounded-2xl p-6"
         >
-          <h3 className="text-xl font-bold text-white mb-6 flex items-center">
+          <h3 className="text-xl font-bold text-gray-900 mb-6 flex items-center">
             <ImageIcon className="w-5 h-5 mr-2 text-gray-400" /> Official Logo
           </h3>
           <div className="space-y-6">
             {!imageSrc ? (
-              <div className="border-2 border-dashed border-white/20 rounded-xl p-12 text-center hover:border-[#00ffcc]/50 transition-colors">
+              <div className="border-2 border-dashed border-gray-200 rounded-xl p-12 text-center hover:border-brand-blue/50 transition-colors bg-gray-50">
                 <input
                   type="file"
                   accept="image/*"
@@ -209,7 +209,7 @@ export default function ManageTheme() {
                   className="cursor-pointer flex flex-col items-center"
                 >
                   <Upload className="w-12 h-12 text-gray-400 mb-4" />
-                  <span className="text-white font-medium mb-2">
+                  <span className="text-gray-900 font-medium mb-2">
                     Click to upload logo
                   </span>
                   <span className="text-sm text-gray-500">
@@ -219,7 +219,7 @@ export default function ManageTheme() {
               </div>
             ) : (
               <div className="space-y-4">
-                <div className="relative h-64 bg-black rounded-xl overflow-hidden">
+                <div className="relative h-64 bg-gray-100 rounded-xl overflow-hidden border border-gray-200">
                   <Cropper
                     image={imageSrc}
                     crop={crop}
@@ -231,7 +231,7 @@ export default function ManageTheme() {
                   />
                 </div>
                 <div className="flex items-center space-x-4">
-                  <span className="text-sm text-gray-400">Zoom:</span>
+                  <span className="text-sm text-gray-600">Zoom:</span>
                   <input
                     type="range"
                     value={zoom}
@@ -248,7 +248,7 @@ export default function ManageTheme() {
                       setZoom(1);
                       setCrop({ x: 0, y: 0 });
                     }}
-                    className="p-2 bg-red-500/20 text-red-400 rounded-lg hover:bg-red-500/30 transition-colors"
+                    className="p-2 bg-red-50 text-red-500 rounded-lg hover:bg-red-100 transition-colors"
                   >
                     <X className="w-5 h-5" />
                   </button>
@@ -261,15 +261,15 @@ export default function ManageTheme() {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-[#0f131f] border border-white/10 rounded-2xl p-6"
+          className="bg-white border border-gray-100 shadow-sm rounded-2xl p-6"
         >
-          <h3 className="text-xl font-bold text-white mb-6 flex items-center">
+          <h3 className="text-xl font-bold text-gray-900 mb-6 flex items-center">
             <Palette className="w-5 h-5 mr-2 text-gray-400" /> Colors &
             Gradients
           </h3>
           <div className="space-y-6">
             <div>
-              <label className="block text-sm font-medium text-gray-400 mb-2">
+              <label className="block text-sm font-medium text-gray-600 mb-2">
                 Primary Color
               </label>
               <div className="flex items-center space-x-4">
@@ -285,12 +285,12 @@ export default function ManageTheme() {
                   name="primaryColor"
                   value={theme.primaryColor}
                   onChange={handleChange}
-                  className="flex-1 bg-black border border-white/10 rounded-xl px-4 py-2 text-white focus:outline-none focus:border-[#00ffcc]"
+                  className="flex-1 bg-white border border-gray-200 rounded-xl px-4 py-2 text-gray-900 focus:outline-none focus:border-brand-blue"
                 />
               </div>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-400 mb-2">
+              <label className="block text-sm font-medium text-gray-600 mb-2">
                 Secondary Color (Gradient End)
               </label>
               <div className="flex items-center space-x-4">
@@ -306,12 +306,12 @@ export default function ManageTheme() {
                   name="secondaryColor"
                   value={theme.secondaryColor}
                   onChange={handleChange}
-                  className="flex-1 bg-black border border-white/10 rounded-xl px-4 py-2 text-white focus:outline-none focus:border-[#00ffcc]"
+                  className="flex-1 bg-white border border-gray-200 rounded-xl px-4 py-2 text-gray-900 focus:outline-none focus:border-brand-blue"
                 />
               </div>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-400 mb-2">
+              <label className="block text-sm font-medium text-gray-600 mb-2">
                 Background Color
               </label>
               <div className="flex items-center space-x-4">
@@ -327,7 +327,7 @@ export default function ManageTheme() {
                   name="backgroundColor"
                   value={theme.backgroundColor}
                   onChange={handleChange}
-                  className="flex-1 bg-black border border-white/10 rounded-xl px-4 py-2 text-white focus:outline-none focus:border-[#00ffcc]"
+                  className="flex-1 bg-white border border-gray-200 rounded-xl px-4 py-2 text-gray-900 focus:outline-none focus:border-brand-blue"
                 />
               </div>
             </div>
@@ -338,21 +338,21 @@ export default function ManageTheme() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="bg-[#0f131f] border border-white/10 rounded-2xl p-6"
+          className="bg-white border border-gray-100 shadow-sm rounded-2xl p-6"
         >
-          <h3 className="text-xl font-bold text-white mb-6 flex items-center">
+          <h3 className="text-xl font-bold text-gray-900 mb-6 flex items-center">
             <Type className="w-5 h-5 mr-2 text-gray-400" /> Typography
           </h3>
           <div className="space-y-6">
             <div>
-              <label className="block text-sm font-medium text-gray-400 mb-2">
+              <label className="block text-sm font-medium text-gray-600 mb-2">
                 Body Font Family
               </label>
               <select
                 name="fontFamily"
                 value={theme.fontFamily}
                 onChange={handleChange}
-                className="w-full bg-black border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-[#00ffcc]"
+                className="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-gray-900 focus:outline-none focus:border-brand-blue"
               >
                 <option value="Inter, sans-serif">Inter</option>
                 <option value="Roboto, sans-serif">Roboto</option>
@@ -361,14 +361,14 @@ export default function ManageTheme() {
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-400 mb-2">
+              <label className="block text-sm font-medium text-gray-600 mb-2">
                 Heading Font Family
               </label>
               <select
                 name="headingFont"
                 value={theme.headingFont}
                 onChange={handleChange}
-                className="w-full bg-black border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-[#00ffcc]"
+                className="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-gray-900 focus:outline-none focus:border-brand-blue"
               >
                 <option value="Space Grotesk, sans-serif">Space Grotesk</option>
                 <option value="Montserrat, sans-serif">Montserrat</option>
@@ -385,22 +385,22 @@ export default function ManageTheme() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.15 }}
-          className="md:col-span-2 bg-[#0f131f] border border-white/10 rounded-2xl p-6"
+          className="md:col-span-2 bg-white border border-gray-100 shadow-sm rounded-2xl p-6"
         >
-          <h3 className="text-xl font-bold text-white mb-6 flex items-center">
+          <h3 className="text-xl font-bold text-gray-900 mb-6 flex items-center">
             <Sparkles className="w-5 h-5 mr-2 text-gray-400" /> Effects &
             Animations
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div>
-              <label className="block text-sm font-medium text-gray-400 mb-2">
+              <label className="block text-sm font-medium text-gray-600 mb-2">
                 Background Design
               </label>
               <select
                 name="backgroundDesign"
                 value={theme.backgroundDesign}
                 onChange={handleChange}
-                className="w-full bg-black border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-[#00ffcc]"
+                className="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-gray-900 focus:outline-none focus:border-brand-blue"
               >
                 <option value="none">Solid Color</option>
                 <option value="gradient-blobs">Gradient Blobs</option>
@@ -412,14 +412,14 @@ export default function ManageTheme() {
               </p>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-400 mb-2">
+              <label className="block text-sm font-medium text-gray-600 mb-2">
                 Button Animation Style
               </label>
               <select
                 name="buttonAnimation"
                 value={theme.buttonAnimation}
                 onChange={handleChange}
-                className="w-full bg-black border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-[#00ffcc]"
+                className="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-gray-900 focus:outline-none focus:border-brand-blue"
               >
                 <option value="none">None</option>
                 <option value="glow">Neon Glow</option>
@@ -437,14 +437,14 @@ export default function ManageTheme() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
-          className="md:col-span-2 bg-[#0f131f] border border-white/10 rounded-2xl p-6"
+          className="md:col-span-2 bg-white border border-gray-100 shadow-sm rounded-2xl p-6"
         >
-          <h3 className="text-xl font-bold text-white mb-6 flex items-center">
+          <h3 className="text-xl font-bold text-gray-900 mb-6 flex items-center">
             <LayoutTemplate className="w-5 h-5 mr-2 text-gray-400" /> Live
             Preview
           </h3>
           <div
-            className="p-8 rounded-xl border border-white/5"
+            className="p-8 rounded-xl border border-gray-200"
             style={{
               backgroundColor: theme.backgroundColor,
               fontFamily: theme.fontFamily,
@@ -461,7 +461,7 @@ export default function ManageTheme() {
               networking, and online income seamlessly integrate.
             </p>
             <button
-              className="px-8 py-3 rounded-full font-bold text-black border-0"
+              className="px-8 py-3 rounded-full font-bold text-white border-0"
               style={{
                 background: `linear-gradient(to right, ${theme.primaryColor}, ${theme.secondaryColor})`,
               }}

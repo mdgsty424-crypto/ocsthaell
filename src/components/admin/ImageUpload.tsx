@@ -62,20 +62,20 @@ export default function ImageUpload({ value, onChange, label = 'Image' }: ImageU
 
   return (
     <div className="mb-6">
-      <label className="block text-sm font-medium text-gray-400 mb-2">{label}</label>
+      <label className="block text-sm font-medium text-gray-600 mb-2">{label}</label>
       
       <div className="flex space-x-4 mb-4">
         <button
           type="button"
           onClick={() => setMode('url')}
-          className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${mode === 'url' ? 'bg-[#00F0FF]/20 text-[#00F0FF] border border-[#00F0FF]/50' : 'bg-white/5 text-gray-400 hover:text-white'}`}
+          className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${mode === 'url' ? 'bg-brand-blue/10 text-brand-blue border border-brand-blue/50' : 'bg-gray-50 text-gray-500 hover:text-gray-700 border border-gray-200'}`}
         >
           <LinkIcon className="w-4 h-4 inline-block mr-2" /> URL
         </button>
         <button
           type="button"
           onClick={() => setMode('upload')}
-          className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${mode === 'upload' ? 'bg-[#8A2BE2]/20 text-[#8A2BE2] border border-[#8A2BE2]/50' : 'bg-white/5 text-gray-400 hover:text-white'}`}
+          className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${mode === 'upload' ? 'bg-brand-blue/10 text-brand-blue border border-brand-blue/50' : 'bg-gray-50 text-gray-500 hover:text-gray-700 border border-gray-200'}`}
         >
           <UploadCloud className="w-4 h-4 inline-block mr-2" /> Upload
         </button>
@@ -87,10 +87,10 @@ export default function ImageUpload({ value, onChange, label = 'Image' }: ImageU
           value={value}
           onChange={(e) => onChange(e.target.value)}
           placeholder="https://res.cloudinary.com/..."
-          className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-[#00F0FF] transition-colors"
+          className="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-gray-900 focus:outline-none focus:border-brand-blue transition-colors"
         />
       ) : (
-        <div className="relative border-2 border-dashed border-white/20 rounded-xl p-8 text-center hover:border-[#8A2BE2] transition-colors bg-black/30">
+        <div className="relative border-2 border-dashed border-gray-200 rounded-xl p-8 text-center hover:border-brand-blue transition-colors bg-gray-50">
           <input
             type="file"
             accept="image/*"
@@ -100,26 +100,26 @@ export default function ImageUpload({ value, onChange, label = 'Image' }: ImageU
           />
           <div className="flex flex-col items-center justify-center space-y-3">
             {uploading ? (
-              <div className="w-8 h-8 border-2 border-[#8A2BE2]/30 border-t-[#8A2BE2] rounded-full animate-spin"></div>
+              <div className="w-8 h-8 border-2 border-brand-blue/30 border-t-brand-blue rounded-full animate-spin"></div>
             ) : (
               <>
-                <UploadCloud className="w-10 h-10 text-gray-500" />
-                <p className="text-sm text-gray-400">Click or drag image to upload to Cloudinary</p>
+                <UploadCloud className="w-10 h-10 text-gray-400" />
+                <p className="text-sm text-gray-500">Click or drag image to upload to Cloudinary</p>
               </>
             )}
           </div>
         </div>
       )}
 
-      {error && <p className="text-red-400 text-xs mt-2">{error}</p>}
+      {error && <p className="text-red-500 text-xs mt-2">{error}</p>}
 
       {value && (
         <div className="mt-4 relative inline-block">
-          <img src={value} alt="Preview" className="h-32 rounded-lg object-cover border border-white/10" referrerPolicy="no-referrer" />
+          <img src={value} alt="Preview" className="h-32 rounded-lg object-cover border border-gray-200 shadow-sm" referrerPolicy="no-referrer" />
           <button
             type="button"
             onClick={() => onChange('')}
-            className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 transition-colors"
+            className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 transition-colors shadow-sm"
           >
             <X className="w-4 h-4" />
           </button>

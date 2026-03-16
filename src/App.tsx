@@ -14,6 +14,9 @@ import AppDetails from './pages/AppDetails';
 import Services from './pages/Services';
 import ServiceDetails from './pages/ServiceDetails';
 import Team from './pages/Team';
+import Staff from './pages/Staff';
+import Members from './pages/Members';
+import UserDashboard from './pages/UserDashboard';
 import TeamMemberDetails from './pages/TeamMemberDetails';
 import Gallery from './pages/Gallery';
 import News from './pages/News';
@@ -45,6 +48,13 @@ export default function App() {
                 <Route path="/services" element={<Services />} />
                 <Route path="/services/:id" element={<ServiceDetails />} />
                 <Route path="/team" element={<Team />} />
+                <Route path="/staff" element={<Staff />} />
+                <Route path="/members" element={<Members />} />
+                <Route path="/dashboard" element={
+                  <ProtectedRoute requireAdmin={false}>
+                    <UserDashboard />
+                  </ProtectedRoute>
+                } />
                 <Route path="/team/:id" element={<TeamMemberDetails />} />
                 <Route path="/gallery" element={<Gallery />} />
                 <Route path="/news" element={<News />} />
