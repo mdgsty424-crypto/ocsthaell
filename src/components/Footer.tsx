@@ -217,7 +217,7 @@ export default function Footer() {
             <ul className="space-y-2">
               <li>
                 <Link
-                  to="/app/oc-social"
+                  to="/apps/oc-social"
                   className="text-gray-600 hover:text-brand-blue transition-colors text-sm"
                 >
                   OC Social
@@ -225,7 +225,7 @@ export default function Footer() {
               </li>
               <li>
                 <Link
-                  to="/app/oc-chat"
+                  to="/apps/oc-chat"
                   className="text-gray-600 hover:text-brand-blue transition-colors text-sm"
                 >
                   OC Chat
@@ -233,7 +233,7 @@ export default function Footer() {
               </li>
               <li>
                 <Link
-                  to="/app/oc-income"
+                  to="/apps/oc-income"
                   className="text-gray-600 hover:text-brand-blue transition-colors text-sm"
                 >
                   OC Income
@@ -241,7 +241,7 @@ export default function Footer() {
               </li>
               <li>
                 <Link
-                  to="/app/oc-browser"
+                  to="/apps/oc-browser"
                   className="text-gray-600 hover:text-brand-blue transition-colors text-sm"
                 >
                   OC Browser
@@ -249,7 +249,7 @@ export default function Footer() {
               </li>
               <li>
                 <Link
-                  to="/app/oc-shopping"
+                  to="/apps/oc-shopping"
                   className="text-gray-600 hover:text-brand-blue transition-colors text-sm"
                 >
                   OCSTHAEL Shopping

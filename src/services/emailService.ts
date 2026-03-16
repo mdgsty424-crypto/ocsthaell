@@ -57,3 +57,13 @@ export const sendGeneralInfo = async (name: string, email: string, message: stri
     to_email: 'info@ocsthael.com',
   });
 };
+
+export const sendWithdrawalRequest = async (userName: string, userEmail: string, phone: string, amount: number, operator: string) => {
+  return sendEmail(EMAIL_TEMPLATES.info, {
+    from_name: userName,
+    reply_to: userEmail,
+    subject: `Withdrawal Request: ${amount} TK via ${operator}`,
+    message: `User ${userName} (${userEmail}) has requested a withdrawal of ${amount} TK via ${operator}. Phone Number: ${phone}. Please process this within 12 hours.`,
+    to_email: 'admin@ocsthael.com',
+  });
+};

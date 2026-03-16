@@ -6,14 +6,15 @@ export default function ThemeWrapper({ children }: { children: React.ReactNode }
   const [theme, setTheme] = useState({
     primaryColor: '#0047ff',
     secondaryColor: '#00ffcc',
-    backgroundColor: '#ffffff',
+    backgroundColor: '#05070a',
     fontFamily: 'Inter, sans-serif',
     headingFont: 'Space Grotesk, sans-serif',
     backgroundDesign: 'gradient-blobs',
     buttonAnimation: 'glow',
-    gridColor: 'rgba(0,0,0,0.05)',
-    cardBg: 'rgba(255,255,255,0.8)',
+    gridColor: 'rgba(255,255,255,0.05)',
+    cardBg: 'rgba(10,15,25,0.8)',
     accentColor: '#8A2BE2',
+    faviconUrl: '',
   });
 
   useEffect(() => {
@@ -40,6 +41,17 @@ export default function ThemeWrapper({ children }: { children: React.ReactNode }
     // Apply background color to body
     document.body.style.backgroundColor = theme.backgroundColor;
     document.body.style.fontFamily = theme.fontFamily;
+
+    // Update Favicon dynamically
+    if (theme.faviconUrl) {
+      let link = document.querySelector("link[rel~='icon']") as HTMLLinkElement;
+      if (!link) {
+        link = document.createElement('link');
+        link.rel = 'icon';
+        document.head.appendChild(link);
+      }
+      link.href = theme.faviconUrl;
+    }
   }, [theme]);
 
   return (

@@ -26,7 +26,7 @@ export default function Navbar() {
   const location = useLocation();
   const [logoUrl, setLogoUrl] = useState<string | null>(null);
   const [isScrolled, setIsScrolled] = useState(false);
-  const { user, isAdmin } = useAuth();
+  const { user, isAdmin, ocId } = useAuth();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -81,14 +81,19 @@ export default function Navbar() {
               </Link>
             ))}
             {user ? (
-              <Link to={isAdmin ? "/admin/dashboard" : "/dashboard"} className="px-6 py-2.5 rounded-2xl bg-gray-100 text-gray-900 font-bold hover:bg-gray-200 transition-all flex items-center">
+              <Link to={isAdmin ? "/admin/dashboard" : `/${ocId}/profile`} className="px-6 py-2.5 rounded-2xl bg-gray-100 text-gray-900 font-bold hover:bg-gray-200 transition-all flex items-center">
                 <User className="w-4 h-4 mr-2" />
                 Dashboard
               </Link>
             ) : (
-              <Link to="/register" className="px-8 py-3 rounded-2xl bg-brand-blue text-white font-bold shadow-lg hover:bg-brand-blue/90 hover:-translate-y-0.5 transition-all active:scale-95">
-                Get Started
-              </Link>
+              <div className="flex items-center space-x-4">
+                <Link to="/login" className="text-sm font-bold text-gray-600 hover:text-brand-blue transition-colors">
+                  Login
+                </Link>
+                <a href="https://registration.ocsthael.com" target="_blank" rel="noopener noreferrer" className="px-8 py-3 rounded-2xl bg-brand-blue text-white font-bold shadow-lg hover:bg-brand-blue/90 hover:-translate-y-0.5 transition-all active:scale-95">
+                  Get Started
+                </a>
+              </div>
             )}
           </div>
 
@@ -130,7 +135,7 @@ export default function Navbar() {
             ))}
             {user ? (
               <Link
-                to={isAdmin ? "/admin/dashboard" : "/dashboard"}
+                to={isAdmin ? "/admin/dashboard" : `/${ocId}/profile`}
                 onClick={() => setIsOpen(false)}
                 className="block px-4 py-4 rounded-2xl text-center text-base font-bold text-gray-900 bg-gray-100 flex items-center justify-center"
               >
@@ -138,13 +143,24 @@ export default function Navbar() {
                 Dashboard
               </Link>
             ) : (
-              <Link
-                to="/register"
-                onClick={() => setIsOpen(false)}
-                className="block px-4 py-4 rounded-2xl text-center text-base font-bold text-white bg-brand-blue shadow-lg"
-              >
-                Get Started
-              </Link>
+              <div className="space-y-2">
+                <Link
+                  to="/login"
+                  onClick={() => setIsOpen(false)}
+                  className="block px-4 py-4 rounded-2xl text-center text-base font-bold text-gray-600 bg-gray-50 border border-gray-100"
+                >
+                  Login
+                </Link>
+                <a
+                  href="https://registration.ocsthael.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={() => setIsOpen(false)}
+                  className="block px-4 py-4 rounded-2xl text-center text-base font-bold text-white bg-brand-blue shadow-lg"
+                >
+                  Get Started
+                </a>
+              </div>
             )}
           </div>
         </motion.div>

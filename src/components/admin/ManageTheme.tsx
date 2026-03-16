@@ -10,10 +10,12 @@ import {
   X,
   Layers,
   Sparkles,
+  Globe,
 } from "lucide-react";
 import { db } from "../../firebase";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import Cropper from "react-easy-crop";
+import ImageUpload from "./ImageUpload";
 
 const createImage = (url: string): Promise<HTMLImageElement> =>
   new Promise((resolve, reject) => {
@@ -64,6 +66,7 @@ export default function ManageTheme() {
     fontFamily: "Inter, sans-serif",
     headingFont: "Space Grotesk, sans-serif",
     logoUrl: "",
+    faviconUrl: "",
     logoZoom: 1,
     logoX: 0,
     logoY: 0,
@@ -255,6 +258,26 @@ export default function ManageTheme() {
                 </div>
               </div>
             )}
+          </div>
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="md:col-span-2 bg-white border border-gray-100 shadow-sm rounded-2xl p-6"
+        >
+          <h3 className="text-xl font-bold text-gray-900 mb-6 flex items-center">
+            <Globe className="w-5 h-5 mr-2 text-gray-400" /> Favicon (Browser Tab Icon)
+          </h3>
+          <div className="space-y-6">
+            <p className="text-sm text-gray-500 mb-4">
+              Upload a square image (PNG or ICO) to be used as the website's favicon. It will appear in browser tabs and bookmarks.
+            </p>
+            <ImageUpload
+              label="Favicon Image URL (Cloudinary)"
+              value={theme.faviconUrl}
+              onChange={(url) => setTheme((prev) => ({ ...prev, faviconUrl: url }))}
+            />
           </div>
         </motion.div>
 

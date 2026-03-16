@@ -17,21 +17,24 @@ import ServiceDetails from './pages/ServiceDetails';
 import Team from './pages/Team';
 import Staff from './pages/Staff';
 import Members from './pages/Members';
-import MemberDetails from './pages/MemberDetails';
 import UserDashboard from './pages/UserDashboard';
 import TeamMemberDetails from './pages/TeamMemberDetails';
 import Gallery from './pages/Gallery';
 import News from './pages/News';
 import NewsDetails from './pages/NewsDetails';
 import Contact from './pages/Contact';
+import Login from './pages/Login';
 import AdminLogin from './pages/AdminLogin';
 import AdminDashboard from './pages/AdminDashboard';
 import ProtectedRoute from './components/ProtectedRoute';
-import Register from './pages/Register';
 import AIAssistant from './components/AIAssistant';
 import HelpCenter from './pages/HelpCenter';
 import ThemeWrapper from './components/ThemeWrapper';
 import AnimatedBackground from './components/AnimatedBackground';
+import PrivacyPolicy from './pages/PrivacyPolicy';
+import TermsOfService from './pages/TermsOfService';
+import Careers from './pages/Careers';
+import NotFound from './pages/NotFound';
 
 export default function App() {
   return (
@@ -53,20 +56,19 @@ export default function App() {
                   <Route path="/team" element={<Team />} />
                   <Route path="/staff" element={<Staff />} />
                   <Route path="/members" element={<Members />} />
-                  <Route path="/dashboard" element={
-                    <ProtectedRoute requireAdmin={false}>
-                      <UserDashboard />
-                    </ProtectedRoute>
-                  } />
+                  <Route path="/all" element={<Members />} />
+                  <Route path="/:userKey/profile" element={<UserDashboard />} />
                   <Route path="/team/:id" element={<TeamMemberDetails />} />
                   <Route path="/staff/:id" element={<TeamMemberDetails />} />
-                  <Route path="/members/:id" element={<MemberDetails />} />
                   <Route path="/gallery" element={<Gallery />} />
                   <Route path="/news" element={<News />} />
                   <Route path="/news/:id" element={<NewsDetails />} />
                   <Route path="/contact" element={<Contact />} />
-                  <Route path="/register" element={<Register />} />
+                  <Route path="/login" element={<Login />} />
                   <Route path="/help-center" element={<HelpCenter />} />
+                  <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+                  <Route path="/terms-of-service" element={<TermsOfService />} />
+                  <Route path="/careers" element={<Careers />} />
                   <Route path="/admin/login" element={<AdminLogin />} />
                   <Route 
                     path="/admin/dashboard/*" 
@@ -76,6 +78,7 @@ export default function App() {
                       </ProtectedRoute>
                     } 
                   />
+                  <Route path="*" element={<NotFound />} />
                 </Routes>
               </main>
               <Footer />

@@ -143,9 +143,9 @@ export default function Home() {
                 <Link to="/services" className="px-10 py-5 bg-gradient-to-r from-brand-blue to-brand-pink text-white font-bold rounded-2xl hover:shadow-[0_0_30px_rgba(59,130,246,0.4)] transition-all hover:-translate-y-1">
                   Our Services
                 </Link>
-                <Link to="/register" className="px-10 py-5 border-2 border-brand-mango/50 text-brand-mango font-bold rounded-2xl hover:bg-brand-mango/10 transition-all hover:-translate-y-1">
+                <a href="https://registration.ocsthael.com" target="_blank" rel="noopener noreferrer" className="px-10 py-5 border-2 border-brand-mango/50 text-brand-mango font-bold rounded-2xl hover:bg-brand-mango/10 transition-all hover:-translate-y-1">
                   Get Started
-                </Link>
+                </a>
               </div>
             </motion.div>
 
