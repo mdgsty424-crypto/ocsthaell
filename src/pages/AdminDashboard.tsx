@@ -37,8 +37,8 @@ export default function AdminDashboard() {
     { name: 'Statistics', path: '/admin/dashboard/stats', icon: BarChart },
     { name: 'Gallery', path: '/admin/dashboard/gallery', icon: ImageIcon },
     { name: 'News', path: '/admin/dashboard/news', icon: Newspaper },
-    { name: 'Our Staff', path: '/admin/dashboard/team', icon: Users },
-    { name: 'Users', path: '/admin/dashboard/users', icon: Users },
+    { name: 'Team & Staff', path: '/admin/dashboard/team', icon: Users },
+    { name: 'Members', path: '/admin/dashboard/users', icon: Users },
     { name: 'SEO & Scripts', path: '/admin/dashboard/seo', icon: Search },
   ];
 

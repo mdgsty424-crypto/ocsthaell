@@ -9,6 +9,8 @@ interface UserData {
   email: string;
   displayName?: string;
   role?: string;
+  occupation?: string;
+  photoURL?: string;
   createdAt?: any;
 }
 
@@ -16,7 +18,7 @@ const ManageUsers = () => {
   const [users, setUsers] = useState<UserData[]>([]);
   const [loading, setLoading] = useState(true);
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [editRole, setEditRole] = useState('');
+  const [editData, setEditData] = useState<Partial<UserData>>({});
 
   useEffect(() => {
     const unsubscribe = onSnapshot(collection(db, 'users'), (snapshot) => {
@@ -44,18 +46,26 @@ const ManageUsers = () => {
 
   const startEdit = (user: UserData) => {
     setEditingId(user.id);
-    setEditRole(user.role || 'user');
+    setEditData({
+      role: user.role || 'user',
+      displayName: user.displayName || '',
+      occupation: user.occupation || '',
+      photoURL: user.photoURL || ''
+    });
   };
 
   const saveEdit = async (id: string) => {
     try {
       await updateDoc(doc(db, 'users', id), {
-        role: editRole
+        role: editData.role,
+        displayName: editData.displayName,
+        occupation: editData.occupation,
+        photoURL: editData.photoURL
       });
       setEditingId(null);
     } catch (error) {
-      console.error('Error updating user role:', error);
-      alert('Failed to update user role');
+      console.error('Error updating user:', error);
+      alert('Failed to update user');
     }
   };
 
@@ -66,7 +76,7 @@ const ManageUsers = () => {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold text-gray-800 dark:text-white">Manage Users</h2>
+        <h2 className="text-2xl font-bold text-gray-800 dark:text-white">Manage Members</h2>
       </div>
 
       <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden">
@@ -91,22 +101,53 @@ const ManageUsers = () => {
                     className="border-b border-gray-50 dark:border-gray-700/50 hover:bg-gray-50/50 dark:hover:bg-gray-700/30 transition-colors"
                   >
                     <td className="p-4">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-full bg-brand-blue/10 flex items-center justify-center text-brand-blue">
-                          <UserIcon size={20} />
+                      {editingId === user.id ? (
+                        <div className="space-y-2">
+                          <input
+                            type="text"
+                            value={editData.displayName || ''}
+                            onChange={(e) => setEditData({ ...editData, displayName: e.target.value })}
+                            placeholder="Display Name"
+                            className="w-full p-2 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-brand-blue text-sm dark:bg-gray-700 dark:text-white"
+                          />
+                          <input
+                            type="text"
+                            value={editData.occupation || ''}
+                            onChange={(e) => setEditData({ ...editData, occupation: e.target.value })}
+                            placeholder="Occupation"
+                            className="w-full p-2 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-brand-blue text-sm dark:bg-gray-700 dark:text-white"
+                          />
+                          <input
+                            type="text"
+                            value={editData.photoURL || ''}
+                            onChange={(e) => setEditData({ ...editData, photoURL: e.target.value })}
+                            placeholder="Photo URL"
+                            className="w-full p-2 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-brand-blue text-sm dark:bg-gray-700 dark:text-white"
+                          />
                         </div>
-                        <div>
-                          <p className="font-medium text-gray-800 dark:text-white">{user.displayName || 'Unknown User'}</p>
-                          <p className="text-xs text-gray-500 dark:text-gray-400 font-mono">{user.id}</p>
+                      ) : (
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-full bg-brand-blue/10 flex items-center justify-center text-brand-blue overflow-hidden">
+                            {user.photoURL ? (
+                              <img src={user.photoURL} alt={user.displayName} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+                            ) : (
+                              <UserIcon size={20} />
+                            )}
+                          </div>
+                          <div>
+                            <p className="font-medium text-gray-800 dark:text-white">{user.displayName || 'Unknown User'}</p>
+                            {user.occupation && <p className="text-xs text-gray-500 dark:text-gray-400">{user.occupation}</p>}
+                            <p className="text-xs text-gray-500 dark:text-gray-400 font-mono">{user.id}</p>
+                          </div>
                         </div>
-                      </div>
+                      )}
                     </td>
                     <td className="p-4 text-gray-600 dark:text-gray-300">{user.email || 'No email'}</td>
                     <td className="p-4">
                       {editingId === user.id ? (
                         <select
-                          value={editRole}
-                          onChange={(e) => setEditRole(e.target.value)}
+                          value={editData.role || 'user'}
+                          onChange={(e) => setEditData({ ...editData, role: e.target.value })}
                           className="w-full p-2 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-brand-blue focus:border-transparent dark:bg-gray-700 dark:text-white"
                         >
                           <option value="user">User</option>

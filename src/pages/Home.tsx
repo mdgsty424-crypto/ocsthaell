@@ -8,6 +8,8 @@ import { db } from '../firebase';
 export default function Home() {
   const [apps, setApps] = useState<any[]>([]);
   const [team, setTeam] = useState<any[]>([]);
+  const [staff, setStaff] = useState<any[]>([]);
+  const [members, setMembers] = useState<any[]>([]);
   const [services, setServices] = useState<any[]>([]);
   const [news, setNews] = useState<any[]>([]);
   const [gallery, setGallery] = useState<any[]>([]);
@@ -45,7 +47,19 @@ export default function Home() {
       const executiveData = teamData
         .filter((m: any) => m.type === 'Executive')
         .slice(0, 3);
+      const staffData = teamData
+        .filter((m: any) => m.type === 'General')
+        .slice(0, 5);
       setTeam(executiveData);
+      setStaff(staffData);
+    });
+
+    const membersUnsubscribe = onSnapshot(collection(db, 'users'), (snapshot) => {
+      const membersData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      const registeredMembers = membersData
+        .filter((m: any) => m.role === 'user')
+        .slice(0, 5);
+      setMembers(registeredMembers);
     });
 
     const servicesUnsubscribe = onSnapshot(collection(db, 'services'), (snapshot) => {
@@ -66,6 +80,7 @@ export default function Home() {
     return () => {
       appsUnsubscribe();
       teamUnsubscribe();
+      membersUnsubscribe();
       servicesUnsubscribe();
       newsUnsubscribe();
       galleryUnsubscribe();
@@ -84,14 +99,6 @@ export default function Home() {
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.8 }}
             >
-              <motion.p 
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.2 }}
-                className="text-brand-pink font-bold tracking-[0.3em] uppercase mb-6 text-sm"
-              >
-                Welcome to OCSTHAEL
-              </motion.p>
               <h1 className="text-6xl md:text-8xl font-display font-black mb-8 leading-[1.1] tracking-tight text-gray-900">
                 Building a <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-blue via-brand-pink to-brand-mango">New Bangladesh</span>
               </h1>
@@ -152,8 +159,8 @@ export default function Home() {
               <div className="absolute inset-0 bg-gradient-to-r from-brand-blue/20 via-brand-pink/20 to-brand-mango/20 rounded-full blur-3xl animate-pulse"></div>
               <div className="relative z-10 rounded-[3rem] overflow-hidden border border-gray-100 shadow-2xl backdrop-blur-sm bg-white/50">
                 <img 
-                  src="https://picsum.photos/seed/corporate-team/1200/1000" 
-                  alt="OCSTHAEL Team" 
+                  src="https://i.postimg.cc/05ZcC2b1/14.jpg" 
+                  alt="Hero Image" 
                   className="w-full h-auto object-cover hover:scale-105 transition-transform duration-1000"
                   referrerPolicy="no-referrer"
                 />
@@ -314,6 +321,132 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      {/* Our Staff Section */}
+      {staff.length > 0 && (
+        <section className="py-20 relative overflow-hidden bg-gray-50 text-gray-900">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-8">
+              <div className="max-w-2xl">
+                <motion.h2 
+                  initial={{ opacity: 0, x: -20 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  viewport={{ once: true }}
+                  className="text-4xl md:text-5xl font-display font-bold mb-4 text-brand-blue"
+                >
+                  Our Staff
+                </motion.h2>
+                <motion.p 
+                  initial={{ opacity: 0, x: -20 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: 0.1 }}
+                  className="text-lg text-gray-600"
+                >
+                  Meet the dedicated employees who drive OCSTHAEL forward every day.
+                </motion.p>
+              </div>
+              <Link to="/staff" className="px-8 py-4 bg-white/50 backdrop-blur-sm border border-gray-200 rounded-2xl font-bold text-brand-blue hover:border-brand-pink hover:text-brand-pink transition-all shadow-sm">
+                View All Staff
+              </Link>
+            </div>
+
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-8">
+              {staff.map((member, index) => (
+                <Link to={`/staff/${member.id}`} key={member.id}>
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    whileInView={{ opacity: 1, scale: 1 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: index * 0.05 }}
+                    className="text-center group cursor-pointer"
+                  >
+                    <div className="relative mb-6 mx-auto w-32 h-32 sm:w-40 sm:h-40">
+                      <div className="absolute inset-0 bg-gradient-brand rounded-full scale-105 opacity-0 group-hover:opacity-20 transition-opacity duration-500"></div>
+                      <div className="relative w-full h-full rounded-full overflow-hidden border-4 border-white shadow-lg group-hover:shadow-xl transition-all duration-500">
+                        <img 
+                          src={member.imageUrl || member.image || "https://picsum.photos/seed/user/200/200"} 
+                          alt={member.name} 
+                          className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700"
+                          referrerPolicy="no-referrer"
+                        />
+                      </div>
+                    </div>
+                    <h3 className="text-lg font-bold text-gray-900 mb-1 group-hover:text-brand-pink transition-colors">{member.name}</h3>
+                    <p className="text-xs font-bold text-brand-blue uppercase tracking-widest">{member.role}</p>
+                  </motion.div>
+                </Link>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* Registered Members Section */}
+      {members.length > 0 && (
+        <section className="py-20 relative overflow-hidden bg-white text-gray-900">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-8">
+              <div className="max-w-2xl">
+                <motion.h2 
+                  initial={{ opacity: 0, x: -20 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  viewport={{ once: true }}
+                  className="text-4xl md:text-5xl font-display font-bold mb-4 text-brand-blue"
+                >
+                  Registered Members
+                </motion.h2>
+                <motion.p 
+                  initial={{ opacity: 0, x: -20 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: 0.1 }}
+                  className="text-lg text-gray-600"
+                >
+                  Connect with our growing community of professionals and enthusiasts.
+                </motion.p>
+              </div>
+              <Link to="/members" className="px-8 py-4 bg-gray-50 backdrop-blur-sm border border-gray-200 rounded-2xl font-bold text-brand-blue hover:border-brand-pink hover:text-brand-pink transition-all shadow-sm">
+                View All Members
+              </Link>
+            </div>
+
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-8">
+              {members.map((member, index) => (
+                <Link to={`/members/${member.id}`} key={member.id}>
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    whileInView={{ opacity: 1, scale: 1 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: index * 0.05 }}
+                    className="text-center group cursor-pointer"
+                  >
+                    <div className="relative mb-6 mx-auto w-32 h-32 sm:w-40 sm:h-40">
+                      <div className="absolute inset-0 bg-gradient-brand rounded-full scale-105 opacity-0 group-hover:opacity-20 transition-opacity duration-500"></div>
+                      <div className="relative w-full h-full rounded-full overflow-hidden border-4 border-white shadow-lg group-hover:shadow-xl transition-all duration-500 bg-gray-100 flex items-center justify-center">
+                        {member.photoURL ? (
+                          <img 
+                            src={member.photoURL} 
+                            alt={member.displayName} 
+                            className="w-full h-full object-cover transition-all duration-700"
+                            referrerPolicy="no-referrer"
+                          />
+                        ) : (
+                          <Users className="w-12 h-12 text-gray-400" />
+                        )}
+                      </div>
+                    </div>
+                    <h3 className="text-lg font-bold text-gray-900 mb-1 group-hover:text-brand-pink transition-colors">{member.displayName || 'Anonymous User'}</h3>
+                    {member.occupation && (
+                      <p className="text-xs font-bold text-brand-blue uppercase tracking-widest">{member.occupation}</p>
+                    )}
+                  </motion.div>
+                </Link>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* Our Platforms Section */}
       <section className="py-32 bg-transparent relative overflow-hidden">

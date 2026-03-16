@@ -5,6 +5,7 @@
 
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
+import ErrorBoundary from './components/ErrorBoundary';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import Home from './pages/Home';
@@ -16,6 +17,7 @@ import ServiceDetails from './pages/ServiceDetails';
 import Team from './pages/Team';
 import Staff from './pages/Staff';
 import Members from './pages/Members';
+import MemberDetails from './pages/MemberDetails';
 import UserDashboard from './pages/UserDashboard';
 import TeamMemberDetails from './pages/TeamMemberDetails';
 import Gallery from './pages/Gallery';
@@ -33,51 +35,55 @@ import AnimatedBackground from './components/AnimatedBackground';
 
 export default function App() {
   return (
-    <AuthProvider>
-      <ThemeWrapper>
-        <Router>
-          <div className="min-h-screen flex flex-col relative">
-            <AnimatedBackground />
-            <Navbar />
-            <main className="flex-grow">
-              <Routes>
-                <Route path="/" element={<Home />} />
-                <Route path="/about" element={<About />} />
-                <Route path="/apps" element={<Apps />} />
-                <Route path="/apps/:id" element={<AppDetails />} />
-                <Route path="/services" element={<Services />} />
-                <Route path="/services/:id" element={<ServiceDetails />} />
-                <Route path="/team" element={<Team />} />
-                <Route path="/staff" element={<Staff />} />
-                <Route path="/members" element={<Members />} />
-                <Route path="/dashboard" element={
-                  <ProtectedRoute requireAdmin={false}>
-                    <UserDashboard />
-                  </ProtectedRoute>
-                } />
-                <Route path="/team/:id" element={<TeamMemberDetails />} />
-                <Route path="/gallery" element={<Gallery />} />
-                <Route path="/news" element={<News />} />
-                <Route path="/news/:id" element={<NewsDetails />} />
-                <Route path="/contact" element={<Contact />} />
-                <Route path="/register" element={<Register />} />
-                <Route path="/help-center" element={<HelpCenter />} />
-                <Route path="/admin/login" element={<AdminLogin />} />
-                <Route 
-                  path="/admin/dashboard/*" 
-                  element={
-                    <ProtectedRoute>
-                      <AdminDashboard />
+    <ErrorBoundary>
+      <AuthProvider>
+        <ThemeWrapper>
+          <Router>
+            <div className="min-h-screen flex flex-col relative">
+              <AnimatedBackground />
+              <Navbar />
+              <main className="flex-grow">
+                <Routes>
+                  <Route path="/" element={<Home />} />
+                  <Route path="/about" element={<About />} />
+                  <Route path="/apps" element={<Apps />} />
+                  <Route path="/apps/:id" element={<AppDetails />} />
+                  <Route path="/services" element={<Services />} />
+                  <Route path="/services/:id" element={<ServiceDetails />} />
+                  <Route path="/team" element={<Team />} />
+                  <Route path="/staff" element={<Staff />} />
+                  <Route path="/members" element={<Members />} />
+                  <Route path="/dashboard" element={
+                    <ProtectedRoute requireAdmin={false}>
+                      <UserDashboard />
                     </ProtectedRoute>
-                  } 
-                />
-              </Routes>
-            </main>
-            <Footer />
-            <AIAssistant />
-          </div>
-        </Router>
-      </ThemeWrapper>
-    </AuthProvider>
+                  } />
+                  <Route path="/team/:id" element={<TeamMemberDetails />} />
+                  <Route path="/staff/:id" element={<TeamMemberDetails />} />
+                  <Route path="/members/:id" element={<MemberDetails />} />
+                  <Route path="/gallery" element={<Gallery />} />
+                  <Route path="/news" element={<News />} />
+                  <Route path="/news/:id" element={<NewsDetails />} />
+                  <Route path="/contact" element={<Contact />} />
+                  <Route path="/register" element={<Register />} />
+                  <Route path="/help-center" element={<HelpCenter />} />
+                  <Route path="/admin/login" element={<AdminLogin />} />
+                  <Route 
+                    path="/admin/dashboard/*" 
+                    element={
+                      <ProtectedRoute>
+                        <AdminDashboard />
+                      </ProtectedRoute>
+                    } 
+                  />
+                </Routes>
+              </main>
+              <Footer />
+              <AIAssistant />
+            </div>
+          </Router>
+        </ThemeWrapper>
+      </AuthProvider>
+    </ErrorBoundary>
   );
 }

@@ -112,7 +112,7 @@ export default function ManageTeam() {
   return (
     <div>
       <div className="flex justify-between items-center mb-8">
-        <h2 className="text-3xl font-display font-bold text-brand-blue">Manage Staff</h2>
+        <h2 className="text-3xl font-display font-bold text-brand-blue">Manage Team & Staff</h2>
         <button
           onClick={() => { setCurrentMember({ skills: [''], social: { linkedin: '', twitter: '', github: '' } }); setIsEditing(true); }}
           className="flex items-center px-4 py-2 bg-brand-blue/10 text-brand-blue border border-brand-blue/50 rounded-lg hover:bg-brand-blue/20 transition-colors"
@@ -287,7 +287,12 @@ export default function ManageTeam() {
               <img src={member.imageUrl || member.image} alt={member.name} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
             </div>
             <div className="p-4 bg-white">
-              <h3 className="text-lg font-bold text-gray-900 truncate">{member.name}</h3>
+              <div className="flex justify-between items-start mb-1">
+                <h3 className="text-lg font-bold text-gray-900 truncate">{member.name}</h3>
+                <span className={`text-[10px] px-2 py-1 rounded-full font-bold uppercase tracking-wider ${member.type === 'Executive' ? 'bg-brand-blue/10 text-brand-blue' : 'bg-gray-100 text-gray-600'}`}>
+                  {member.type}
+                </span>
+              </div>
               <p className="text-sm text-brand-blue truncate">{member.role}</p>
             </div>
           </div>

@@ -3,7 +3,20 @@ import { motion, AnimatePresence } from 'motion/react';
 import { MessageSquare, X, Send, Bot, User, Loader2 } from 'lucide-react';
 import { GoogleGenAI } from '@google/genai';
 
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+// Safely access the API key, falling back to import.meta.env for Vite builds
+const getApiKey = () => {
+  try {
+    if (typeof process !== 'undefined' && process.env && process.env.GEMINI_API_KEY) {
+      return process.env.GEMINI_API_KEY;
+    }
+  } catch (e) {
+    // Ignore process is not defined error
+  }
+  return import.meta.env.VITE_GEMINI_API_KEY || '';
+};
+
+const apiKey = getApiKey();
+const ai = new GoogleGenAI({ apiKey: apiKey || 'dummy-key-to-prevent-crash' });
 
 const SYSTEM_PROMPT = `You are the official AI Assistant for OCSTHAEL, an innovative technology-based initiative building a powerful digital ecosystem. 
 OCSTHAEL connects communication, social networking, online income, internet usage, and e-commerce into one platform.
