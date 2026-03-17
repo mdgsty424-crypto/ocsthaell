@@ -1,22 +1,36 @@
-import React, { useState } from 'react';
-import { UploadCloud, X, Link as LinkIcon } from 'lucide-react';
+import React, { useState, useRef } from 'react';
+import { UploadCloud, X, Link as LinkIcon, FileVideo, Image as ImageIcon } from 'lucide-react';
 
 interface ImageUploadProps {
   value: string;
   onChange: (url: string) => void;
   label?: string;
+  accept?: 'image/*' | 'video/*' | 'image/*,video/*';
 }
 
-export default function ImageUpload({ value, onChange, label = 'Image' }: ImageUploadProps) {
+export default function ImageUpload({ value, onChange, label = 'Media', accept = 'image/*' }: ImageUploadProps) {
   const [uploading, setUploading] = useState(false);
+  const [progress, setProgress] = useState(0);
   const [error, setError] = useState('');
   const [mode, setMode] = useState<'upload' | 'url'>('url');
+  const xhrRef = useRef<XMLHttpRequest | null>(null);
 
   const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
+    // Check file size limits
+    const isVideo = file.type.startsWith('video/');
+    const maxSizeMB = isVideo ? 300 : 20;
+    const maxSizeBytes = maxSizeMB * 1024 * 1024;
+
+    if (file.size > maxSizeBytes) {
+      setError(`File is too large. Maximum size for ${isVideo ? 'videos is 300MB' : 'photos is 20MB'}.`);
+      return;
+    }
+
     setUploading(true);
+    setProgress(0);
     setError('');
 
     try {
@@ -40,24 +54,59 @@ export default function ImageUpload({ value, onChange, label = 'Image' }: ImageU
       formData.append('timestamp', timestamp.toString());
       formData.append('signature', signature);
 
-      const res = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
-        method: 'POST',
-        body: formData,
+      const resourceType = isVideo ? 'video' : 'image';
+      const uploadUrl = `https://api.cloudinary.com/v1_1/${cloudName}/${resourceType}/upload`;
+
+      const xhr = new XMLHttpRequest();
+      xhrRef.current = xhr;
+
+      xhr.upload.addEventListener('progress', (event) => {
+        if (event.lengthComputable) {
+          const percentComplete = Math.round((event.loaded / event.total) * 100);
+          setProgress(percentComplete);
+        }
       });
 
-      const responseData = await res.json();
-      
-      if (res.ok) {
-        onChange(responseData.secure_url);
-      } else {
-        throw new Error(responseData.error?.message || 'Upload failed');
-      }
+      xhr.addEventListener('load', () => {
+        if (xhr.status >= 200 && xhr.status < 300) {
+          const responseData = JSON.parse(xhr.responseText);
+          onChange(responseData.secure_url);
+          setUploading(false);
+        } else {
+          const responseData = JSON.parse(xhr.responseText);
+          setError(responseData.error?.message || 'Upload failed');
+          setUploading(false);
+        }
+      });
+
+      xhr.addEventListener('error', () => {
+        setError('Upload failed. Please check your network connection.');
+        setUploading(false);
+      });
+
+      xhr.addEventListener('abort', () => {
+        setError('Upload cancelled.');
+        setUploading(false);
+      });
+
+      xhr.open('POST', uploadUrl, true);
+      xhr.send(formData);
+
     } catch (err: any) {
       console.error('Cloudinary upload error:', err);
       setError('Upload failed. Please check your Cloudinary configuration or use the URL mode.');
-    } finally {
       setUploading(false);
     }
+  };
+
+  const cancelUpload = () => {
+    if (xhrRef.current) {
+      xhrRef.current.abort();
+    }
+  };
+
+  const isVideoUrl = (url: string) => {
+    return url.match(/\.(mp4|webm|ogg)$/i) || url.includes('/video/upload/');
   };
 
   return (
@@ -90,21 +139,34 @@ export default function ImageUpload({ value, onChange, label = 'Image' }: ImageU
           className="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-gray-900 focus:outline-none focus:border-brand-blue transition-colors"
         />
       ) : (
-        <div className="relative border-2 border-dashed border-gray-200 rounded-xl p-8 text-center hover:border-brand-blue transition-colors bg-gray-50">
-          <input
-            type="file"
-            accept="image/*"
-            onChange={handleUpload}
-            disabled={uploading}
-            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer disabled:cursor-not-allowed"
-          />
-          <div className="flex flex-col items-center justify-center space-y-3">
+        <div className="relative border-2 border-dashed border-gray-200 rounded-xl p-8 text-center hover:border-brand-blue transition-colors bg-gray-50 overflow-hidden">
+          {!uploading && (
+            <input
+              type="file"
+              accept={accept}
+              onChange={handleUpload}
+              className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+            />
+          )}
+          <div className="flex flex-col items-center justify-center space-y-3 relative z-10">
             {uploading ? (
-              <div className="w-8 h-8 border-2 border-brand-blue/30 border-t-brand-blue rounded-full animate-spin"></div>
+              <div className="w-full max-w-xs">
+                <div className="flex justify-between text-sm text-gray-600 mb-1">
+                  <span>Uploading...</span>
+                  <span>{progress}%</span>
+                </div>
+                <div className="w-full bg-gray-200 rounded-full h-2.5 mb-4 overflow-hidden">
+                  <div className="bg-brand-blue h-2.5 rounded-full transition-all duration-300" style={{ width: `${progress}%` }}></div>
+                </div>
+                <button type="button" onClick={cancelUpload} className="text-xs text-red-500 hover:text-red-700">
+                  Cancel Upload
+                </button>
+              </div>
             ) : (
               <>
                 <UploadCloud className="w-10 h-10 text-gray-400" />
-                <p className="text-sm text-gray-500">Click or drag image to upload to Cloudinary</p>
+                <p className="text-sm text-gray-500">Click or drag media to upload to Cloudinary</p>
+                <p className="text-xs text-gray-400">Max size: Photos 20MB, Videos 300MB</p>
               </>
             )}
           </div>
@@ -113,13 +175,17 @@ export default function ImageUpload({ value, onChange, label = 'Image' }: ImageU
 
       {error && <p className="text-red-500 text-xs mt-2">{error}</p>}
 
-      {value && (
-        <div className="mt-4 relative inline-block">
-          <img src={value} alt="Preview" className="h-32 rounded-lg object-cover border border-gray-200 shadow-sm" referrerPolicy="no-referrer" />
+      {value && !uploading && (
+        <div className="mt-4 relative inline-block max-w-full">
+          {isVideoUrl(value) ? (
+            <video src={value} controls className="h-32 rounded-lg object-cover border border-gray-200 shadow-sm" />
+          ) : (
+            <img src={value} alt="Preview" className="h-32 rounded-lg object-cover border border-gray-200 shadow-sm" referrerPolicy="no-referrer" />
+          )}
           <button
             type="button"
             onClick={() => onChange('')}
-            className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 transition-colors shadow-sm"
+            className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 transition-colors shadow-sm z-10"
           >
             <X className="w-4 h-4" />
           </button>

@@ -25,19 +25,19 @@ export default function HelpCenter() {
 
     try {
       // Save to Firestore
-      await addDoc(collection(db, 'support_tickets'), {
+      const docRef = await addDoc(collection(db, 'support_tickets'), {
         ...formData,
         createdAt: serverTimestamp(),
         status: 'open'
       });
 
       // Send Email Notification
-      await sendSupportTicket(
-        formData.name,
-        formData.email,
-        `[${formData.type.toUpperCase()}] ${formData.subject}`,
-        formData.message
-      );
+      await sendSupportTicket({
+        name: formData.name,
+        email: formData.email,
+        issueSubject: `[${formData.type.toUpperCase()}] ${formData.subject}`,
+        userId: docRef.id // Use the newly created document ID as userId for the ticket link
+      });
 
       setStatus('success');
       setFormData({ name: '', email: '', subject: '', type: 'help', message: '' });

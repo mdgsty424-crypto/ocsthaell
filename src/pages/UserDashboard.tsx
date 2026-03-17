@@ -1,14 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { Save, User, Mail, Phone, Briefcase, ShieldCheck, Wallet, ArrowUpRight, Gift, Calendar, QrCode, LogOut } from 'lucide-react';
-import { doc, getDoc, updateDoc, setDoc, collection, query, where, getDocs } from 'firebase/firestore';
+import { doc, getDoc, updateDoc, setDoc, collection, query, where, getDocs, addDoc } from 'firebase/firestore';
 import { updateProfile, signOut } from 'firebase/auth';
 import { useNavigate, useParams, Link } from 'react-router-dom';
 import { db, auth } from '../firebase';
 import { useAuth } from '../context/AuthContext';
 import ImageUpload from '../components/admin/ImageUpload';
 import { QRCodeSVG } from 'qrcode.react';
-import { sendWithdrawalRequest } from '../services/emailService';
 
 export default function UserDashboard() {
   const { user, ocId: loggedInOcId } = useAuth();
@@ -264,14 +263,17 @@ export default function UserDashboard() {
 
     setWithdrawing(true);
     try {
-      // Send email to admin
-      await sendWithdrawalRequest(
-        formData.displayName || user.email || 'User',
-        user.email || '',
-        withdrawForm.phone,
-        amount,
-        withdrawForm.method === 'recharge' ? `Mobile Recharge (${withdrawForm.operator})` : 'Bkash'
-      );
+      // Save withdrawal request to Firestore
+      await addDoc(collection(db, 'withdrawals'), {
+        userId: user.uid,
+        userName: formData.displayName || user.email || 'User',
+        userEmail: user.email || '',
+        amount: amount,
+        method: withdrawForm.method === 'recharge' ? `Mobile Recharge (${withdrawForm.operator})` : 'Bkash',
+        phone: withdrawForm.phone,
+        status: 'pending',
+        createdAt: new Date()
+      });
 
       // Deduct balance
       const newBalance = wallet.balance - amount;

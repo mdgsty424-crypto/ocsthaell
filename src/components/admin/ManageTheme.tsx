@@ -72,6 +72,7 @@ export default function ManageTheme() {
     logoY: 0,
     backgroundDesign: "gradient-blobs", // 'none', 'gradient-blobs', 'grid', 'particles'
     buttonAnimation: "glow", // 'none', 'glow', 'pulse', 'bounce'
+    baseFontSize: "16px",
   });
 
   const [imageSrc, setImageSrc] = useState<string | null>(null);
@@ -399,6 +400,22 @@ export default function ManageTheme() {
                 <option value="Playfair Display, serif">
                   Playfair Display
                 </option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-600 mb-2">
+                Base Font Size
+              </label>
+              <select
+                name="baseFontSize"
+                value={theme.baseFontSize || "16px"}
+                onChange={handleChange}
+                className="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-gray-900 focus:outline-none focus:border-brand-blue"
+              >
+                <option value="14px">Small (14px)</option>
+                <option value="16px">Medium (16px)</option>
+                <option value="18px">Large (18px)</option>
+                <option value="20px">Extra Large (20px)</option>
               </select>
             </div>
           </div>

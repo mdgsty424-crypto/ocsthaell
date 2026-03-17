@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import ErrorBoundary from './components/ErrorBoundary';
 import Navbar from './components/Navbar';
@@ -24,6 +24,7 @@ import News from './pages/News';
 import NewsDetails from './pages/NewsDetails';
 import Contact from './pages/Contact';
 import Login from './pages/Login';
+import OCChat from './pages/OCChat';
 import AdminLogin from './pages/AdminLogin';
 import AdminDashboard from './pages/AdminDashboard';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -65,6 +66,8 @@ export default function App() {
                   <Route path="/news/:id" element={<NewsDetails />} />
                   <Route path="/contact" element={<Contact />} />
                   <Route path="/login" element={<Login />} />
+                  <Route path="/chat" element={<ProtectedRoute requireAdmin={false}><OCChat /></ProtectedRoute>} />
+                  <Route path="/shop" element={<Navigate to="/apps/oc-shopping" replace />} />
                   <Route path="/help-center" element={<HelpCenter />} />
                   <Route path="/privacy-policy" element={<PrivacyPolicy />} />
                   <Route path="/terms-of-service" element={<TermsOfService />} />

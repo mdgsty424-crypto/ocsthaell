@@ -18,6 +18,8 @@ const navLinks = [
   { name: 'Members', path: '/members' },
   { name: 'Gallery', path: '/gallery' },
   { name: 'News', path: '/news' },
+  { name: 'Chat', path: '/chat' },
+  { name: 'Shop', path: '/apps/oc-shopping' },
   { name: 'Contact', path: '/contact' },
 ];
 

@@ -5,6 +5,7 @@ import { auth, db } from '../firebase';
 import { doc, getDoc, setDoc, serverTimestamp, collection, query, where, getDocs } from 'firebase/firestore';
 import { useNavigate, Link } from 'react-router-dom';
 import { Hexagon, Lock, Mail, Key, ArrowRight } from 'lucide-react';
+import { sendAuthOTP, sendSecurityAlert, sendWelcomeMail } from '../services/emailService';
 
 export default function Login() {
   const [loginMethod, setLoginMethod] = useState<'email' | 'ocid'>('email');
@@ -12,6 +13,14 @@ export default function Login() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  
+  // OTP State
+  const [showOTP, setShowOTP] = useState(false);
+  const [otpInput, setOtpInput] = useState('');
+  const [generatedOTP, setGeneratedOTP] = useState<number | null>(null);
+  const [pendingUser, setPendingUser] = useState<any>(null);
+  const [pendingOcId, setPendingOcId] = useState<string>('');
+
   const navigate = useNavigate();
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -41,7 +50,10 @@ export default function Login() {
       // Ensure user document exists
       const userDoc = await getDoc(doc(db, 'users', userCredential.user.uid));
       let ocId = `OC-${userCredential.user.uid.substring(0, 8).toUpperCase()}`;
+      let isNewUser = false;
+
       if (!userDoc.exists()) {
+        isNewUser = true;
         await setDoc(doc(db, 'users', userCredential.user.uid), {
           email: userCredential.user.email,
           role: 'user',
@@ -52,7 +64,22 @@ export default function Login() {
         ocId = userDoc.data().ocId || ocId;
       }
       
-      navigate(`/${ocId}/profile`);
+      // Send OTP
+      const otpResult = await sendAuthOTP(userCredential.user.email || '', userCredential.user.displayName || 'User');
+      if (otpResult.success) {
+        setGeneratedOTP(otpResult.otp || null);
+        setPendingUser(userCredential.user);
+        setPendingOcId(ocId);
+        setShowOTP(true);
+        
+        if (isNewUser) {
+          await sendWelcomeMail({ name: userCredential.user.displayName || 'User', userEmail: userCredential.user.email || '' });
+        }
+      } else {
+        // Fallback if OTP fails
+        await completeLogin(userCredential.user, ocId);
+      }
+      
     } catch (err: any) {
       if (err.code === 'auth/invalid-credential') {
         setError('Invalid credentials. Please check your details and try again.');
@@ -76,8 +103,10 @@ export default function Login() {
       const userDocRef = doc(db, 'users', userCredential.user.uid);
       const userDoc = await getDoc(userDocRef);
       let ocId = `OC-${userCredential.user.uid.substring(0, 8).toUpperCase()}`;
+      let isNewUser = false;
       
       if (!userDoc.exists()) {
+        isNewUser = true;
         const userData: any = {
           email: userCredential.user.email,
           role: 'user',
@@ -95,7 +124,22 @@ export default function Login() {
         ocId = userDoc.data().ocId || ocId;
       }
       
-      navigate(`/${ocId}/profile`);
+      // Send OTP
+      const otpResult = await sendAuthOTP(userCredential.user.email || '', userCredential.user.displayName || 'User');
+      if (otpResult.success) {
+        setGeneratedOTP(otpResult.otp || null);
+        setPendingUser(userCredential.user);
+        setPendingOcId(ocId);
+        setShowOTP(true);
+        
+        if (isNewUser) {
+          await sendWelcomeMail({ name: userCredential.user.displayName || 'User', userEmail: userCredential.user.email || '' });
+        }
+      } else {
+        // Fallback if OTP fails
+        await completeLogin(userCredential.user, ocId);
+      }
+      
     } catch (err: any) {
       setError(err.message || 'Failed to log in with Google');
       console.error(err);
@@ -103,6 +147,82 @@ export default function Login() {
       setLoading(false);
     }
   };
+
+  const verifyOTP = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (parseInt(otpInput) === generatedOTP) {
+      await completeLogin(pendingUser, pendingOcId);
+    } else {
+      setError('Invalid OTP. Please try again.');
+    }
+  };
+
+  const completeLogin = async (user: any, ocId: string) => {
+    // Send Security Alert
+    await sendSecurityAlert({
+      name: user.displayName || 'User',
+      device: navigator.userAgent.substring(0, 50),
+      city: 'Unknown Location', // Could use geolocation API here
+      userEmail: user.email || ''
+    });
+    
+    navigate(`/${ocId}/profile`);
+  };
+
+  if (showOTP) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#05070a] px-4 pt-20">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="max-w-md w-full bg-[#0a0f19] rounded-3xl p-10 relative overflow-hidden shadow-2xl border border-gray-800"
+        >
+          <div className="absolute top-0 left-0 w-full h-2 bg-gradient-brand"></div>
+          
+          <div className="text-center mb-10">
+            <div className="flex justify-center mb-6">
+              <Hexagon className="w-16 h-16 text-brand-blue drop-shadow-lg" />
+            </div>
+            <h2 className="text-3xl font-display font-bold text-white mb-2">
+              Verify OTP
+            </h2>
+            <p className="text-gray-400 text-sm">
+              We've sent a 6-digit code to your email.
+            </p>
+          </div>
+
+          {error && (
+            <div className="bg-red-500/10 border border-red-500/20 text-red-400 p-4 rounded-xl text-sm mb-6 text-center">
+              {error}
+            </div>
+          )}
+
+          <form onSubmit={verifyOTP} className="space-y-4 mb-6">
+            <div>
+              <div className="relative">
+                <Key className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
+                <input
+                  type="text"
+                  required
+                  placeholder="Enter 6-digit OTP"
+                  value={otpInput}
+                  onChange={(e) => setOtpInput(e.target.value)}
+                  className="w-full bg-[#111827] border border-gray-800 rounded-xl pl-12 pr-4 py-4 text-white placeholder-gray-500 focus:outline-none focus:border-brand-blue transition-colors text-center tracking-widest text-lg"
+                  maxLength={6}
+                />
+              </div>
+            </div>
+            <button
+              type="submit"
+              className="w-full py-4 px-6 rounded-xl bg-brand-blue text-white font-semibold hover:bg-blue-600 transition-all flex items-center justify-center shadow-lg"
+            >
+              Verify & Login
+            </button>
+          </form>
+        </motion.div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#05070a] px-4 pt-20">

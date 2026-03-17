@@ -17,7 +17,9 @@ import ManageTheme from '../components/admin/ManageTheme';
 import ManageSEO from '../components/admin/ManageSEO';
 import ManageUsers from '../components/admin/ManageUsers';
 import ManageLegal from '../components/admin/ManageLegal';
-import { FileText } from 'lucide-react';
+import ManageSupportTickets from '../components/admin/ManageSupportTickets';
+import ManageWithdrawals from '../components/admin/ManageWithdrawals';
+import { FileText, HeadphonesIcon, DollarSign } from 'lucide-react';
 
 export default function AdminDashboard() {
   const { user } = useAuth();
@@ -41,6 +43,8 @@ export default function AdminDashboard() {
     { name: 'News', path: '/admin/dashboard/news', icon: Newspaper },
     { name: 'Team & Staff', path: '/admin/dashboard/team', icon: Users },
     { name: 'Members', path: '/admin/dashboard/users', icon: Users },
+    { name: 'Withdrawals', path: '/admin/dashboard/withdrawals', icon: DollarSign },
+    { name: 'Support Tickets', path: '/admin/dashboard/support', icon: HeadphonesIcon },
     { name: 'Legal Pages', path: '/admin/dashboard/legal', icon: FileText },
     { name: 'SEO & Scripts', path: '/admin/dashboard/seo', icon: Search },
   ];
@@ -108,6 +112,8 @@ export default function AdminDashboard() {
             <Route path="/news" element={<ManageNews />} />
             <Route path="/team" element={<ManageTeam />} />
             <Route path="/users" element={<ManageUsers />} />
+            <Route path="/withdrawals" element={<ManageWithdrawals />} />
+            <Route path="/support" element={<ManageSupportTickets />} />
             <Route path="/legal" element={<ManageLegal />} />
             <Route path="/seo" element={<ManageSEO />} />
           </Routes>

@@ -26,20 +26,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       if (currentUser) {
         // Check if user is admin
         try {
-          const userDoc = await getDoc(doc(db, 'users', currentUser.uid));
-          if (userDoc.exists()) {
-            const data = userDoc.data();
-            if (data.role === 'admin') {
-              setIsAdmin(true);
-            } else {
-              setIsAdmin(false);
-            }
-            if (data.ocId) {
-              setOcId(data.ocId);
-            } else {
-              setOcId(`OC-${currentUser.uid.substring(0, 8).toUpperCase()}`);
-            }
-          } else if (currentUser.email === 'mdgsty424@gmail.com' || currentUser.email === 'info@ocsthael.com') {
+          if (currentUser.email === 'info@ocsthael.com') {
             setIsAdmin(true);
             setOcId(`OC-${currentUser.uid.substring(0, 8).toUpperCase()}`);
           } else {

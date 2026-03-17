@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { collection, onSnapshot } from 'firebase/firestore';
 import { db } from '../firebase';
 import { Linkedin, Twitter, Mail, Facebook, Youtube } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 interface TeamMember {
   id: string;
@@ -80,19 +81,21 @@ export default function Staff() {
                 transition={{ delay: index * 0.05 }}
                 className="text-center group"
               >
-                <div className="relative mb-6 mx-auto w-40 h-40 sm:w-48 sm:h-48">
-                  <div className="absolute inset-0 bg-gradient-brand rounded-full scale-105 opacity-0 group-hover:opacity-20 transition-opacity duration-500"></div>
-                  <div className="relative w-full h-full rounded-full overflow-hidden border-4 border-white shadow-lg group-hover:shadow-xl transition-all duration-500">
-                    <img 
-                      src={member.imageUrl || member.image} 
-                      alt={member.name} 
-                      className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700"
-                      referrerPolicy="no-referrer"
-                    />
+                <Link to={`/staff/${member.id}`} className="block">
+                  <div className="relative mb-6 mx-auto w-40 h-40 sm:w-48 sm:h-48">
+                    <div className="absolute inset-0 bg-gradient-brand rounded-full scale-105 opacity-0 group-hover:opacity-20 transition-opacity duration-500"></div>
+                    <div className="relative w-full h-full rounded-full overflow-hidden border-4 border-white shadow-lg group-hover:shadow-xl transition-all duration-500">
+                      <img 
+                        src={member.imageUrl || member.image} 
+                        alt={member.name} 
+                        className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700"
+                        referrerPolicy="no-referrer"
+                      />
+                    </div>
                   </div>
-                </div>
-                <h3 className="text-xl font-bold text-gray-900 mb-1 group-hover:text-brand-pink transition-colors">{member.name}</h3>
-                <p className="text-sm font-bold text-brand-blue uppercase tracking-widest">{member.role}</p>
+                  <h3 className="text-xl font-bold text-gray-900 mb-1 group-hover:text-brand-pink transition-colors">{member.name}</h3>
+                  <p className="text-sm font-bold text-brand-blue uppercase tracking-widest">{member.role}</p>
+                </Link>
               </motion.div>
             ))}
           </div>

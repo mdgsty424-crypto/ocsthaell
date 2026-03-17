@@ -21,33 +21,38 @@ export default function AdminLogin() {
     try {
       let userCredential;
       if (isSignUp) {
+        if (email !== 'info@ocsthael.com') {
+          setError('Access Denied. Only authorized admins can enter.');
+          setLoading(false);
+          return;
+        }
         userCredential = await createUserWithEmailAndPassword(auth, email, password);
         // Create user document
         await setDoc(doc(db, 'users', userCredential.user.uid), {
           email: userCredential.user.email,
-          role: 'user', // Default role
+          role: 'admin',
           createdAt: serverTimestamp()
         });
-        navigate('/dashboard');
+        navigate('/admin/dashboard');
       } else {
         userCredential = await signInWithEmailAndPassword(auth, email, password);
+        if (userCredential.user.email !== 'info@ocsthael.com') {
+          await auth.signOut();
+          setError('Access Denied. Only authorized admins can enter.');
+          setLoading(false);
+          return;
+        }
+        
         // Ensure user document exists
         const userDoc = await getDoc(doc(db, 'users', userCredential.user.uid));
         if (!userDoc.exists()) {
           await setDoc(doc(db, 'users', userCredential.user.uid), {
             email: userCredential.user.email,
-            role: 'user',
+            role: 'admin',
             createdAt: serverTimestamp()
           });
-          navigate('/dashboard');
-        } else {
-          const role = userDoc.data().role;
-          if (role === 'admin' || userCredential.user.email === 'mdgsty424@gmail.com' || userCredential.user.email === 'info@ocsthael.com') {
-            navigate('/admin/dashboard');
-          } else {
-            navigate('/dashboard');
-          }
         }
+        navigate('/admin/dashboard');
       }
     } catch (err: any) {
       if (err.code === 'auth/invalid-credential') {
@@ -70,27 +75,27 @@ export default function AdminLogin() {
       const provider = new GoogleAuthProvider();
       const userCredential = await signInWithPopup(auth, provider);
       
+      if (userCredential.user.email !== 'info@ocsthael.com') {
+        await auth.signOut();
+        setError('Access Denied. Only authorized admins can enter.');
+        setLoading(false);
+        return;
+      }
+
       // Ensure user document exists
       const userDoc = await getDoc(doc(db, 'users', userCredential.user.uid));
       if (!userDoc.exists()) {
         const userData: any = {
           email: userCredential.user.email,
-          role: 'user',
+          role: 'admin',
           createdAt: serverTimestamp()
         };
         if (userCredential.user.displayName) {
           userData.displayName = userCredential.user.displayName;
         }
         await setDoc(doc(db, 'users', userCredential.user.uid), userData);
-        navigate('/dashboard');
-      } else {
-        const role = userDoc.data().role;
-        if (role === 'admin' || userCredential.user.email === 'mdgsty424@gmail.com' || userCredential.user.email === 'info@ocsthael.com') {
-          navigate('/admin/dashboard');
-        } else {
-          navigate('/dashboard');
-        }
       }
+      navigate('/admin/dashboard');
     } catch (err: any) {
       setError(err.message || 'Failed to log in with Google');
       console.error(err);

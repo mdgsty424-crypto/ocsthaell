@@ -1,18 +1,42 @@
 import { motion } from 'motion/react';
 import { Mail, MapPin, Phone, Send } from 'lucide-react';
 import React, { useState } from 'react';
+import { sendInquiryMail } from '../services/emailService';
 
 export default function Contact() {
   const [status, setStatus] = useState<'idle' | 'sending' | 'success' | 'error'>('idle');
+  const [formData, setFormData] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+    message: ''
+  });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setStatus('sending');
-    // Simulate API call
-    setTimeout(() => {
+    
+    const result = await sendInquiryMail({
+      senderName: `${formData.firstName} ${formData.lastName}`,
+      topic: 'General Inquiry from Contact Form',
+      senderEmail: formData.email
+    });
+
+    if (result.success) {
       setStatus('success');
+      setFormData({ firstName: '', lastName: '', email: '', message: '' });
       setTimeout(() => setStatus('idle'), 3000);
-    }, 1500);
+    } else {
+      setStatus('error');
+      setTimeout(() => setStatus('idle'), 3000);
+    }
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    setFormData(prev => ({
+      ...prev,
+      [e.target.name]: e.target.value
+    }));
   };
 
   return (
@@ -96,6 +120,9 @@ export default function Contact() {
                   <label className="block text-sm font-medium text-gray-500 mb-2">First Name</label>
                   <input
                     type="text"
+                    name="firstName"
+                    value={formData.firstName}
+                    onChange={handleChange}
                     required
                     className="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-gray-900 focus:outline-none focus:border-brand-blue transition-colors"
                   />
@@ -104,6 +131,9 @@ export default function Contact() {
                   <label className="block text-sm font-medium text-gray-500 mb-2">Last Name</label>
                   <input
                     type="text"
+                    name="lastName"
+                    value={formData.lastName}
+                    onChange={handleChange}
                     required
                     className="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-gray-900 focus:outline-none focus:border-brand-blue transition-colors"
                   />
@@ -114,6 +144,9 @@ export default function Contact() {
                 <label className="block text-sm font-medium text-gray-500 mb-2">Email Address</label>
                 <input
                   type="email"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleChange}
                   required
                   className="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-gray-900 focus:outline-none focus:border-brand-blue transition-colors"
                 />
@@ -122,6 +155,9 @@ export default function Contact() {
               <div>
                 <label className="block text-sm font-medium text-gray-500 mb-2">Message</label>
                 <textarea
+                  name="message"
+                  value={formData.message}
+                  onChange={handleChange}
                   required
                   rows={5}
                   className="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-gray-900 focus:outline-none focus:border-brand-blue transition-colors resize-none"

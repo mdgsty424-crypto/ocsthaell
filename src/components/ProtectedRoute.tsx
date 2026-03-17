@@ -18,7 +18,10 @@ export default function ProtectedRoute({ children, requireAdmin = true }: { chil
   }
 
   if (requireAdmin && !isAdmin) {
-    return <Navigate to="/dashboard" replace />;
+    setTimeout(() => {
+      alert('Access Denied: Only Official Admin Allowed');
+    }, 0);
+    return <Navigate to="/" replace />;
   }
 
   return <>{children}</>;

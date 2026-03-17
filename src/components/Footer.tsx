@@ -13,7 +13,7 @@ import {
 import { motion } from "motion/react";
 import { doc, onSnapshot } from "firebase/firestore";
 import { db } from "../firebase";
-import { sendGeneralInfo } from "../services/emailService";
+import { sendInquiryMail } from "../services/emailService";
 
 export default function Footer() {
   const [logoUrl, setLogoUrl] = useState<string | null>(null);
@@ -36,7 +36,7 @@ export default function Footer() {
     e.preventDefault();
     setStatus("sending");
     try {
-      await sendGeneralInfo("Website Visitor", email, message);
+      await sendInquiryMail({ senderName: "Website Visitor", senderEmail: email, topic: message });
       setStatus("success");
       setEmail("");
       setMessage("");

@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { collection, onSnapshot, doc, updateDoc, deleteDoc } from 'firebase/firestore';
 import { db } from '../../firebase';
-import { Trash2, Edit2, Plus, X, Shield, ShieldAlert, User as UserIcon } from 'lucide-react';
+import { Trash2, Edit2, Plus, X, Shield, ShieldAlert, User as UserIcon, Gift, Send } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { sendBonusMail } from '../../services/emailService';
 
 interface UserData {
   id: string;
@@ -19,6 +20,10 @@ const ManageUsers = () => {
   const [loading, setLoading] = useState(true);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editData, setEditData] = useState<Partial<UserData>>({});
+  const [sendingBonusId, setSendingBonusId] = useState<string | null>(null);
+  const [bonusAmount, setBonusAmount] = useState('');
+  const [bonusDescription, setBonusDescription] = useState('');
+  const [isSendingBonus, setIsSendingBonus] = useState(false);
 
   useEffect(() => {
     const unsubscribe = onSnapshot(collection(db, 'users'), (snapshot) => {
@@ -69,6 +74,36 @@ const ManageUsers = () => {
     }
   };
 
+  const handleSendBonus = async (user: UserData) => {
+    if (!bonusAmount.trim() || !bonusDescription.trim()) {
+      alert('Please enter both bonus amount and description.');
+      return;
+    }
+
+    setIsSendingBonus(true);
+    try {
+      const success = await sendBonusMail({
+        name: user.displayName || 'Member',
+        email: user.email,
+        amount: bonusAmount
+      });
+
+      if (success) {
+        alert('Bonus email sent successfully!');
+        setSendingBonusId(null);
+        setBonusAmount('');
+        setBonusDescription('');
+      } else {
+        alert('Failed to send bonus email.');
+      }
+    } catch (error) {
+      console.error('Error sending bonus:', error);
+      alert('An error occurred while sending the bonus email.');
+    } finally {
+      setIsSendingBonus(false);
+    }
+  };
+
   if (loading) {
     return <div className="flex justify-center items-center h-64"><div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-brand-blue"></div></div>;
   }
@@ -93,8 +128,8 @@ const ManageUsers = () => {
             <tbody>
               <AnimatePresence>
                 {users.map((user) => (
+                  <React.Fragment key={user.id}>
                   <motion.tr
-                    key={user.id}
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, scale: 0.95 }}
@@ -185,6 +220,13 @@ const ManageUsers = () => {
                       ) : (
                         <div className="flex items-center justify-end gap-2">
                           <button
+                            onClick={() => setSendingBonusId(sendingBonusId === user.id ? null : user.id)}
+                            className="p-2 text-purple-600 hover:bg-purple-50 dark:hover:bg-purple-900/20 rounded-lg transition-colors"
+                            title="Send Bonus"
+                          >
+                            <Gift size={18} />
+                          </button>
+                          <button
                             onClick={() => startEdit(user)}
                             className="p-2 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
                             title="Edit Role"
@@ -202,6 +244,59 @@ const ManageUsers = () => {
                       )}
                     </td>
                   </motion.tr>
+                  {sendingBonusId === user.id && (
+                    <tr className="bg-purple-50/50 dark:bg-purple-900/10">
+                      <td colSpan={4} className="p-4 border-b border-gray-100 dark:border-gray-700">
+                        <div className="space-y-3">
+                          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                            Send Bonus to {user.displayName || user.email}
+                          </label>
+                          <div className="flex gap-3">
+                            <input
+                              type="text"
+                              value={bonusAmount}
+                              onChange={(e) => setBonusAmount(e.target.value)}
+                              className="w-1/3 p-3 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-brand-blue dark:bg-gray-700 dark:text-white"
+                              placeholder="Amount (e.g. $50)"
+                            />
+                            <input
+                              type="text"
+                              value={bonusDescription}
+                              onChange={(e) => setBonusDescription(e.target.value)}
+                              className="flex-1 p-3 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-brand-blue dark:bg-gray-700 dark:text-white"
+                              placeholder="Description (e.g. Loyalty Reward)"
+                            />
+                          </div>
+                          <div className="flex justify-end gap-3">
+                            <button
+                              onClick={() => setSendingBonusId(null)}
+                              className="px-4 py-2 text-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                            >
+                              Cancel
+                            </button>
+                            <button
+                              onClick={() => handleSendBonus(user)}
+                              disabled={isSendingBonus || !bonusAmount.trim() || !bonusDescription.trim()}
+                              className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors disabled:opacity-50 flex items-center gap-2"
+                            >
+                              {isSendingBonus ? (
+                                <>
+                                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                  Sending...
+                                </>
+                              ) : (
+                                <>
+                                  <Send size={16} />
+                                  Send Bonus
+                                </>
+                              )}
+                            </button>
+                          </div>
+                        </div>
+                      </td>
+                    </tr>
+                  )}
+                </React.Fragment>
                 ))}
                 {users.length === 0 && (
                   <tr>

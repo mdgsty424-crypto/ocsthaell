@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { ArrowRight, Youtube, Facebook, Image as ImageIcon, MousePointer2, ChevronDown, Users, TrendingUp, Globe, Hexagon, Layers, Zap, Shield, Code, Smartphone, Cloud, Calendar, Target, Eye, ShieldCheck, DollarSign, Briefcase, MessageSquare, ShoppingCart, BookOpen, Music, Video, Map, Bot, Mail, MapPin, Send, Phone } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { collection, onSnapshot, query, limit } from 'firebase/firestore';
+import { collection, onSnapshot, query, limit, where } from 'firebase/firestore';
 import { db } from '../firebase';
 
 export default function Home() {
@@ -13,6 +13,8 @@ export default function Home() {
   const [services, setServices] = useState<any[]>([]);
   const [news, setNews] = useState<any[]>([]);
   const [gallery, setGallery] = useState<any[]>([]);
+  const [banners, setBanners] = useState<any[]>([]);
+  const [ads, setAds] = useState<any[]>([]);
   const [contactStatus, setContactStatus] = useState<'idle' | 'sending' | 'success' | 'error'>('idle');
 
   const getServiceIcon = (name: string) => {
@@ -77,6 +79,16 @@ export default function Home() {
       setGallery(galleryData.slice(0, 6));
     });
 
+    const bannersUnsubscribe = onSnapshot(query(collection(db, 'banners'), where('active', '==', true)), (snapshot) => {
+      const bannersData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      setBanners(bannersData.sort((a: any, b: any) => a.order - b.order));
+    });
+
+    const adsUnsubscribe = onSnapshot(query(collection(db, 'ads'), where('active', '==', true)), (snapshot) => {
+      const adsData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      setAds(adsData);
+    });
+
     return () => {
       appsUnsubscribe();
       teamUnsubscribe();
@@ -84,6 +96,8 @@ export default function Home() {
       servicesUnsubscribe();
       newsUnsubscribe();
       galleryUnsubscribe();
+      bannersUnsubscribe();
+      adsUnsubscribe();
     };
   }, []);
 
@@ -197,6 +211,61 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Banners Section */}
+      {banners.length > 0 && (
+        <section className="py-12 bg-gray-50">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {banners.map((banner) => (
+                <a 
+                  key={banner.id} 
+                  href={banner.link || '#'} 
+                  target={banner.link ? "_blank" : "_self"}
+                  rel="noopener noreferrer"
+                  className="block relative rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all group"
+                >
+                  <div className="aspect-[21/9] md:aspect-video w-full">
+                    <img 
+                      src={banner.imageUrl} 
+                      alt={banner.title} 
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      referrerPolicy="no-referrer"
+                    />
+                  </div>
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex flex-col justify-end p-6">
+                    <h3 className="text-white font-bold text-xl mb-1">{banner.title}</h3>
+                    {banner.description && <p className="text-gray-300 text-sm line-clamp-2">{banner.description}</p>}
+                  </div>
+                </a>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* Ads Section (Marquee) */}
+      {ads.length > 0 && (
+        <div className="bg-brand-blue/10 py-4 overflow-hidden border-y border-brand-blue/20">
+          <div className="flex whitespace-nowrap animate-marquee">
+            {[...ads, ...ads, ...ads].map((ad, idx) => (
+              <a 
+                key={`${ad.id}-${idx}`} 
+                href={ad.link || '#'} 
+                target={ad.link ? "_blank" : "_self"}
+                rel="noopener noreferrer"
+                className="inline-flex items-center mx-8 text-gray-800 hover:text-brand-blue transition-colors"
+              >
+                {ad.imageUrl && (
+                  <img src={ad.imageUrl} alt={ad.title} className="h-8 w-auto mr-3 rounded" referrerPolicy="no-referrer" />
+                )}
+                <span className="font-bold">{ad.title}</span>
+                {ad.description && <span className="ml-2 text-gray-500 text-sm">- {ad.description}</span>}
+              </a>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* About Us Section */}
       <section className="py-32 bg-transparent relative overflow-hidden">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
@@ -206,7 +275,9 @@ export default function Home() {
             viewport={{ once: true }}
             className="text-center mb-20"
           >
-            <h2 className="text-5xl md:text-6xl font-display font-bold mb-6 text-brand-blue">About <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-blue via-brand-pink to-brand-mango">OCSTHAEL</span></h2>
+            <Link to="/about">
+              <h2 className="text-5xl md:text-6xl font-display font-bold mb-6 text-brand-blue hover:text-brand-pink transition-colors inline-block">About <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-blue via-brand-pink to-brand-mango">OCSTHAEL</span></h2>
+            </Link>
             <p className="text-xl text-gray-600 max-w-4xl mx-auto font-light leading-relaxed">
               OCSTHAEL একটি উদ্ভাবনী প্রযুক্তি ভিত্তিক উদ্যোগ যার লক্ষ্য হলো একটি শক্তিশালী ডিজিটাল ইকোসিস্টেম তৈরি করা যেখানে যোগাযোগ, সামাজিক যোগাযোগ, অনলাইন আয়, ইন্টারনেট ব্যবহার এবং ই-কমার্স সবকিছু একসাথে একটি প্ল্যাটফর্মে সংযুক্ত থাকবে।
             </p>
@@ -241,14 +312,16 @@ export default function Home() {
       <section className="py-32 relative overflow-hidden bg-transparent text-gray-900">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="text-center mb-24">
-            <motion.h2 
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              className="text-5xl md:text-6xl font-display font-bold mb-6 text-brand-blue"
-            >
-              Our Team
-            </motion.h2>
+            <Link to="/team">
+              <motion.h2 
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                className="text-5xl md:text-6xl font-display font-bold mb-6 text-brand-blue hover:text-brand-pink transition-colors inline-block"
+              >
+                Our Team
+              </motion.h2>
+            </Link>
           </div>
 
           <div className="space-y-32">
@@ -328,14 +401,16 @@ export default function Home() {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
             <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-8">
               <div className="max-w-2xl">
-                <motion.h2 
-                  initial={{ opacity: 0, x: -20 }}
-                  whileInView={{ opacity: 1, x: 0 }}
-                  viewport={{ once: true }}
-                  className="text-4xl md:text-5xl font-display font-bold mb-4 text-brand-blue"
-                >
-                  Our Staff
-                </motion.h2>
+                <Link to="/staff">
+                  <motion.h2 
+                    initial={{ opacity: 0, x: -20 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    viewport={{ once: true }}
+                    className="text-4xl md:text-5xl font-display font-bold mb-4 text-brand-blue hover:text-brand-pink transition-colors inline-block"
+                  >
+                    Our Staff
+                  </motion.h2>
+                </Link>
                 <motion.p 
                   initial={{ opacity: 0, x: -20 }}
                   whileInView={{ opacity: 1, x: 0 }}
@@ -388,14 +463,16 @@ export default function Home() {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
             <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-8">
               <div className="max-w-2xl">
-                <motion.h2 
-                  initial={{ opacity: 0, x: -20 }}
-                  whileInView={{ opacity: 1, x: 0 }}
-                  viewport={{ once: true }}
-                  className="text-4xl md:text-5xl font-display font-bold mb-4 text-brand-blue"
-                >
-                  Registered Members
-                </motion.h2>
+                <Link to="/members">
+                  <motion.h2 
+                    initial={{ opacity: 0, x: -20 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    viewport={{ once: true }}
+                    className="text-4xl md:text-5xl font-display font-bold mb-4 text-brand-blue hover:text-brand-pink transition-colors inline-block"
+                  >
+                    Registered Members
+                  </motion.h2>
+                </Link>
                 <motion.p 
                   initial={{ opacity: 0, x: -20 }}
                   whileInView={{ opacity: 1, x: 0 }}
@@ -453,14 +530,16 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="flex flex-col md:flex-row md:items-end justify-between mb-20 gap-8">
             <div className="max-w-2xl">
-              <motion.h2 
-                initial={{ opacity: 0, x: -20 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true }}
-                className="text-5xl font-display font-bold mb-6 text-brand-blue"
-              >
-                Our Platforms
-              </motion.h2>
+              <Link to="/apps">
+                <motion.h2 
+                  initial={{ opacity: 0, x: -20 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  viewport={{ once: true }}
+                  className="text-5xl font-display font-bold mb-6 text-brand-blue hover:text-brand-pink transition-colors inline-block"
+                >
+                  Our Platforms
+                </motion.h2>
+              </Link>
               <motion.p 
                 initial={{ opacity: 0, x: -20 }}
                 whileInView={{ opacity: 1, x: 0 }}
@@ -518,14 +597,16 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="flex flex-col md:flex-row md:items-end justify-between mb-20 gap-8">
             <div className="max-w-2xl">
-              <motion.h2 
-                initial={{ opacity: 0, x: -20 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true }}
-                className="text-5xl font-display font-bold mb-6 text-brand-blue"
-              >
-                Core Services
-              </motion.h2>
+              <Link to="/services">
+                <motion.h2 
+                  initial={{ opacity: 0, x: -20 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  viewport={{ once: true }}
+                  className="text-5xl font-display font-bold mb-6 text-brand-blue hover:text-brand-pink transition-colors inline-block"
+                >
+                  Core Services
+                </motion.h2>
+              </Link>
               <motion.p 
                 initial={{ opacity: 0, x: -20 }}
                 whileInView={{ opacity: 1, x: 0 }}
@@ -570,14 +651,16 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="flex flex-col md:flex-row md:items-end justify-between mb-20 gap-8">
             <div className="max-w-2xl">
-              <motion.h2 
-                initial={{ opacity: 0, x: -20 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true }}
-                className="text-5xl font-display font-bold mb-6 text-brand-blue"
-              >
-                Latest News
-              </motion.h2>
+              <Link to="/news">
+                <motion.h2 
+                  initial={{ opacity: 0, x: -20 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  viewport={{ once: true }}
+                  className="text-5xl font-display font-bold mb-6 text-brand-blue hover:text-brand-pink transition-colors inline-block"
+                >
+                  Latest News
+                </motion.h2>
+              </Link>
               <motion.p 
                 initial={{ opacity: 0, x: -20 }}
                 whileInView={{ opacity: 1, x: 0 }}
@@ -632,14 +715,16 @@ export default function Home() {
       <section className="py-32 bg-transparent relative overflow-hidden">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="text-center mb-20">
-            <motion.h2 
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              className="text-5xl font-display font-bold mb-6 text-brand-blue"
-            >
-              Our Gallery
-            </motion.h2>
+            <Link to="/gallery">
+              <motion.h2 
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                className="text-5xl font-display font-bold mb-6 text-brand-blue hover:text-brand-pink transition-colors inline-block"
+              >
+                Our Gallery
+              </motion.h2>
+            </Link>
             <Link to="/gallery" className="inline-flex items-center px-8 py-4 bg-white/50 backdrop-blur-sm border border-gray-200 rounded-2xl font-bold text-brand-blue hover:bg-brand-blue hover:text-white transition-all shadow-sm">
               View Full Gallery <ArrowRight className="ml-2 w-4 h-4" />
             </Link>
@@ -674,14 +759,16 @@ export default function Home() {
       <section className="py-32 bg-transparent relative overflow-hidden">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="text-center mb-20">
-            <motion.h2 
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              className="text-5xl font-display font-bold mb-6 text-brand-blue"
-            >
-              Get in <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-blue via-brand-pink to-brand-mango">Touch</span>
-            </motion.h2>
+            <Link to="/contact">
+              <motion.h2 
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                className="text-5xl font-display font-bold mb-6 text-brand-blue hover:text-brand-pink transition-colors inline-block"
+              >
+                Get in <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-blue via-brand-pink to-brand-mango">Touch</span>
+              </motion.h2>
+            </Link>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16">
