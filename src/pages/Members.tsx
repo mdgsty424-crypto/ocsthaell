@@ -25,13 +25,18 @@ export default function Members() {
     const fetchMembers = async () => {
       try {
         const querySnapshot = await getDocs(collection(db, 'users'));
-        const membersData = querySnapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data()
-        })) as UserProfile[];
+        const membersData = querySnapshot.docs.map(doc => {
+          const data = doc.data();
+          return {
+            id: doc.id,
+            ...data,
+            // Handle Firestore timestamp or ISO string
+            createdAt: data.createdAt?.toDate?.()?.toLocaleDateString() || 
+                       (data.createdAt ? new Date(data.createdAt).toLocaleDateString() : 'N/A')
+          };
+        }) as (UserProfile & { createdAt: string })[];
         
-        // Filter out admins if we only want to show registered members
-        // Or keep them. Let's keep everyone for now, or filter by role === 'user'
+        // Filter out admins to show only registered members
         const registeredMembers = membersData.filter(m => m.role === 'user');
         setMembers(registeredMembers);
       } catch (error) {
@@ -114,7 +119,11 @@ export default function Members() {
                       </div>
                     )}
                   </div>
-                  <h3 className="text-lg font-bold text-white mb-1">{member.displayName || 'Anonymous User'}</h3>
+                  <h3 className="text-lg font-bold text-white mb-0.5">{member.displayName || 'Anonymous User'}</h3>
+                  {(member as any).nameBengali && (
+                    <p className="text-sm text-gray-400 mb-1 font-medium">{(member as any).nameBengali}</p>
+                  )}
+                  <p className="text-xs text-gray-500 mb-2 font-mono">{member.ocId || 'No OC-ID'}</p>
                   
                   {member.occupation && (
                     <div className="flex items-center text-sm text-brand-blue font-medium mb-3">
@@ -136,6 +145,10 @@ export default function Members() {
                         <span className="truncate">{member.phone}</span>
                       </div>
                     )}
+                    <div className="flex items-center text-xs text-gray-500 pt-1">
+                      <Users className="w-3 h-3 mr-2 flex-shrink-0" />
+                      <span>Joined: {(member as any).createdAt}</span>
+                    </div>
                   </div>
                 </div>
                 <div className="p-4 border-t border-gray-800 bg-[#05070a]/50">

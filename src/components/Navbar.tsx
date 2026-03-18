@@ -28,7 +28,18 @@ export default function Navbar() {
   const location = useLocation();
   const [logoUrl, setLogoUrl] = useState<string | null>(null);
   const [isScrolled, setIsScrolled] = useState(false);
-  const { user, isAdmin, ocId } = useAuth();
+  const { user, isAdmin, isTeam, ocId } = useAuth();
+
+  const getDashboardPath = () => {
+    if (isAdmin) return "/admin/dashboard";
+    if (isTeam) return "/team/dashboard";
+    return `/${ocId}/profile`;
+  };
+
+  const filteredNavLinks = [...navLinks];
+  if (isTeam && !isAdmin) {
+    filteredNavLinks.push({ name: 'Team Workspace', path: '/team/dashboard' });
+  }
 
   useEffect(() => {
     const handleScroll = () => {
@@ -66,7 +77,7 @@ export default function Navbar() {
 
           {/* Desktop Nav */}
           <div className="hidden md:flex items-center space-x-4 lg:space-x-6">
-            {navLinks.map((link) => (
+            {filteredNavLinks.map((link) => (
               <Link
                 key={link.name}
                 to={link.path}
@@ -83,7 +94,7 @@ export default function Navbar() {
               </Link>
             ))}
             {user ? (
-              <Link to={isAdmin ? "/admin/dashboard" : `/${ocId}/profile`} className="px-6 py-2.5 rounded-2xl bg-gray-100 text-gray-900 font-bold hover:bg-gray-200 transition-all flex items-center">
+              <Link to={getDashboardPath()} className="px-6 py-2.5 rounded-2xl bg-gray-100 text-gray-900 font-bold hover:bg-gray-200 transition-all flex items-center">
                 <User className="w-4 h-4 mr-2" />
                 Dashboard
               </Link>
@@ -120,7 +131,7 @@ export default function Navbar() {
           className="md:hidden bg-white border-t border-gray-100"
         >
           <div className="px-4 pt-4 pb-8 space-y-2">
-            {navLinks.map((link) => (
+            {filteredNavLinks.map((link) => (
               <Link
                 key={link.name}
                 to={link.path}
@@ -137,7 +148,7 @@ export default function Navbar() {
             ))}
             {user ? (
               <Link
-                to={isAdmin ? "/admin/dashboard" : `/${ocId}/profile`}
+                to={getDashboardPath()}
                 onClick={() => setIsOpen(false)}
                 className="block px-4 py-4 rounded-2xl text-center text-base font-bold text-gray-900 bg-gray-100 flex items-center justify-center"
               >

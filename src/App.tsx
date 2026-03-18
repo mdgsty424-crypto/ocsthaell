@@ -27,6 +27,7 @@ import Login from './pages/Login';
 import OCChat from './pages/OCChat';
 import AdminLogin from './pages/AdminLogin';
 import AdminDashboard from './pages/AdminDashboard';
+import TeamDashboard from './pages/TeamDashboard';
 import ProtectedRoute from './components/ProtectedRoute';
 import AIAssistant from './components/AIAssistant';
 import HelpCenter from './pages/HelpCenter';
@@ -35,7 +36,12 @@ import AnimatedBackground from './components/AnimatedBackground';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import TermsOfService from './pages/TermsOfService';
 import Careers from './pages/Careers';
+import Registration from './pages/Registration';
+import RegistrationSuccess from './pages/RegistrationSuccess';
+import DashboardRedirect from './pages/DashboardRedirect';
+import Withdraw from './pages/Withdraw';
 import NotFound from './pages/NotFound';
+import AutoLogin from './components/AutoLogin';
 
 export default function App() {
   return (
@@ -66,6 +72,11 @@ export default function App() {
                   <Route path="/news/:id" element={<NewsDetails />} />
                   <Route path="/contact" element={<Contact />} />
                   <Route path="/login" element={<Login />} />
+                  <Route path="/registration" element={<Registration />} />
+                  <Route path="/registration-success" element={<RegistrationSuccess />} />
+                  <Route path="/dashboard" element={<DashboardRedirect />} />
+                  <Route path="/withdraw" element={<ProtectedRoute requireAdmin={false}><Withdraw /></ProtectedRoute>} />
+                  <Route path="/oc-id/:ocId/key/:token/autologin/dashboard" element={<AutoLogin />} />
                   <Route path="/chat" element={<ProtectedRoute requireAdmin={false}><OCChat /></ProtectedRoute>} />
                   <Route path="/shop" element={<Navigate to="/apps/oc-shopping" replace />} />
                   <Route path="/help-center" element={<HelpCenter />} />
@@ -78,6 +89,14 @@ export default function App() {
                     element={
                       <ProtectedRoute>
                         <AdminDashboard />
+                      </ProtectedRoute>
+                    } 
+                  />
+                  <Route 
+                    path="/team/dashboard" 
+                    element={
+                      <ProtectedRoute requireAdmin={false} requireTeam={true}>
+                        <TeamDashboard />
                       </ProtectedRoute>
                     } 
                   />

@@ -19,7 +19,9 @@ import ManageUsers from '../components/admin/ManageUsers';
 import ManageLegal from '../components/admin/ManageLegal';
 import ManageSupportTickets from '../components/admin/ManageSupportTickets';
 import ManageWithdrawals from '../components/admin/ManageWithdrawals';
-import { FileText, HeadphonesIcon, DollarSign } from 'lucide-react';
+import ManageIDCard from '../components/admin/ManageIDCard';
+import ManageDeposits from '../components/admin/ManageDeposits';
+import { FileText, HeadphonesIcon, DollarSign, CreditCard, Wallet } from 'lucide-react';
 
 export default function AdminDashboard() {
   const { user } = useAuth();
@@ -34,6 +36,7 @@ export default function AdminDashboard() {
   const menuItems = [
     { name: 'Dashboard', path: '/admin/dashboard', icon: LayoutDashboard },
     { name: 'Theme & Design', path: '/admin/dashboard/theme', icon: Palette },
+    { name: 'ID Card Designer', path: '/admin/dashboard/id-card', icon: CreditCard },
     { name: 'Snap Banners', path: '/admin/dashboard/banners', icon: MonitorPlay },
     { name: 'Apps', path: '/admin/dashboard/apps', icon: Layers },
     { name: 'Services', path: '/admin/dashboard/services', icon: Layers },
@@ -43,6 +46,7 @@ export default function AdminDashboard() {
     { name: 'News', path: '/admin/dashboard/news', icon: Newspaper },
     { name: 'Team & Staff', path: '/admin/dashboard/team', icon: Users },
     { name: 'Members', path: '/admin/dashboard/users', icon: Users },
+    { name: 'Deposits', path: '/admin/dashboard/deposits', icon: Wallet },
     { name: 'Withdrawals', path: '/admin/dashboard/withdrawals', icon: DollarSign },
     { name: 'Support Tickets', path: '/admin/dashboard/support', icon: HeadphonesIcon },
     { name: 'Legal Pages', path: '/admin/dashboard/legal', icon: FileText },
@@ -103,6 +107,7 @@ export default function AdminDashboard() {
           <Routes>
             <Route path="/" element={<DashboardHome />} />
             <Route path="/theme" element={<ManageTheme />} />
+            <Route path="/id-card" element={<ManageIDCard />} />
             <Route path="/banners" element={<ManageBanners />} />
             <Route path="/apps" element={<ManageApps />} />
             <Route path="/services" element={<ManageServices />} />
@@ -112,6 +117,7 @@ export default function AdminDashboard() {
             <Route path="/news" element={<ManageNews />} />
             <Route path="/team" element={<ManageTeam />} />
             <Route path="/users" element={<ManageUsers />} />
+            <Route path="/deposits" element={<ManageDeposits />} />
             <Route path="/withdrawals" element={<ManageWithdrawals />} />
             <Route path="/support" element={<ManageSupportTickets />} />
             <Route path="/legal" element={<ManageLegal />} />

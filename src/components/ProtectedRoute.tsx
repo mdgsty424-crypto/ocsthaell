@@ -2,8 +2,16 @@ import React from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
-export default function ProtectedRoute({ children, requireAdmin = true }: { children: React.ReactNode, requireAdmin?: boolean }) {
-  const { user, isAdmin, loading } = useAuth();
+export default function ProtectedRoute({ 
+  children, 
+  requireAdmin = true,
+  requireTeam = false
+}: { 
+  children: React.ReactNode, 
+  requireAdmin?: boolean,
+  requireTeam?: boolean
+}) {
+  const { user, isAdmin, isTeam, loading } = useAuth();
 
   if (loading) {
     return (
@@ -20,6 +28,13 @@ export default function ProtectedRoute({ children, requireAdmin = true }: { chil
   if (requireAdmin && !isAdmin) {
     setTimeout(() => {
       alert('Access Denied: Only Official Admin Allowed');
+    }, 0);
+    return <Navigate to="/" replace />;
+  }
+
+  if (requireTeam && !isTeam) {
+    setTimeout(() => {
+      alert('Access Denied: Only Team Members Allowed');
     }, 0);
     return <Navigate to="/" replace />;
   }

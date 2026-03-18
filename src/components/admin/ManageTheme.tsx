@@ -67,6 +67,9 @@ export default function ManageTheme() {
     headingFont: "Space Grotesk, sans-serif",
     logoUrl: "",
     faviconUrl: "",
+    appleTouchIconUrl: "",
+    manifestIcon192Url: "",
+    manifestIcon512Url: "",
     logoZoom: 1,
     logoX: 0,
     logoY: 0,
@@ -268,17 +271,49 @@ export default function ManageTheme() {
           className="md:col-span-2 bg-white border border-gray-100 shadow-sm rounded-2xl p-6"
         >
           <h3 className="text-xl font-bold text-gray-900 mb-6 flex items-center">
-            <Globe className="w-5 h-5 mr-2 text-gray-400" /> Favicon (Browser Tab Icon)
+            <Globe className="w-5 h-5 mr-2 text-gray-400" /> Web App Icons (Favicon, Apple, Manifest)
           </h3>
-          <div className="space-y-6">
-            <p className="text-sm text-gray-500 mb-4">
-              Upload a square image (PNG or ICO) to be used as the website's favicon. It will appear in browser tabs and bookmarks.
-            </p>
-            <ImageUpload
-              label="Favicon Image URL (Cloudinary)"
-              value={theme.faviconUrl}
-              onChange={(url) => setTheme((prev) => ({ ...prev, faviconUrl: url }))}
-            />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-4">
+              <p className="text-sm text-gray-500">
+                <strong>Favicon (96x96):</strong> Appears in browser tabs.
+              </p>
+              <ImageUpload
+                label="Favicon Image URL"
+                value={theme.faviconUrl}
+                onChange={(url) => setTheme((prev) => ({ ...prev, faviconUrl: url }))}
+              />
+            </div>
+            <div className="space-y-4">
+              <p className="text-sm text-gray-500">
+                <strong>Apple Touch Icon (180x180):</strong> For iOS home screen.
+              </p>
+              <ImageUpload
+                label="Apple Touch Icon URL"
+                value={theme.appleTouchIconUrl}
+                onChange={(url) => setTheme((prev) => ({ ...prev, appleTouchIconUrl: url }))}
+              />
+            </div>
+            <div className="space-y-4">
+              <p className="text-sm text-gray-500">
+                <strong>Manifest Icon (192x192):</strong> For Android PWA.
+              </p>
+              <ImageUpload
+                label="Manifest Icon 192x192 URL"
+                value={theme.manifestIcon192Url}
+                onChange={(url) => setTheme((prev) => ({ ...prev, manifestIcon192Url: url }))}
+              />
+            </div>
+            <div className="space-y-4">
+              <p className="text-sm text-gray-500">
+                <strong>Manifest Icon (512x512):</strong> Large splash screen icon.
+              </p>
+              <ImageUpload
+                label="Manifest Icon 512x512 URL"
+                value={theme.manifestIcon512Url}
+                onChange={(url) => setTheme((prev) => ({ ...prev, manifestIcon512Url: url }))}
+              />
+            </div>
           </div>
         </motion.div>
 

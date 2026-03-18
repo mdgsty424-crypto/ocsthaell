@@ -186,16 +186,19 @@ const ManageUsers = () => {
                           className="w-full p-2 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-brand-blue focus:border-transparent dark:bg-gray-700 dark:text-white"
                         >
                           <option value="user">User</option>
+                          <option value="team">Team Member</option>
                           <option value="admin">Admin</option>
                         </select>
                       ) : (
                         <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${
                           user.role === 'admin' 
                             ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400' 
+                            : user.role === 'team'
+                            ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
                             : 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300'
                         }`}>
-                          {user.role === 'admin' ? <Shield size={14} /> : <UserIcon size={14} />}
-                          {user.role === 'admin' ? 'Admin' : 'User'}
+                          {user.role === 'admin' ? <Shield size={14} /> : user.role === 'team' ? <Shield size={14} className="text-blue-500" /> : <UserIcon size={14} />}
+                          {user.role === 'admin' ? 'Admin' : user.role === 'team' ? 'Team' : 'User'}
                         </span>
                       )}
                     </td>

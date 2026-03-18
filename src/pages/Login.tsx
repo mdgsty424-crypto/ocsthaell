@@ -3,7 +3,7 @@ import { motion } from 'motion/react';
 import { signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
 import { auth, db } from '../firebase';
 import { doc, getDoc, setDoc, serverTimestamp, collection, query, where, getDocs } from 'firebase/firestore';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { Hexagon, Lock, Mail, Key, ArrowRight } from 'lucide-react';
 import { sendAuthOTP, sendSecurityAlert, sendWelcomeMail } from '../services/emailService';
 
@@ -22,6 +22,14 @@ export default function Login() {
   const [pendingOcId, setPendingOcId] = useState<string>('');
 
   const navigate = useNavigate();
+  const location = useLocation();
+
+  React.useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    if (params.get('error') === 'network') {
+      setError('Network error. This may be due to an ad-blocker, firewall, or if the current domain is not allowlisted in Firebase Console.');
+    }
+  }, [location.search]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -83,6 +91,8 @@ export default function Login() {
     } catch (err: any) {
       if (err.code === 'auth/invalid-credential') {
         setError('Invalid credentials. Please check your details and try again.');
+      } else if (err.code === 'auth/network-request-failed') {
+        setError('Network error. This may be due to an ad-blocker, firewall, or if the current domain is not allowlisted in Firebase Console.');
       } else {
         setError(err.message || 'Failed to log in');
       }

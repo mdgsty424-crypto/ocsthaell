@@ -87,6 +87,25 @@
       },
       "required": ["name", "role", "imageUrl", "createdAt"]
     },
+    "IDCardDesign": {
+      "title": "ID Card Design",
+      "description": "Global design settings for the ID card",
+      "type": "object",
+      "properties": {
+        "primaryColor": { "type": "string" },
+        "secondaryColor": { "type": "string" },
+        "backgroundColor": { "type": "string" },
+        "backgroundImage": { "type": "string" },
+        "borderRadius": { "type": "string" },
+        "borderWidth": { "type": "string" },
+        "borderColor": { "type": "string" },
+        "titleFont": { "type": "string" },
+        "bodyFont": { "type": "string" },
+        "logoUrl": { "type": "string" },
+        "updatedAt": { "type": "timestamp" }
+      },
+      "required": ["primaryColor", "secondaryColor", "updatedAt"]
+    },
     "User": {
       "title": "User",
       "description": "Admin user",
@@ -100,6 +119,10 @@
     }
   },
   "firestore": {
+    "/settings/idCard": {
+      "schema": { "$ref": "#/entities/IDCardDesign" },
+      "description": "Global ID card design settings"
+    },
     "/users/{userId}": {
       "schema": { "$ref": "#/entities/User" },
       "description": "Collection of users"

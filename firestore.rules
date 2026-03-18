@@ -176,9 +176,38 @@ service cloud.firestore {
              request.resource.data.createdAt is timestamp;
     }
 
+    function isValidDeposit() {
+      return request.resource.data.keys().hasAll(['userId', 'userName', 'amount', 'txid', 'status', 'createdAt']) &&
+             request.resource.data.userId is string &&
+             request.resource.data.amount is number && request.resource.data.amount > 0 &&
+             request.resource.data.txid is string && request.resource.data.txid.size() >= 8 &&
+             request.resource.data.status in ['pending', 'approved', 'rejected'] &&
+             request.resource.data.createdAt is timestamp;
+    }
+
+    function isValidWithdrawal() {
+      return request.resource.data.keys().hasAll(['userId', 'userName', 'amount', 'method', 'account', 'status', 'createdAt']) &&
+             request.resource.data.userId is string &&
+             request.resource.data.amount is number && request.resource.data.amount > 0 &&
+             request.resource.data.status in ['pending', 'approved', 'rejected'] &&
+             request.resource.data.createdAt is timestamp;
+    }
+
+    function isValidIDCardDesign() {
+      return hasOnlyAllowedFields(['primaryColor', 'secondaryColor', 'backgroundColor', 'backgroundImage', 'borderRadius', 'borderWidth', 'borderColor', 'titleFont', 'bodyFont', 'logoUrl', 'updatedAt']) &&
+             request.resource.data.primaryColor is string &&
+             request.resource.data.secondaryColor is string &&
+             request.resource.data.updatedAt is timestamp;
+    }
+
     // ===============================================================
     // Rules
     // ===============================================================
+
+    match /settings/idCard {
+      allow read: if true;
+      allow write: if isAdmin() && isValidIDCardDesign();
+    }
 
     match /users/{userId} {
       allow read: if true;
@@ -234,6 +263,18 @@ service cloud.firestore {
       allow create: if isAdmin() && isValidTeamMember();
       allow update: if isAdmin() && isValidTeamMember() && areImmutableFieldsUnchanged(['createdAt']);
       allow delete: if isAdmin();
+    }
+
+    match /deposits/{depositId} {
+      allow read: if isAdmin() || (isAuthenticated() && resource.data.userId == request.auth.uid);
+      allow create: if isAuthenticated() && request.resource.data.userId == request.auth.uid && isValidDeposit();
+      allow update, delete: if isAdmin();
+    }
+
+    match /withdrawals/{withdrawalId} {
+      allow read: if isAdmin() || (isAuthenticated() && resource.data.userId == request.auth.uid);
+      allow create: if isAuthenticated() && request.resource.data.userId == request.auth.uid && isValidWithdrawal();
+      allow update, delete: if isAdmin();
     }
   }
 }

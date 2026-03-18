@@ -40,11 +40,12 @@ interface ChatUser {
   photoURL?: string;
   email: string;
   role: string;
+  ocId?: string;
 }
 
 export default function OCChat() {
   const { user, isAdmin } = useAuth();
-  const [activeChannel, setActiveChannel] = useState<string>('general'); // 'general', 'ai', or userId
+  const [activeChannel, setActiveChannel] = useState<string>('general');
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [users, setUsers] = useState<ChatUser[]>([]);
@@ -65,7 +66,19 @@ export default function OCChat() {
       const q = query(collection(db, 'users'));
       const snapshot = await getDocs(q);
       const usersData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as ChatUser[];
-      setUsers(usersData.filter(u => u.id !== user.uid));
+      const otherUsers = usersData.filter(u => u.id !== user.uid);
+      setUsers(otherUsers);
+
+      // Check for 'user' query param to open DM
+      const params = new URLSearchParams(window.location.search);
+      const targetUserKey = params.get('user');
+      if (targetUserKey) {
+        // Find user by ocId or id
+        const target = usersData.find(u => u.ocId === targetUserKey || u.id === targetUserKey);
+        if (target && target.id !== user.uid) {
+          setActiveChannel(target.id);
+        }
+      }
     };
     fetchUsers();
 
@@ -95,7 +108,7 @@ export default function OCChat() {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
-  const startCall = async (element: HTMLDivElement | null) => {
+  const startCall = (element: HTMLDivElement | null) => {
     if (!element || !user) return;
     const appID = 1698335343;
     const serverSecret = "827755ef5ec4c06648bc783998a6d0c2";

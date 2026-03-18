@@ -16,16 +16,35 @@ export default function ThemeWrapper({ children }: { children: React.ReactNode }
     cardBg: 'rgba(10,15,25,0.8)',
     accentColor: '#8A2BE2',
     faviconUrl: '',
+    appleTouchIconUrl: '',
+    manifestIcon192Url: '',
+    manifestIcon512Url: '',
+  });
+
+  const [seo, setSeo] = useState({
+    siteTitle: 'OCSTHAEL - Your Complete Digital Ecosystem',
+    metaDescription: 'OCSTHAEL is building a unified digital platform connecting communication, social networking, online income, browsing and e-commerce in one ecosystem.',
   });
 
   useEffect(() => {
-    const unsubscribe = onSnapshot(doc(db, 'settings', 'theme'), (doc) => {
+    const unsubscribeTheme = onSnapshot(doc(db, 'settings', 'theme'), (doc) => {
       if (doc.exists()) {
         const data = doc.data() as any;
         setTheme(prev => ({ ...prev, ...data }));
       }
     });
-    return () => unsubscribe();
+
+    const unsubscribeSEO = onSnapshot(doc(db, 'settings', 'seo'), (doc) => {
+      if (doc.exists()) {
+        const data = doc.data() as any;
+        setSeo(prev => ({ ...prev, ...data }));
+      }
+    });
+
+    return () => {
+      unsubscribeTheme();
+      unsubscribeSEO();
+    };
   }, []);
 
   useEffect(() => {
@@ -44,17 +63,81 @@ export default function ThemeWrapper({ children }: { children: React.ReactNode }
     document.body.style.backgroundColor = theme.backgroundColor;
     document.body.style.fontFamily = theme.fontFamily;
 
+    // Update Site Title and Description
+    if (seo.siteTitle) {
+      document.title = seo.siteTitle;
+    }
+    
+    const metaDesc = document.querySelector('meta[name="description"]');
+    if (metaDesc && seo.metaDescription) {
+      metaDesc.setAttribute('content', seo.metaDescription);
+    }
+
     // Update Favicon dynamically
     if (theme.faviconUrl) {
-      let link = document.querySelector("link[rel~='icon']") as HTMLLinkElement;
-      if (!link) {
-        link = document.createElement('link');
+      const links = document.querySelectorAll("link[rel*='icon']");
+      links.forEach(link => {
+        (link as HTMLLinkElement).href = theme.faviconUrl;
+      });
+      
+      if (links.length === 0) {
+        const link = document.createElement('link');
         link.rel = 'icon';
+        link.href = theme.faviconUrl;
         document.head.appendChild(link);
       }
-      link.href = theme.faviconUrl;
     }
-  }, [theme]);
+
+    // Update Apple Touch Icon
+    if (theme.appleTouchIconUrl) {
+      let appleIcon = document.querySelector("link[rel='apple-touch-icon']") as HTMLLinkElement;
+      if (!appleIcon) {
+        appleIcon = document.createElement('link');
+        appleIcon.rel = 'apple-touch-icon';
+        document.head.appendChild(appleIcon);
+      }
+      appleIcon.href = theme.appleTouchIconUrl;
+    }
+
+    // Update Manifest dynamically
+    if (theme.manifestIcon192Url || theme.manifestIcon512Url) {
+      const manifest = {
+        name: seo.siteTitle || 'OCSTHAEL',
+        short_name: 'OCSTHAEL',
+        icons: [
+          {
+            src: theme.manifestIcon192Url || theme.faviconUrl || '/web-app-manifest-192x192.png',
+            sizes: '192x192',
+            type: 'image/png'
+          },
+          {
+            src: theme.manifestIcon512Url || theme.faviconUrl || '/web-app-manifest-512x512.png',
+            sizes: '512x512',
+            type: 'image/png'
+          }
+        ],
+        theme_color: theme.primaryColor,
+        background_color: theme.backgroundColor,
+        display: 'standalone'
+      };
+
+      const stringManifest = JSON.stringify(manifest);
+      const blob = new Blob([stringManifest], { type: 'application/json' });
+      const manifestUrl = URL.createObjectURL(blob);
+      
+      let manifestLink = document.querySelector("link[rel='manifest']") as HTMLLinkElement;
+      if (!manifestLink) {
+        manifestLink = document.createElement('link');
+        manifestLink.rel = 'manifest';
+        document.head.appendChild(manifestLink);
+      }
+      manifestLink.href = manifestUrl;
+
+      return () => {
+        URL.revokeObjectURL(manifestUrl);
+      };
+    }
+  }, [theme, seo]);
 
   return (
     <div className={`theme-wrapper design-${theme.backgroundDesign} btn-anim-${theme.buttonAnimation}`}>

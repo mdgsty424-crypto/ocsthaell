@@ -73,6 +73,7 @@ const ManageWithdrawals = () => {
         userName: withdrawal.userName,
         userEmail: withdrawal.userEmail,
         amount: withdrawal.amount.toString(),
+        method: withdrawal.method,
         transactionId: transactionId
       });
 

@@ -1,9 +1,10 @@
-@import url("https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@300;400;500;600;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400;1,700&display=swap");
 @import "tailwindcss";
 
 @theme {
   --font-sans: "Outfit", ui-sans-serif, system-ui, sans-serif;
   --font-display: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
+  --font-serif: "Playfair Display", serif;
 
   --color-brand-dark: #05050a;
   --color-brand-cyan: #00f0ff;
@@ -11,6 +12,10 @@
   --color-brand-blue: #3b82f6;
   --color-brand-pink: #ec4899;
   --color-brand-mango: #ffbe00;
+  --color-gold-light: #f9dfa1;
+  --color-gold: #d4af37;
+  --color-gold-dark: #996515;
+  --color-bronze: #cd7f32;
 
   --color-glass: rgba(255, 255, 255, 0.03);
   --color-glass-border: rgba(255, 255, 255, 0.08);
