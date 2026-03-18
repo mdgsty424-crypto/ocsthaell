@@ -67,6 +67,7 @@ export default function ManageTheme() {
     headingFont: "Space Grotesk, sans-serif",
     logoUrl: "",
     faviconUrl: "",
+    faviconIcoUrl: "",
     appleTouchIconUrl: "",
     manifestIcon192Url: "",
     manifestIcon512Url: "",
@@ -274,6 +275,16 @@ export default function ManageTheme() {
             <Globe className="w-5 h-5 mr-2 text-gray-400" /> Web App Icons (Favicon, Apple, Manifest)
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-4">
+              <p className="text-sm text-gray-500">
+                <strong>Favicon.ico (Direct File):</strong> Specifically for Google Search Console.
+              </p>
+              <ImageUpload
+                label="Favicon.ico URL"
+                value={theme.faviconIcoUrl}
+                onChange={(url) => setTheme((prev) => ({ ...prev, faviconIcoUrl: url }))}
+              />
+            </div>
             <div className="space-y-4">
               <p className="text-sm text-gray-500">
                 <strong>Favicon (96x96):</strong> Appears in browser tabs.

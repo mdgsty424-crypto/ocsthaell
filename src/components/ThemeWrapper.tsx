@@ -15,10 +15,11 @@ export default function ThemeWrapper({ children }: { children: React.ReactNode }
     gridColor: 'rgba(255,255,255,0.05)',
     cardBg: 'rgba(10,15,25,0.8)',
     accentColor: '#8A2BE2',
-    faviconUrl: '',
-    appleTouchIconUrl: '',
-    manifestIcon192Url: '',
-    manifestIcon512Url: '',
+    faviconUrl: 'https://i.postimg.cc/qRw70X1t/favicon.jpg',
+    faviconIcoUrl: 'https://i.postimg.cc/qRw70X1t/favicon.jpg',
+    appleTouchIconUrl: 'https://i.postimg.cc/qRw70X1t/favicon.jpg',
+    manifestIcon192Url: 'https://i.postimg.cc/qRw70X1t/favicon.jpg',
+    manifestIcon512Url: 'https://i.postimg.cc/qRw70X1t/favicon.jpg',
   });
 
   const [seo, setSeo] = useState({
@@ -74,16 +75,21 @@ export default function ThemeWrapper({ children }: { children: React.ReactNode }
     }
 
     // Update Favicon dynamically
-    if (theme.faviconUrl) {
+    if (theme.faviconUrl || theme.faviconIcoUrl) {
       const links = document.querySelectorAll("link[rel*='icon']");
       links.forEach(link => {
-        (link as HTMLLinkElement).href = theme.faviconUrl;
+        const l = link as HTMLLinkElement;
+        if (l.rel === 'shortcut icon' || l.href.endsWith('.ico')) {
+          l.href = theme.faviconIcoUrl || theme.faviconUrl;
+        } else {
+          l.href = theme.faviconUrl || theme.faviconIcoUrl;
+        }
       });
       
       if (links.length === 0) {
         const link = document.createElement('link');
         link.rel = 'icon';
-        link.href = theme.faviconUrl;
+        link.href = theme.faviconUrl || theme.faviconIcoUrl;
         document.head.appendChild(link);
       }
     }
