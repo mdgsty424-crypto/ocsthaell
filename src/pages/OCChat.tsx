@@ -20,7 +20,7 @@ const getApiKey = () => {
 };
 
 const apiKey = getApiKey();
-const ai = new GoogleGenAI({ apiKey: apiKey || 'dummy-key' });
+const ai = new GoogleGenAI({ apiKey: apiKey || 'AIzaSyBD6Kmgt4Z8QjYlZUHDSQxgIt95Z5QLdn4' });
 
 interface Message {
   id: string;

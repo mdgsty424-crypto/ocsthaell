@@ -16,7 +16,7 @@ const getApiKey = () => {
 };
 
 const apiKey = getApiKey();
-const ai = new GoogleGenAI({ apiKey: apiKey || 'dummy-key-to-prevent-crash' });
+const ai = new GoogleGenAI({ apiKey: apiKey || 'AIzaSyBD6Kmgt4Z8QjYlZUHDSQxgIt95Z5QLdn4' });
 
 const SYSTEM_PROMPT = `You are the official AI Assistant for OCSTHAEL, an innovative technology-based initiative building a powerful digital ecosystem. 
 OCSTHAEL connects communication, social networking, online income, internet usage, and e-commerce into one platform.
