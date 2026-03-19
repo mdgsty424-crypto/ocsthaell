@@ -9,6 +9,8 @@ export default defineConfig(({mode}) => {
     plugins: [react(), tailwindcss()],
     define: {
       'process.env.GEMINI_API_KEY': JSON.stringify(env.GEMINI_API_KEY),
+      'process.env.ZEGO_APP_ID': JSON.stringify(env.ZEGO_APP_ID),
+      'process.env.ZEGO_SERVER_SECRET': JSON.stringify(env.ZEGO_SERVER_SECRET),
     },
     resolve: {
       alias: {

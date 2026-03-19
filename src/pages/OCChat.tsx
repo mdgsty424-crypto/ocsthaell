@@ -12,8 +12,8 @@ import { useDropzone } from 'react-dropzone';
 import { useNavigate } from 'react-router-dom';
 
 // ZegoCloud Config
-const APP_ID = 1698335343;
-const SERVER_SECRET = "827755ef5ec4c06648bc783998a6d0c2";
+const APP_ID = Number(process.env.ZEGO_APP_ID || 0);
+const SERVER_SECRET = process.env.ZEGO_SERVER_SECRET || "";
 
 interface Message {
   id: string;
