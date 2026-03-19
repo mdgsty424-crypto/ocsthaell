@@ -296,16 +296,28 @@ export default function OCChat() {
   };
 
   const triggerAIResponse = async (channelId: string, userMessage: string, userName: string, isDirectChat: boolean) => {
+    console.log("AI: triggerAIResponse called", { channelId, isDirectChat });
     try {
-      const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+      const apiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY || process.env.GEMINI_API_KEY;
+      console.log("AI: API Key present?", !!apiKey);
+      
+      if (!apiKey) {
+        console.error("AI Error: API Key is missing. Please set NEXT_PUBLIC_GEMINI_API_KEY in secrets.");
+        return;
+      }
+      
+      const ai = new GoogleGenAI({ apiKey });
       const prompt = isDirectChat 
         ? `You are OCSTHAEL AI, a helpful and friendly AI assistant. The user ${userName} said: "${userMessage}". Reply directly to them.`
         : `You are a fun, witty AI assistant hanging out in a chat between friends. The user ${userName} just said: "${userMessage}". Reply with a short, funny, or relevant comment (in Bengali or English) as if you are a 3rd friend chiming in. Keep it under 2 sentences.`;
       
+      console.log("AI: Sending request to Gemini...");
       const response = await ai.models.generateContent({
         model: "gemini-3-flash-preview",
         contents: prompt,
       });
+
+      console.log("AI: Response received", response.text ? "Success" : "Empty");
 
       if (response.text) {
         await addDoc(collection(db, 'chats', channelId, 'messages'), {
@@ -315,6 +327,7 @@ export default function OCChat() {
           senderPhoto: 'https://api.dicebear.com/7.x/bottts/svg?seed=ocsthael',
           timestamp: serverTimestamp(),
         });
+        console.log("AI: Message added to Firestore");
       }
     } catch (error) {
       console.error("AI Response Error:", error);

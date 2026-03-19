@@ -8,9 +8,10 @@ export default defineConfig(({mode}) => {
   return {
     plugins: [react(), tailwindcss()],
     define: {
-      'process.env.GEMINI_API_KEY': JSON.stringify(env.GEMINI_API_KEY),
-      'process.env.ZEGO_APP_ID': JSON.stringify(env.ZEGO_APP_ID),
-      'process.env.ZEGO_SERVER_SECRET': JSON.stringify(env.ZEGO_SERVER_SECRET),
+      'process.env.GEMINI_API_KEY': JSON.stringify(env.GEMINI_API_KEY || env.NEXT_PUBLIC_GEMINI_API_KEY || process.env.GEMINI_API_KEY || process.env.NEXT_PUBLIC_GEMINI_API_KEY || ''),
+      'process.env.NEXT_PUBLIC_GEMINI_API_KEY': JSON.stringify(env.NEXT_PUBLIC_GEMINI_API_KEY || env.GEMINI_API_KEY || process.env.NEXT_PUBLIC_GEMINI_API_KEY || process.env.GEMINI_API_KEY || ''),
+      'process.env.ZEGO_APP_ID': JSON.stringify(env.ZEGO_APP_ID || process.env.ZEGO_APP_ID || ''),
+      'process.env.ZEGO_SERVER_SECRET': JSON.stringify(env.ZEGO_SERVER_SECRET || process.env.ZEGO_SERVER_SECRET || ''),
     },
     resolve: {
       alias: {
