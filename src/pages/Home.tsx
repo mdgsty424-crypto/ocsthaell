@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { motion } from 'motion/react';
+import { motion, AnimatePresence } from 'motion/react';
 import { ArrowRight, Youtube, Facebook, Image as ImageIcon, MousePointer2, ChevronDown, Users, TrendingUp, Globe, Hexagon, Layers, Zap, Shield, Code, Smartphone, Cloud, Calendar, Target, Eye, ShieldCheck, DollarSign, Briefcase, MessageSquare, ShoppingCart, BookOpen, Music, Video, Map, Bot, Mail, MapPin, Send, Phone } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { collection, onSnapshot, query, limit, where } from 'firebase/firestore';
@@ -14,8 +14,16 @@ export default function Home() {
   const [news, setNews] = useState<any[]>([]);
   const [gallery, setGallery] = useState<any[]>([]);
   const [banners, setBanners] = useState<any[]>([]);
+  const [heroBanners, setHeroBanners] = useState<any[]>([]);
+  const [currentHeroIndex, setCurrentHeroIndex] = useState(0);
+  const [heroBackground, setHeroBackground] = useState<any>(null);
   const [ads, setAds] = useState<any[]>([]);
   const [contactStatus, setContactStatus] = useState<'idle' | 'sending' | 'success' | 'error'>('idle');
+
+  const isVideoUrl = (url: string | undefined) => {
+    if (!url) return false;
+    return url.match(/\.(mp4|webm|ogg)$/i) || url.includes('video');
+  };
 
   const getServiceIcon = (name: string) => {
     const icons: any = { Layers, Zap, Shield, Code, Smartphone, Globe, Cloud };
@@ -89,6 +97,19 @@ export default function Home() {
       setAds(adsData);
     });
 
+    const heroBannersUnsubscribe = onSnapshot(query(collection(db, 'heroBanners'), where('active', '==', true)), (snapshot) => {
+      const heroBannersData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      setHeroBanners(heroBannersData.sort((a: any, b: any) => a.order - b.order));
+    });
+    
+    const heroBackgroundUnsubscribe = onSnapshot(collection(db, 'heroBackground'), (snapshot) => {
+      if (!snapshot.empty) {
+        setHeroBackground({ id: snapshot.docs[0].id, ...snapshot.docs[0].data() });
+      } else {
+        setHeroBackground(null);
+      }
+    });
+
     return () => {
       appsUnsubscribe();
       teamUnsubscribe();
@@ -98,11 +119,37 @@ export default function Home() {
       galleryUnsubscribe();
       bannersUnsubscribe();
       adsUnsubscribe();
+      heroBannersUnsubscribe();
+      heroBackgroundUnsubscribe();
     };
   }, []);
 
+  useEffect(() => {
+    if (heroBanners.length > 1) {
+      const interval = setInterval(() => {
+        setCurrentHeroIndex((prev) => (prev + 1) % heroBanners.length);
+      }, 5000);
+      return () => clearInterval(interval);
+    }
+  }, [heroBanners]);
+
   return (
-    <div className="bg-white text-gray-900 min-h-screen">
+    <div className="bg-white text-gray-900 min-h-screen relative">
+      {/* Hero Background Video */}
+      {heroBackground && (heroBackground.mediaType === 'video' || isVideoUrl(heroBackground.mediaUrl)) && heroBackground.active && (
+        <div className="absolute inset-0 w-full h-screen overflow-hidden z-0">
+          <video
+            src={heroBackground.mediaUrl}
+            autoPlay
+            muted
+            loop
+            playsInline
+            className="absolute inset-0 w-full h-full object-cover opacity-20"
+          />
+          <div className="absolute inset-0 bg-white/80 backdrop-blur-[2px]"></div>
+        </div>
+      )}
+      
       {/* Hero Section */}
       <section className="relative min-h-screen flex items-center pt-20 overflow-hidden bg-transparent">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 w-full">
@@ -171,13 +218,51 @@ export default function Home() {
               className="relative"
             >
               <div className="absolute inset-0 bg-gradient-to-r from-brand-blue/20 via-brand-pink/20 to-brand-mango/20 rounded-full blur-3xl animate-pulse"></div>
-              <div className="relative z-10 rounded-[3rem] overflow-hidden border border-gray-100 shadow-2xl backdrop-blur-sm bg-white/50">
-                <img 
-                  src="https://i.postimg.cc/05ZcC2b1/14.jpg" 
-                  alt="Hero Image" 
-                  className="w-full h-auto object-cover hover:scale-105 transition-transform duration-1000"
-                  referrerPolicy="no-referrer"
-                />
+              <div className="relative z-10 rounded-[3rem] overflow-hidden border border-gray-100 shadow-2xl backdrop-blur-sm bg-white/50 aspect-[4/3]">
+                <AnimatePresence mode="wait">
+                  {heroBanners.length > 0 && (heroBanners[currentHeroIndex]?.mediaType === 'video' || isVideoUrl(heroBanners[currentHeroIndex]?.mediaUrl || heroBanners[currentHeroIndex]?.imageUrl)) ? (
+                    <motion.video
+                      key={heroBanners[currentHeroIndex]?.id}
+                      initial={{ opacity: 0, scale: 1.05 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0 }}
+                      transition={{ duration: 0.8 }}
+                      src={heroBanners[currentHeroIndex]?.mediaUrl || heroBanners[currentHeroIndex]?.imageUrl}
+                      autoPlay
+                      muted
+                      loop
+                      playsInline
+                      className="absolute inset-0 w-full h-full object-cover"
+                    />
+                  ) : (
+                    <motion.img 
+                      key={heroBanners.length > 0 ? heroBanners[currentHeroIndex]?.id : 'default'}
+                      initial={{ opacity: 0, scale: 1.05 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0 }}
+                      transition={{ duration: 0.8 }}
+                      src={heroBanners.length > 0 ? (heroBanners[currentHeroIndex]?.mediaUrl || heroBanners[currentHeroIndex]?.imageUrl) : "https://i.postimg.cc/05ZcC2b1/14.jpg"} 
+                      alt="Hero Banner" 
+                      className="absolute inset-0 w-full h-full object-cover"
+                      referrerPolicy="no-referrer"
+                    />
+                  )}
+                </AnimatePresence>
+                
+                {/* Banner Navigation Dots */}
+                {heroBanners.length > 1 && (
+                  <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-2 z-20">
+                    {heroBanners.map((_, idx) => (
+                      <button
+                        key={idx}
+                        onClick={() => setCurrentHeroIndex(idx)}
+                        className={`w-2.5 h-2.5 rounded-full transition-all ${
+                          idx === currentHeroIndex ? 'bg-white w-6' : 'bg-white/50 hover:bg-white/80'
+                        }`}
+                      />
+                    ))}
+                  </div>
+                )}
               </div>
               
               {/* Floating Badge */}
@@ -224,13 +309,24 @@ export default function Home() {
                   rel="noopener noreferrer"
                   className="block relative rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all group"
                 >
-                  <div className="aspect-[21/9] md:aspect-video w-full">
-                    <img 
-                      src={banner.imageUrl} 
-                      alt={banner.title} 
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                      referrerPolicy="no-referrer"
-                    />
+                  <div className="aspect-[21/9] md:aspect-video w-full relative">
+                    {banner.mediaType === 'video' || isVideoUrl(banner.mediaUrl || banner.imageUrl) ? (
+                      <video 
+                        src={banner.mediaUrl || banner.imageUrl} 
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                        autoPlay 
+                        muted 
+                        loop 
+                        playsInline
+                      />
+                    ) : (
+                      <img 
+                        src={banner.mediaUrl || banner.imageUrl} 
+                        alt={banner.title} 
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                        referrerPolicy="no-referrer"
+                      />
+                    )}
                   </div>
                   <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex flex-col justify-end p-6">
                     <h3 className="text-white font-bold text-xl mb-1">{banner.title}</h3>

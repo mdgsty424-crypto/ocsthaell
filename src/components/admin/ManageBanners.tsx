@@ -78,6 +78,11 @@ export default function ManageBanners() {
     }
   };
 
+  const isVideoUrl = (url: string | undefined) => {
+    if (!url) return false;
+    return url.match(/\.(mp4|webm|ogg)$/i) || url.includes('video');
+  };
+
   return (
     <div>
       <div className="flex justify-between items-center mb-8">
@@ -148,7 +153,14 @@ export default function ManageBanners() {
             <ImageUpload
               label="Media URL (Image or Video URL)"
               value={currentBanner.mediaUrl || ''}
-              onChange={(url) => setCurrentBanner({ ...currentBanner, mediaUrl: url })}
+              onChange={(url) => {
+                const isVideo = url.match(/\.(mp4|webm|ogg)$/i) || url.includes('video');
+                setCurrentBanner({ 
+                  ...currentBanner, 
+                  mediaUrl: url,
+                  mediaType: isVideo ? 'video' : 'image'
+                });
+              }}
             />
 
             <div className="grid grid-cols-2 gap-4">
@@ -197,16 +209,16 @@ export default function ManageBanners() {
             </div>
             
             <div className="aspect-video bg-gray-100 rounded-xl mb-4 overflow-hidden border border-gray-200 relative flex items-center justify-center">
-              {banner.mediaType === 'video' ? (
+              {banner.mediaType === 'video' || isVideoUrl(banner.mediaUrl) ? (
                 <>
                   <Video className="w-12 h-12 text-gray-400 absolute z-0" />
-                  <video src={banner.mediaUrl} className="w-full h-full object-cover relative z-10 opacity-80" />
+                  <video src={banner.mediaUrl} className="w-full h-full object-cover relative z-10 opacity-80" autoPlay muted loop playsInline />
                 </>
               ) : (
                 <img src={banner.mediaUrl} alt={banner.title} className="w-full h-full object-cover opacity-80" referrerPolicy="no-referrer" />
               )}
               <div className="absolute bottom-2 left-2 px-2 py-1 bg-black/60 backdrop-blur-md rounded text-xs font-bold uppercase text-white z-20">
-                {banner.mediaType}
+                {banner.mediaType === 'video' || isVideoUrl(banner.mediaUrl) ? 'video' : 'image'}
               </div>
             </div>
             

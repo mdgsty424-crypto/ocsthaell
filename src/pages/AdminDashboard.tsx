@@ -6,6 +6,8 @@ import { signOut } from 'firebase/auth';
 import { useNavigate, Routes, Route, Link, useLocation } from 'react-router-dom';
 import { Hexagon, LayoutDashboard, Layers, Image, Users, Newspaper, LogOut, BarChart, MonitorPlay, Image as ImageIcon, Palette, Search } from 'lucide-react';
 import ManageBanners from '../components/admin/ManageBanners';
+import ManageHeroBanners from '../components/admin/ManageHeroBanners';
+import ManageHeroBackground from '../components/admin/ManageHeroBackground';
 import ManageApps from '../components/admin/ManageApps';
 import ManageAds from '../components/admin/ManageAds';
 import ManageServices from '../components/admin/ManageServices';
@@ -38,6 +40,8 @@ export default function AdminDashboard() {
   const menuItems = [
     { name: 'Dashboard', path: '/admin/dashboard', icon: LayoutDashboard },
     { name: 'Theme & Design', path: '/admin/dashboard/theme', icon: Palette },
+    { name: 'Hero Background', path: '/admin/dashboard/hero-background', icon: Image },
+    { name: 'Hero Banners', path: '/admin/dashboard/hero-banners', icon: Image },
     { name: 'ID Card Designer', path: '/admin/dashboard/id-card', icon: CreditCard },
     { name: 'Snap Banners', path: '/admin/dashboard/banners', icon: MonitorPlay },
     { name: 'Apps', path: '/admin/dashboard/apps', icon: Layers },
@@ -111,6 +115,8 @@ export default function AdminDashboard() {
           <Routes>
             <Route path="/" element={<DashboardHome />} />
             <Route path="/theme" element={<ManageTheme />} />
+            <Route path="/hero-background" element={<ManageHeroBackground />} />
+            <Route path="/hero-banners" element={<ManageHeroBanners />} />
             <Route path="/id-card" element={<ManageIDCard />} />
             <Route path="/banners" element={<ManageBanners />} />
             <Route path="/apps" element={<ManageApps />} />
