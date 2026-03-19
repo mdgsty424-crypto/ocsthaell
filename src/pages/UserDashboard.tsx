@@ -399,8 +399,7 @@ export default function UserDashboard() {
   };
 
   const downloadIdCard = async (format: 'png' | 'pdf') => {
-    const targetRef = showBack ? backCardRef : cardRef;
-    if (targetRef.current === null) return;
+    if (cardRef.current === null) return;
     
     try {
       setSaving(true);
@@ -420,29 +419,55 @@ export default function UserDashboard() {
         }
       };
 
+      const frontBlob = await toBlob(cardRef.current, options);
+      if (!frontBlob) throw new Error('Failed to generate front image blob');
+      const frontUrl = URL.createObjectURL(frontBlob);
+
+      let backBlob = null;
+      let backUrl = null;
+      if (isOwnProfile && backCardRef.current) {
+        backBlob = await toBlob(backCardRef.current, options);
+        if (backBlob) {
+          backUrl = URL.createObjectURL(backBlob);
+        }
+      }
+
       if (format === 'png') {
-        const blob = await toBlob(targetRef.current, options);
-        if (!blob) throw new Error('Failed to generate image blob');
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.download = `OCSTHAEL-ID-${showBack ? 'BACK-' : 'FRONT-'}${ocId}.png`;
-        link.href = url;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        URL.revokeObjectURL(url);
+        const downloadLink = (url: string, filename: string) => {
+          const link = document.createElement('a');
+          link.download = filename;
+          link.href = url;
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+        };
+
+        downloadLink(frontUrl, `OCSTHAEL-ID-FRONT-${ocId}.png`);
+        
+        if (backUrl) {
+          // Add a small delay to ensure the browser allows multiple downloads
+          await new Promise(resolve => setTimeout(resolve, 500));
+          downloadLink(backUrl, `OCSTHAEL-ID-BACK-${ocId}.png`);
+        }
+        
+        URL.revokeObjectURL(frontUrl);
+        if (backUrl) URL.revokeObjectURL(backUrl);
       } else {
-        const blob = await toBlob(targetRef.current, options);
-        if (!blob) throw new Error('Failed to generate image blob');
-        const url = URL.createObjectURL(blob);
         const pdf = new jsPDF({
           orientation: 'landscape',
           unit: 'px',
           format: [1000, 625]
         });
-        pdf.addImage(url, 'PNG', 0, 0, 1000, 625);
-        pdf.save(`OCSTHAEL-ID-${showBack ? 'BACK-' : 'FRONT-'}${ocId}.pdf`);
-        URL.revokeObjectURL(url);
+        pdf.addImage(frontUrl, 'PNG', 0, 0, 1000, 625);
+        
+        if (backUrl) {
+          pdf.addPage();
+          pdf.addImage(backUrl, 'PNG', 0, 0, 1000, 625);
+        }
+        
+        pdf.save(`OCSTHAEL-ID-${ocId}.pdf`);
+        URL.revokeObjectURL(frontUrl);
+        if (backUrl) URL.revokeObjectURL(backUrl);
       }
     } catch (err) {
       console.error('Failed to download ID card', err);
@@ -499,23 +524,26 @@ export default function UserDashboard() {
 
         {/* Digital ID Card Section */}
         <div className="flex flex-col items-center gap-6">
-          <div className="flex bg-[#111827] rounded-xl p-1 mb-2 border border-gray-800">
-            <button
-              onClick={() => setShowBack(false)}
-              className={`px-6 py-2 rounded-lg font-bold transition-all ${!showBack ? 'bg-brand-blue text-white' : 'text-gray-400'}`}
-            >
-              Front Side
-            </button>
-            <button
-              onClick={() => setShowBack(true)}
-              className={`px-6 py-2 rounded-lg font-bold transition-all ${showBack ? 'bg-brand-blue text-white' : 'text-gray-400'}`}
-            >
-              Back Side
-            </button>
-          </div>
+          {isOwnProfile && (
+            <div className="flex bg-[#111827] rounded-xl p-1 mb-2 border border-gray-800">
+              <button
+                onClick={() => setShowBack(false)}
+                className={`px-6 py-2 rounded-lg font-bold transition-all ${!showBack ? 'bg-brand-blue text-white' : 'text-gray-400'}`}
+              >
+                Front Side
+              </button>
+              <button
+                onClick={() => setShowBack(true)}
+                className={`px-6 py-2 rounded-lg font-bold transition-all ${showBack ? 'bg-brand-blue text-white' : 'text-gray-400'}`}
+              >
+                Back Side
+              </button>
+            </div>
+          )}
 
-          {!showBack ? (
-            <div className="w-full overflow-x-auto pb-4 custom-scrollbar">
+          <div className="w-full relative">
+            {/* Front Card */}
+            <div className={`w-full overflow-x-auto pb-4 custom-scrollbar ${!showBack || !isOwnProfile ? 'block' : 'absolute top-0 left-0 opacity-0 pointer-events-none z-[-1]'}`}>
               <motion.div
                 key="front"
                 initial={{ opacity: 0, rotateY: -90 }}
@@ -693,18 +721,20 @@ export default function UserDashboard() {
                 <div className="absolute top-0 left-0 w-full h-4" style={{ background: `linear-gradient(to right, ${cardDesign.primaryColor}, ${cardDesign.secondaryColor}, ${cardDesign.primaryColor})` }}></div>
               </div>
             </motion.div>
-          </div>
-          ) : (
-            <div className="w-full overflow-x-auto pb-4 custom-scrollbar">
-              <motion.div
-                key="back"
-                initial={{ opacity: 0, rotateY: 90 }}
-                animate={{ opacity: 1, rotateY: 0 }}
-                className="relative min-w-[1000px] mx-auto"
-                ref={backCardRef}
-              >
-              <div 
-                className="shadow-2xl relative overflow-hidden aspect-[1.6/1] text-gray-900"
+            </div>
+
+            {/* Back Card */}
+            {isOwnProfile && (
+              <div className={`w-full overflow-x-auto pb-4 custom-scrollbar ${showBack ? 'block' : 'absolute top-0 left-0 opacity-0 pointer-events-none z-[-1]'}`}>
+                <motion.div
+                  key="back"
+                  initial={{ opacity: 0, rotateY: 90 }}
+                  animate={{ opacity: 1, rotateY: 0 }}
+                  className="relative min-w-[1000px] mx-auto"
+                  ref={backCardRef}
+                >
+                <div 
+                  className="shadow-2xl relative overflow-hidden aspect-[1.6/1] text-gray-900"
                 style={{
                   backgroundColor: cardDesign.backgroundColor,
                   borderRadius: cardDesign.borderRadius,
@@ -786,8 +816,9 @@ export default function UserDashboard() {
                 <div className="absolute bottom-0 left-0 w-full h-4" style={{ background: `linear-gradient(to right, ${cardDesign.secondaryColor}, ${cardDesign.primaryColor}, ${cardDesign.secondaryColor})` }}></div>
               </div>
             </motion.div>
+            </div>
+            )}
           </div>
-          )}
 
           <div className="flex flex-col sm:flex-row gap-4 w-full max-w-2xl">
             <button

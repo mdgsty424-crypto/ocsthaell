@@ -6,7 +6,7 @@ import { signOut } from 'firebase/auth';
 import { collection, query, orderBy, onSnapshot, addDoc, serverTimestamp, getDocs, doc, setDoc, updateDoc, where } from 'firebase/firestore';
 import { ZegoUIKitPrebuilt } from '@zegocloud/zego-uikit-prebuilt';
 import { GoogleGenAI } from '@google/genai';
-import { Search, Phone, Video, Send, Plus, X, UserPlus, LogOut, MessageSquare, PhoneIncoming, PhoneOff, FileText, Image as ImageIcon, MoreVertical, MessageCircle, Users, UsersRound, CircleDashed, Bot, Settings, ChevronLeft, ArrowLeft } from 'lucide-react';
+import { Search, Phone, Video, Send, Plus, X, UserPlus, LogOut, MessageSquare, PhoneIncoming, PhoneOff, FileText, Image as ImageIcon, MoreVertical, MessageCircle, Users, UsersRound, CircleDashed, Bot, Settings, ChevronLeft, ArrowLeft, Mic, Smile, Reply, Forward, History, Trash2, Check, CheckCheck, ArrowDownLeft, ArrowUpRight, Play, Pause } from 'lucide-react';
 import { format } from 'date-fns';
 import { useDropzone } from 'react-dropzone';
 import { useNavigate } from 'react-router-dom';
@@ -24,6 +24,29 @@ interface Message {
   timestamp: any;
   fileUrl?: string;
   fileType?: string;
+  waveformData?: number[];
+  duration?: number;
+  replyTo?: {
+    id: string;
+    text: string;
+    senderName: string;
+  };
+  reactions?: { [emoji: string]: string[] };
+}
+
+interface CallLog {
+  id: string;
+  callerId: string;
+  callerName: string;
+  callerPhoto?: string;
+  receiverId: string;
+  receiverName: string;
+  receiverPhoto?: string;
+  type: 'audio' | 'video';
+  status: 'incoming' | 'outgoing' | 'missed' | 'answered' | 'rejected' | 'ended';
+  timestamp: any;
+  duration?: string;
+  isGroup?: boolean;
 }
 
 interface ChatUser {
@@ -53,8 +76,233 @@ interface IncomingCall {
   isGroup: boolean;
 }
 
+const formatTime = (time: number) => {
+  if (isNaN(time)) return "0:00";
+  const mins = Math.floor(time / 60);
+  const secs = Math.floor(time % 60);
+  return `${mins}:${secs.toString().padStart(2, '0')}`;
+};
+
+interface ChatConfig {
+  voiceBubbleWidth: number;
+  voiceBubblePadding: number;
+  voiceBubbleRadius: number;
+  voiceSentColor: string;
+  voiceReceivedColor: string;
+  messageTextSize: number;
+  voiceWaveformColor: string;
+  voiceProgressColor: string;
+  voiceDurationSize: number;
+  recordingBubbleColor: string;
+  voiceWaveformHeight: number;
+  voiceIconSize: number;
+  voiceIconBgColor: string;
+  voiceIconColor: string;
+}
+
+const DEFAULT_CONFIG: ChatConfig = {
+  voiceBubbleWidth: 280,
+  voiceBubblePadding: 12,
+  voiceBubbleRadius: 16,
+  voiceSentColor: '#22c55e', // green-500
+  voiceReceivedColor: '#f3f4f6', // gray-100
+  messageTextSize: 15,
+  voiceWaveformColor: '#94a3b8', // slate-400
+  voiceProgressColor: '#ffffff',
+  voiceDurationSize: 10,
+  recordingBubbleColor: '#ef4444', // red-500
+  voiceWaveformHeight: 32,
+  voiceIconSize: 40,
+  voiceIconBgColor: '#ffffff',
+  voiceIconColor: '#22c55e',
+};
+
+const VoiceMessage = ({ url, isMe, waveformData: initialWaveformData, duration: initialDuration, timestamp, config = DEFAULT_CONFIG }: { 
+  url: string; 
+  isMe: boolean; 
+  waveformData?: number[]; 
+  duration?: number;
+  timestamp?: any;
+  config?: ChatConfig;
+}) => {
+  const [isPlaying, setIsPlaying] = useState(false);
+  const audioRef = useRef<HTMLAudioElement>(null);
+  const [progress, setProgress] = useState(0);
+  const [duration, setDuration] = useState(initialDuration || 0);
+  const [peaks, setPeaks] = useState<number[]>(initialWaveformData || []);
+
+  useEffect(() => {
+    if (initialWaveformData && initialWaveformData.length > 0) {
+      setPeaks(initialWaveformData);
+      return;
+    }
+    const generatePeaks = async () => {
+      try {
+        const response = await fetch(url);
+        const arrayBuffer = await response.arrayBuffer();
+        const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+        const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+        
+        const rawData = audioBuffer.getChannelData(0);
+        const samples = 40;
+        const blockSize = Math.floor(rawData.length / samples);
+        const filteredData = [];
+        for (let i = 0; i < samples; i++) {
+          let blockStart = blockSize * i;
+          let sum = 0;
+          for (let j = 0; j < blockSize; j++) {
+            sum = sum + Math.abs(rawData[blockStart + j]);
+          }
+          filteredData.push(sum / blockSize);
+        }
+        
+        const max = Math.max(...filteredData);
+        const normalizedData = filteredData.map(n => Math.max(0.1, n / max));
+        setPeaks(normalizedData);
+      } catch (e) {
+        setPeaks([...Array(40)].map(() => Math.random() * 0.8 + 0.1));
+      }
+    };
+    if (url) generatePeaks();
+  }, [url, initialWaveformData]);
+
+  const togglePlay = async (e: React.MouseEvent | React.TouchEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (audioRef.current) {
+      try {
+        if (isPlaying) {
+          audioRef.current.pause();
+          setIsPlaying(false);
+        } else {
+          if (audioRef.current.ended) {
+            audioRef.current.currentTime = 0;
+          }
+          await audioRef.current.play();
+          setIsPlaying(true);
+        }
+      } catch (err) {
+        console.error("Playback failed:", err);
+      }
+    }
+  };
+
+  const onTimeUpdate = () => {
+    if (audioRef.current) {
+      setProgress((audioRef.current.currentTime / audioRef.current.duration) * 100);
+    }
+  };
+
+  const onLoadedMetadata = () => {
+    if (audioRef.current) {
+      setDuration(audioRef.current.duration);
+    }
+  };
+
+  const onEnded = () => {
+    setIsPlaying(false);
+    setProgress(0);
+  };
+
+  const isDarkColor = (color: string) => {
+    const hex = color.replace('#', '');
+    const r = parseInt(hex.substr(0, 2), 16);
+    const g = parseInt(hex.substr(2, 2), 16);
+    const b = parseInt(hex.substr(4, 2), 16);
+    const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+    return brightness < 128;
+  };
+
+  const bubbleColor = isMe ? config.voiceSentColor : config.voiceReceivedColor;
+  const textColor = isDarkColor(bubbleColor) ? 'text-white' : 'text-gray-800';
+  const subTextColor = isDarkColor(bubbleColor) ? 'text-white/70' : 'text-gray-500';
+
+  return (
+    <div 
+      onClick={(e) => togglePlay(e)}
+      style={{ 
+        minWidth: `${config.voiceBubbleWidth}px`,
+        padding: `${config.voiceBubblePadding}px`,
+        borderRadius: `${config.voiceBubbleRadius}px`,
+        backgroundColor: bubbleColor
+      }}
+      className={`flex items-center space-x-3 max-w-full cursor-pointer transition-all hover:opacity-95 active:scale-[0.98] border border-black/5 shadow-sm ${textColor}`}
+    >
+      <button 
+        onClick={(e) => {
+          e.stopPropagation();
+          togglePlay(e);
+        }}
+        onPointerDown={(e) => e.stopPropagation()}
+        style={{ 
+          width: `${config.voiceIconSize}px`, 
+          height: `${config.voiceIconSize}px`,
+          backgroundColor: isMe ? config.voiceIconBgColor : '#2563eb', // default blue for received if not configured
+          color: isMe ? config.voiceIconColor : '#ffffff'
+        }}
+        className="rounded-full flex items-center justify-center shadow-sm transition-transform active:scale-90 flex-shrink-0"
+      >
+        {isPlaying ? <Pause size={config.voiceIconSize * 0.5} fill="currentColor" /> : <Play size={config.voiceIconSize * 0.5} className="ml-0.5" fill="currentColor" />}
+      </button>
+      
+        <div className="flex-1 flex flex-col space-y-1 pointer-events-none">
+        <div className="flex items-center space-x-1 overflow-hidden" style={{ height: `${config.voiceWaveformHeight}px` }}>
+          {(peaks.length > 0 ? peaks : [...Array(40)].fill(0.1)).map((peak, i) => {
+            const isActive = (i / peaks.length) * 100 <= progress;
+            return (
+              <div 
+                key={i} 
+                className="w-1 rounded-full transition-all duration-200"
+                style={{ 
+                  height: `${Math.max(15, peak * 100)}%`,
+                  backgroundColor: isActive ? config.voiceProgressColor : config.voiceWaveformColor
+                }} 
+              />
+            );
+          })}
+        </div>
+        <div 
+          className="flex justify-between items-center font-bold tabular-nums"
+          style={{ fontSize: `${config.voiceDurationSize}px`, color: isDarkColor(bubbleColor) ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.5)' }}
+        >
+          <span>
+            {isPlaying ? formatTime(audioRef.current?.currentTime || 0) : formatTime(duration)}
+          </span>
+          {timestamp && (
+             <span>
+               {format(timestamp.toDate(), 'h:mm a')}
+             </span>
+          )}
+        </div>
+      </div>
+      <audio 
+        ref={audioRef} 
+        src={url} 
+        onTimeUpdate={onTimeUpdate} 
+        onLoadedMetadata={onLoadedMetadata} 
+        onEnded={onEnded}
+        className="hidden"
+        preload="auto"
+      />
+    </div>
+  );
+};
+
 export default function OCChat() {
   const { user } = useAuth();
+  const [chatConfig, setChatConfig] = useState<ChatConfig>(DEFAULT_CONFIG);
+  const [showAdminPanel, setShowAdminPanel] = useState(false);
+  const isAdmin = user?.email === 'mdgsty424@gmail.com';
+
+  // Listen to Global Chat Config
+  useEffect(() => {
+    const unsubConfig = onSnapshot(doc(db, 'config', 'chat'), (snapshot) => {
+      if (snapshot.exists()) {
+        setChatConfig({ ...DEFAULT_CONFIG, ...snapshot.data() });
+      }
+    });
+    return () => unsubConfig();
+  }, []);
   const [users, setUsers] = useState<ChatUser[]>([]);
   const [groups, setGroups] = useState<Group[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
@@ -74,6 +322,26 @@ export default function OCChat() {
   const [activeSettingsTab, setActiveSettingsTab] = useState<'account' | 'privacy' | 'notifications'>('account');
   const [newDisplayName, setNewDisplayName] = useState('');
   const [newPhotoURL, setNewPhotoURL] = useState('');
+
+  // New Features State
+  const [replyTo, setReplyTo] = useState<any | null>(null);
+  const [isTyping, setIsTyping] = useState(false);
+  const [otherUserTyping, setOtherUserTyping] = useState(false);
+  const [recording, setRecording] = useState(false);
+  const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(null);
+  const [audioChunks, setAudioChunks] = useState<Blob[]>([]);
+  const [waveformData, setWaveformData] = useState<number[]>([]);
+  const [recordingDuration, setRecordingDuration] = useState(0);
+  const analyserRef = useRef<AnalyserNode | null>(null);
+  const audioContextRef = useRef<AudioContext | null>(null);
+  const animationFrameRef = useRef<number | null>(null);
+  const startTimeRef = useRef<number>(0);
+  const [showEmojiPicker, setShowEmojiPicker] = useState<string | null>(null); // messageId
+  const [forwardMessage, setForwardMessage] = useState<Message | null>(null);
+  const [callLogs, setCallLogs] = useState<CallLog[]>([]);
+  const typingTimeoutRef = useRef<any>(null);
+
+  const emojis = ['❤️', '😂', '😮', '😢', '😡', '👍', '🔥', '🙏'];
 
   // Call State
   const [incomingCall, setIncomingCall] = useState<IncomingCall | null>(null);
@@ -186,7 +454,7 @@ export default function OCChat() {
     };
   }, [user]);
 
-  // Listen to Messages
+  // Listen to Messages & Typing
   useEffect(() => {
     if (!user || !activeChat) return;
 
@@ -200,14 +468,87 @@ export default function OCChat() {
     }
 
     const q = query(collection(db, 'chats', channelId, 'messages'), orderBy('timestamp', 'asc'));
-    const unsubscribe = onSnapshot(q, (snapshot) => {
+    const unsubMessages = onSnapshot(q, (snapshot) => {
       const msgs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Message[];
       setMessages(msgs);
       scrollToBottom();
     });
 
-    return () => unsubscribe();
+    // Typing Indicator Listener
+    let unsubTyping: () => void;
+    if (activeChat.type === 'group') {
+      const typingQuery = query(collection(db, 'chats', channelId, 'typing'), where('isTyping', '==', true));
+      unsubTyping = onSnapshot(typingQuery, (snapshot) => {
+        const typingUsers = snapshot.docs
+          .filter(doc => doc.id !== user.uid)
+          .map(doc => {
+            const u = users.find(u => u.id === doc.id);
+            return u ? u.displayName : 'Someone';
+          });
+        setOtherUserTyping(typingUsers.length > 0);
+        // You could also store the names of typing users to show "X is typing..."
+      });
+    } else {
+      const otherUserId = activeChat.id === 'ai_bot' ? 'ai_bot' : activeChat.id;
+      unsubTyping = onSnapshot(doc(db, 'chats', channelId, 'typing', otherUserId), (snapshot) => {
+        if (snapshot.exists()) {
+          setOtherUserTyping(snapshot.data().isTyping);
+        } else {
+          setOtherUserTyping(false);
+        }
+      });
+    }
+
+    return () => {
+      unsubMessages();
+      unsubTyping();
+    };
   }, [user, activeChat]);
+
+  // Fetch Call Logs
+  useEffect(() => {
+    if (!user) return;
+    const q = query(
+      collection(db, 'callLogs'),
+      where('participants', 'array-contains', user.uid)
+    );
+    return onSnapshot(q, (snapshot) => {
+      const logs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as CallLog[];
+      // Sort client-side to avoid index requirement
+      logs.sort((a, b) => {
+        const timeA = a.timestamp?.toMillis?.() || 0;
+        const timeB = b.timestamp?.toMillis?.() || 0;
+        return timeB - timeA;
+      });
+      setCallLogs(logs);
+    });
+  }, [user]);
+
+  // Handle Typing Status
+  const handleTyping = () => {
+    if (!user || !activeChat) return;
+    
+    let channelId = '';
+    if (activeChat.id === 'ai_bot') {
+      channelId = [user.uid, 'ai_bot'].sort().join('_');
+    } else if (activeChat.type === 'user') {
+      channelId = [user.uid, activeChat.id].sort().join('_');
+    } else {
+      channelId = activeChat.id;
+    }
+
+    if (!isTyping) {
+      setIsTyping(true);
+      setDoc(doc(db, 'chats', channelId, 'typing', user.uid), { isTyping: true }, { merge: true });
+    }
+
+    if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+    
+    typingTimeoutRef.current = setTimeout(() => {
+      setIsTyping(false);
+      setDoc(doc(db, 'chats', channelId, 'typing', user.uid), { isTyping: false }, { merge: true });
+    }, 3000);
+  };
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -251,19 +592,41 @@ export default function OCChat() {
   });
 
   const handleSend = async () => {
-    if (!input.trim() && !selectedFile) return;
-    if (!user || !activeChat) return;
+    if ((!input.trim() && !selectedFile) || !user || !activeChat) return;
 
     let fileUrl = '';
     let fileType = '';
+    let finalWaveformData: number[] | null = null;
+    let finalDuration: number | null = null;
 
     if (selectedFile) {
+      const isAudio = selectedFile.type.startsWith('audio/') || selectedFile.name.endsWith('.webm');
       const uploadResult = await handleFileUpload(selectedFile);
       if (uploadResult) {
         fileUrl = uploadResult.url;
-        fileType = uploadResult.type;
+        fileType = isAudio ? 'audio' : uploadResult.type;
+        
+        if (isAudio && waveformData.length > 0) {
+          const samples = 40;
+          const blockSize = Math.max(1, Math.floor(waveformData.length / samples));
+          const downsampled = [];
+          for (let i = 0; i < samples; i++) {
+            let blockStart = blockSize * i;
+            let sum = 0;
+            let count = 0;
+            for (let j = 0; j < blockSize && (blockStart + j) < waveformData.length; j++) {
+              sum += waveformData[blockStart + j];
+              count++;
+            }
+            downsampled.push(count > 0 ? sum / count : 0.1);
+          }
+          finalWaveformData = downsampled;
+          finalDuration = recordingDuration;
+        }
       }
       setSelectedFile(null);
+      setWaveformData([]);
+      setRecordingDuration(0);
     }
 
     const messageText = input.trim();
@@ -278,14 +641,31 @@ export default function OCChat() {
       channelId = activeChat.id;
     }
 
-    await addDoc(collection(db, 'chats', channelId, 'messages'), {
+    const messageData: any = {
       text: messageText,
       senderId: user.uid,
       senderName: user.displayName || 'User',
       senderPhoto: user.photoURL || '',
       timestamp: serverTimestamp(),
-      ...(fileUrl && { fileUrl, fileType })
-    });
+      ...(fileUrl && { fileUrl, fileType }),
+      ...(finalWaveformData && { waveformData: finalWaveformData }),
+      ...(finalDuration && { duration: finalDuration })
+    };
+
+    if (replyTo) {
+      messageData.replyTo = {
+        id: replyTo.id,
+        text: replyTo.text || (replyTo.fileUrl ? 'Attachment' : ''),
+        senderName: replyTo.senderName
+      };
+    }
+
+    await addDoc(collection(db, 'chats', channelId, 'messages'), messageData);
+    
+    // Clear typing status
+    setIsTyping(false);
+    setDoc(doc(db, 'chats', channelId, 'typing', user.uid), { isTyping: false }, { merge: true });
+    setReplyTo(null);
 
     // AI Chime-in Logic
     if (activeChat.id === 'ai_bot') {
@@ -295,10 +675,134 @@ export default function OCChat() {
     }
   };
 
+  const handleReaction = async (messageId: string, emoji: string) => {
+    if (!user || !activeChat) return;
+    
+    let channelId = '';
+    if (activeChat.id === 'ai_bot') {
+      channelId = [user.uid, 'ai_bot'].sort().join('_');
+    } else if (activeChat.type === 'user') {
+      channelId = [user.uid, activeChat.id].sort().join('_');
+    } else {
+      channelId = activeChat.id;
+    }
+
+    const msgRef = doc(db, 'chats', channelId, 'messages', messageId);
+    const msg = messages.find(m => m.id === messageId);
+    if (!msg) return;
+
+    const currentReactions = msg.reactions || {};
+    const usersWhoReacted = currentReactions[emoji] || [];
+
+    if (usersWhoReacted.includes(user.uid)) {
+      currentReactions[emoji] = usersWhoReacted.filter(id => id !== user.uid);
+      if (currentReactions[emoji].length === 0) delete currentReactions[emoji];
+    } else {
+      currentReactions[emoji] = [...usersWhoReacted, user.uid];
+    }
+
+    await updateDoc(msgRef, { reactions: currentReactions });
+    setShowEmojiPicker(null);
+  };
+
+  const startRecording = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const recorder = new MediaRecorder(stream);
+      setMediaRecorder(recorder);
+      const chunks: Blob[] = [];
+
+      // Setup AudioContext for waveform
+      const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+      const source = audioContext.createMediaStreamSource(stream);
+      const analyser = audioContext.createAnalyser();
+      analyser.fftSize = 256;
+      source.connect(analyser);
+      
+      analyserRef.current = analyser;
+      audioContextRef.current = audioContext;
+      setWaveformData([]);
+      startTimeRef.current = Date.now();
+
+      const bufferLength = analyser.frequencyBinCount;
+      const dataArray = new Uint8Array(bufferLength);
+
+      const captureAmplitude = () => {
+        if (!analyserRef.current) return;
+        analyserRef.current.getByteFrequencyData(dataArray);
+        let sum = 0;
+        for (let i = 0; i < bufferLength; i++) {
+          sum += dataArray[i];
+        }
+        const average = sum / bufferLength;
+        const normalized = Math.min(1, average / 128);
+        
+        setWaveformData(prev => [...prev, normalized]);
+        setRecordingDuration(Math.floor((Date.now() - startTimeRef.current) / 1000));
+        
+        animationFrameRef.current = requestAnimationFrame(captureAmplitude);
+      };
+
+      captureAmplitude();
+
+      recorder.ondataavailable = (e) => {
+        if (e.data.size > 0) chunks.push(e.data);
+      };
+
+      recorder.onstop = async () => {
+        const audioBlob = new Blob(chunks, { type: 'audio/webm' });
+        const audioFile = new File([audioBlob], 'voice_message.webm', { type: 'audio/webm' });
+        setSelectedFile(audioFile);
+        setRecording(false);
+        
+        if (animationFrameRef.current) cancelAnimationFrame(animationFrameRef.current);
+        if (audioContextRef.current) audioContextRef.current.close();
+        analyserRef.current = null;
+        audioContextRef.current = null;
+      };
+
+      recorder.start();
+      setRecording(true);
+    } catch (err) {
+      console.error('Error starting recording:', err);
+    }
+  };
+
+  const stopRecording = () => {
+    if (mediaRecorder) {
+      mediaRecorder.stop();
+      mediaRecorder.stream.getTracks().forEach(track => track.stop());
+    }
+  };
+
+  const handleForward = async (targetId: string, targetType: 'user' | 'group') => {
+    if (!forwardMessage || !user) return;
+
+    let channelId = '';
+    if (targetType === 'user') {
+      channelId = [user.uid, targetId].sort().join('_');
+    } else {
+      channelId = targetId;
+    }
+
+    await addDoc(collection(db, 'chats', channelId, 'messages'), {
+      text: forwardMessage.text,
+      senderId: user.uid,
+      senderName: user.displayName || 'User',
+      senderPhoto: user.photoURL || '',
+      timestamp: serverTimestamp(),
+      fileUrl: forwardMessage.fileUrl || '',
+      fileType: forwardMessage.fileType || '',
+      isForwarded: true
+    });
+
+    setForwardMessage(null);
+  };
+
   const triggerAIResponse = async (channelId: string, userMessage: string, userName: string, isDirectChat: boolean) => {
     console.log("AI: triggerAIResponse called", { channelId, isDirectChat });
     try {
-      const apiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY || process.env.GEMINI_API_KEY;
+      const apiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY || process.env.GEMINI_API_KEY || (import.meta as any).env?.VITE_GEMINI_API_KEY;
       console.log("AI: API Key present?", !!apiKey);
       
       if (!apiKey) {
@@ -329,70 +833,102 @@ export default function OCChat() {
         });
         console.log("AI: Message added to Firestore");
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("AI Response Error:", error);
+      // If the error is about the model not being found, try a fallback model
+      if (error.message?.includes('model') || error.message?.includes('not found')) {
+        try {
+          console.log("AI: Retrying with gemini-flash-latest...");
+          const apiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY || process.env.GEMINI_API_KEY;
+          const ai = new GoogleGenAI({ apiKey: apiKey! });
+          const prompt = isDirectChat 
+            ? `You are OCSTHAEL AI, a helpful and friendly AI assistant. The user ${userName} said: "${userMessage}". Reply directly to them.`
+            : `You are a fun, witty AI assistant hanging out in a chat between friends. The user ${userName} just said: "${userMessage}". Reply with a short, funny, or relevant comment (in Bengali or English) as if you are a 3rd friend chiming in. Keep it under 2 sentences.`;
+          
+          const response = await ai.models.generateContent({
+            model: "gemini-flash-latest",
+            contents: prompt,
+          });
+
+          if (response.text) {
+            await addDoc(collection(db, 'chats', channelId, 'messages'), {
+              text: response.text,
+              senderId: 'ai_bot',
+              senderName: 'OCSTHAEL AI',
+              senderPhoto: 'https://api.dicebear.com/7.x/bottts/svg?seed=ocsthael',
+              timestamp: serverTimestamp(),
+            });
+          }
+        } catch (retryError) {
+          console.error("AI Fallback Error:", retryError);
+        }
+      }
     }
   };
 
   // Call Logic
-  const initiateCall = async (type: 'audio' | 'video') => {
-    if (!user || !activeChat || inCall) return;
+  const initiateCall = async (targetId: string, targetName: string, targetPhoto: string, isVideo: boolean, isGroup: boolean = false) => {
+    if (!user || inCall) return;
+    const roomId = Math.random().toString(36).substring(7);
+    const callType = isVideo ? 'video' : 'audio';
 
-    const roomId = activeChat.type === 'user' 
-      ? [user.uid, activeChat.id].sort().join('_')
-      : activeChat.id;
+    setOutgoingCall({
+      id: roomId,
+      receiverId: targetId,
+      receiverName: targetName,
+      receiverPhoto: targetPhoto,
+      type: callType,
+      isGroup
+    });
 
-    // Notify receiver(s)
-    if (activeChat.type === 'user') {
-      await setDoc(doc(db, 'calls', activeChat.id), {
+    if (isGroup) {
+      const group = groups.find(g => g.id === targetId);
+      if (group) {
+        // Notify all members except self
+        const otherMembers = group.members.filter(m => m !== user.uid);
+        for (const memberId of otherMembers) {
+          await setDoc(doc(db, 'calls', memberId), {
+            callerId: user.uid,
+            callerName: user.displayName || 'User',
+            callerPhoto: user.photoURL || '',
+            roomId,
+            type: callType,
+            status: 'ringing',
+            timestamp: serverTimestamp(),
+            isGroup: true,
+            groupName: targetName
+          });
+        }
+        // Join immediately for group calls
+        joinCallRoom(roomId, callType, true);
+      }
+    } else {
+      await setDoc(doc(db, 'calls', targetId), {
         callerId: user.uid,
         callerName: user.displayName || 'User',
         callerPhoto: user.photoURL || '',
         roomId,
-        type,
-        isGroup: false,
+        type: callType,
         status: 'ringing',
-        timestamp: serverTimestamp()
+        timestamp: serverTimestamp(),
+        isGroup: false
       });
-      setOutgoingCall({ 
-        id: activeChat.id, 
-        receiverId: activeChat.id, 
-        receiverName: activeChat.name, 
-        receiverPhoto: activeChat.photo || '', 
-        type, 
-        isGroup: false 
-      });
-    } else {
-      // Notify group members
-      const group = groups.find(g => g.id === activeChat.id);
-      if (group) {
-        const promises = group.members
-          .filter(m => m !== user.uid)
-          .map(memberId => setDoc(doc(db, 'calls', memberId), {
-            callerId: user.uid,
-            callerName: `${user.displayName} (Group Call)`,
-            callerPhoto: user.photoURL || '',
-            roomId,
-            type,
-            isGroup: true,
-            status: 'ringing',
-            timestamp: serverTimestamp()
-          }));
-        await Promise.all(promises);
-        setOutgoingCall({ 
-          id: activeChat.id, 
-          receiverId: activeChat.id, 
-          receiverName: activeChat.name, 
-          receiverPhoto: activeChat.photo || '', 
-          type, 
-          isGroup: true 
-        });
-      }
     }
 
-    if (activeChat.type === 'group') {
-      joinCallRoom(roomId, type, true);
-    }
+    // Log the call
+    await addDoc(collection(db, 'callLogs'), {
+      callerId: user.uid,
+      callerName: user.displayName || 'User',
+      callerPhoto: user.photoURL || '',
+      receiverId: targetId,
+      receiverName: targetName,
+      receiverPhoto: targetPhoto,
+      type: callType,
+      status: 'outgoing',
+      timestamp: serverTimestamp(),
+      participants: isGroup ? groups.find(g => g.id === targetId)?.members || [user.uid] : [user.uid, targetId],
+      isGroup
+    });
   };
 
   const answerCall = () => {
@@ -446,16 +982,20 @@ export default function OCChat() {
         scenario: {
           mode: isGroup ? ZegoUIKitPrebuilt.GroupCall : ZegoUIKitPrebuilt.OneONoneCall,
         },
+        showPreJoinView: false,
         turnOnMicrophoneWhenJoining: true,
         turnOnCameraWhenJoining: type === 'video',
-        showMyCameraToggleButton: type === 'video', // Hide camera toggle for audio calls
+        showMyCameraToggleButton: type === 'video',
         showAudioVideoSettingsButton: true,
         showScreenSharingButton: type === 'video',
-        showTextChat: true,
-        showUserList: true,
+        showTextChat: false,
+        showUserList: false,
         maxUsers: isGroup ? 50 : 2,
         layout: isGroup ? "Grid" : "Auto",
         showLayoutButton: isGroup,
+        onJoinRoom: () => {
+          console.log('Joined call room successfully');
+        },
         onLeaveRoom: () => {
           setInCall(false);
           setOutgoingCall(null);
@@ -500,8 +1040,8 @@ export default function OCChat() {
     { id: 'calls', icon: Phone, label: 'Calls' },
     { id: 'people', icon: Users, label: 'People' },
     { id: 'groups', icon: UsersRound, label: 'Groups' },
-    { id: 'stories', icon: CircleDashed, label: 'Stories' },
     { id: 'ai', icon: Bot, label: 'AI' },
+    ...(isAdmin ? [{ id: 'admin', icon: Settings, label: 'Admin' }] : []),
     { id: 'settings', icon: Settings, label: 'Settings' }
   ];
 
@@ -603,9 +1143,62 @@ export default function OCChat() {
           )}
 
           {activeTab === 'calls' && (
-            <div className="flex flex-col items-center justify-center h-full text-gray-400 p-6 text-center">
-              <Phone className="w-12 h-12 mb-4 opacity-20" />
-              <p>No recent calls</p>
+            <div className="divide-y divide-gray-100">
+              {callLogs.length > 0 ? (
+                callLogs.map(log => {
+                  const isIncoming = log.receiverId === user?.uid;
+                  const otherPartyName = isIncoming ? log.callerName : log.receiverName;
+                  const otherPartyPhoto = isIncoming ? log.callerPhoto : log.receiverPhoto;
+                  const otherPartyId = isIncoming ? log.callerId : log.receiverId;
+
+                  return (
+                    <div key={log.id} className="flex items-center space-x-3 px-4 py-4 hover:bg-gray-50 cursor-pointer transition-colors">
+                      <div className="relative">
+                        {log.isGroup ? (
+                          <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold text-lg">
+                            {log.receiverName?.charAt(0)?.toUpperCase() || 'G'}
+                          </div>
+                        ) : otherPartyPhoto ? (
+                          <img src={otherPartyPhoto} alt={otherPartyName} className="w-12 h-12 rounded-full object-cover" />
+                        ) : (
+                          <div className="w-12 h-12 rounded-full bg-gray-200 flex items-center justify-center text-gray-600 font-bold text-lg">
+                            {otherPartyName?.charAt(0)?.toUpperCase() || 'U'}
+                          </div>
+                        )}
+                        <div className={`absolute -bottom-1 -right-1 p-1 rounded-full border-2 border-white ${log.status === 'missed' ? 'bg-red-100 text-red-600' : 'bg-green-100 text-green-600'}`}>
+                          {log.status === 'missed' ? <PhoneOff size={10} /> : <Phone size={10} />}
+                        </div>
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex justify-between items-baseline">
+                          <h4 className={`text-sm font-semibold truncate ${log.status === 'missed' ? 'text-red-600' : 'text-gray-900'}`}>
+                            {log.isGroup ? log.receiverName : otherPartyName}
+                          </h4>
+                          <span className="text-xs text-gray-400">{log.timestamp?.toDate ? format(log.timestamp.toDate(), 'MMM d, h:mm a') : ''}</span>
+                        </div>
+                        <div className="flex items-center text-xs text-gray-500 mt-0.5">
+                          {log.status === 'incoming' && <ArrowDownLeft className="w-3 h-3 mr-1 text-blue-500" />}
+                          {log.status === 'outgoing' && <ArrowUpRight className="w-3 h-3 mr-1 text-green-500" />}
+                          {log.status === 'missed' && <PhoneOff className="w-3 h-3 mr-1 text-red-500" />}
+                          <span className="capitalize">{log.status} {log.type} {log.isGroup ? 'group' : ''} call</span>
+                          {log.duration && <span className="ml-2">• {log.duration}</span>}
+                        </div>
+                      </div>
+                      <button 
+                        onClick={() => initiateCall(log.isGroup ? log.receiverId : otherPartyId, log.isGroup ? log.receiverName : otherPartyName, log.isGroup ? log.receiverPhoto || '' : otherPartyPhoto || '', log.type === 'video', log.isGroup)}
+                        className="p-2 text-blue-600 hover:bg-blue-50 rounded-full transition-colors"
+                      >
+                        {log.type === 'video' ? <Video size={18} /> : <Phone size={18} />}
+                      </button>
+                    </div>
+                  );
+                })
+              ) : (
+                <div className="flex flex-col items-center justify-center py-20 text-gray-400 text-center">
+                  <Phone className="w-12 h-12 mb-4 opacity-20" />
+                  <p>No recent calls</p>
+                </div>
+              )}
             </div>
           )}
 
@@ -669,17 +1262,220 @@ export default function OCChat() {
             </div>
           )}
 
-          {activeTab === 'ai' && (
-            <div className="flex flex-col items-center justify-center h-full text-gray-400 p-6 text-center">
-              <Bot className="w-12 h-12 mb-4 text-blue-500" />
-              <p className="text-gray-900 font-medium mb-2">OCSTHAEL AI Assistant</p>
-              <p className="text-sm mb-4">Your personal AI companion. Ask me anything!</p>
-              <button 
-                onClick={() => setActiveChat({ id: 'ai_bot', type: 'user', name: 'OCSTHAEL AI', photo: 'https://api.dicebear.com/7.x/bottts/svg?seed=ocsthael' })}
-                className="px-6 py-2 bg-blue-600 text-white rounded-full font-medium hover:bg-blue-700 transition-colors"
-              >
-                Start Chat
-              </button>
+          {activeTab === 'admin' && isAdmin && (
+            <div className="p-6 space-y-6">
+              <h3 className="text-lg font-bold text-gray-900 mb-4">Chat Design Settings</h3>
+              
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Voice Bubble Width ({chatConfig.voiceBubbleWidth}px)</label>
+                  <input 
+                    type="range" min="200" max="400" step="10"
+                    value={chatConfig.voiceBubbleWidth}
+                    onChange={(e) => {
+                      const val = parseInt(e.target.value);
+                      setChatConfig(prev => ({ ...prev, voiceBubbleWidth: val }));
+                      updateDoc(doc(db, 'config', 'chat'), { voiceBubbleWidth: val });
+                    }}
+                    className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Voice Bubble Padding ({chatConfig.voiceBubblePadding}px)</label>
+                  <input 
+                    type="range" min="4" max="24" step="2"
+                    value={chatConfig.voiceBubblePadding}
+                    onChange={(e) => {
+                      const val = parseInt(e.target.value);
+                      setChatConfig(prev => ({ ...prev, voiceBubblePadding: val }));
+                      updateDoc(doc(db, 'config', 'chat'), { voiceBubblePadding: val });
+                    }}
+                    className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Voice Bubble Radius ({chatConfig.voiceBubbleRadius}px)</label>
+                  <input 
+                    type="range" min="4" max="40" step="2"
+                    value={chatConfig.voiceBubbleRadius}
+                    onChange={(e) => {
+                      const val = parseInt(e.target.value);
+                      setChatConfig(prev => ({ ...prev, voiceBubbleRadius: val }));
+                      updateDoc(doc(db, 'config', 'chat'), { voiceBubbleRadius: val });
+                    }}
+                    className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Message Text Size ({chatConfig.messageTextSize}px)</label>
+                  <input 
+                    type="range" min="10" max="24" step="1"
+                    value={chatConfig.messageTextSize}
+                    onChange={(e) => {
+                      const val = parseInt(e.target.value);
+                      setChatConfig(prev => ({ ...prev, messageTextSize: val }));
+                      updateDoc(doc(db, 'config', 'chat'), { messageTextSize: val });
+                    }}
+                    className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Voice Duration Size ({chatConfig.voiceDurationSize}px)</label>
+                  <input 
+                    type="range" min="8" max="16" step="1"
+                    value={chatConfig.voiceDurationSize}
+                    onChange={(e) => {
+                      const val = parseInt(e.target.value);
+                      setChatConfig(prev => ({ ...prev, voiceDurationSize: val }));
+                      updateDoc(doc(db, 'config', 'chat'), { voiceDurationSize: val });
+                    }}
+                    className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Waveform Height ({chatConfig.voiceWaveformHeight}px)</label>
+                  <input 
+                    type="range" min="20" max="60" step="2"
+                    value={chatConfig.voiceWaveformHeight}
+                    onChange={(e) => {
+                      const val = parseInt(e.target.value);
+                      setChatConfig(prev => ({ ...prev, voiceWaveformHeight: val }));
+                      updateDoc(doc(db, 'config', 'chat'), { voiceWaveformHeight: val });
+                    }}
+                    className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Icon Size ({chatConfig.voiceIconSize}px)</label>
+                  <input 
+                    type="range" min="30" max="60" step="2"
+                    value={chatConfig.voiceIconSize}
+                    onChange={(e) => {
+                      const val = parseInt(e.target.value);
+                      setChatConfig(prev => ({ ...prev, voiceIconSize: val }));
+                      updateDoc(doc(db, 'config', 'chat'), { voiceIconSize: val });
+                    }}
+                    className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Icon BG Color</label>
+                    <input 
+                      type="color"
+                      value={chatConfig.voiceIconBgColor}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        setChatConfig(prev => ({ ...prev, voiceIconBgColor: val }));
+                        updateDoc(doc(db, 'config', 'chat'), { voiceIconBgColor: val });
+                      }}
+                      className="w-full h-10 rounded-lg cursor-pointer border-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Icon Color</label>
+                    <input 
+                      type="color"
+                      value={chatConfig.voiceIconColor}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        setChatConfig(prev => ({ ...prev, voiceIconColor: val }));
+                        updateDoc(doc(db, 'config', 'chat'), { voiceIconColor: val });
+                      }}
+                      className="w-full h-10 rounded-lg cursor-pointer border-none"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Sent Color</label>
+                    <input 
+                      type="color"
+                      value={chatConfig.voiceSentColor}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        setChatConfig(prev => ({ ...prev, voiceSentColor: val }));
+                        updateDoc(doc(db, 'config', 'chat'), { voiceSentColor: val });
+                      }}
+                      className="w-full h-10 rounded-lg cursor-pointer border-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Received Color</label>
+                    <input 
+                      type="color"
+                      value={chatConfig.voiceReceivedColor}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        setChatConfig(prev => ({ ...prev, voiceReceivedColor: val }));
+                        updateDoc(doc(db, 'config', 'chat'), { voiceReceivedColor: val });
+                      }}
+                      className="w-full h-10 rounded-lg cursor-pointer border-none"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Waveform Color</label>
+                    <input 
+                      type="color"
+                      value={chatConfig.voiceWaveformColor}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        setChatConfig(prev => ({ ...prev, voiceWaveformColor: val }));
+                        updateDoc(doc(db, 'config', 'chat'), { voiceWaveformColor: val });
+                      }}
+                      className="w-full h-10 rounded-lg cursor-pointer border-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Progress Color</label>
+                    <input 
+                      type="color"
+                      value={chatConfig.voiceProgressColor}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        setChatConfig(prev => ({ ...prev, voiceProgressColor: val }));
+                        updateDoc(doc(db, 'config', 'chat'), { voiceProgressColor: val });
+                      }}
+                      className="w-full h-10 rounded-lg cursor-pointer border-none"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Recording Bubble Color</label>
+                  <input 
+                    type="color"
+                    value={chatConfig.recordingBubbleColor}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      setChatConfig(prev => ({ ...prev, recordingBubbleColor: val }));
+                      updateDoc(doc(db, 'config', 'chat'), { recordingBubbleColor: val });
+                    }}
+                    className="w-full h-10 rounded-lg cursor-pointer border-none"
+                  />
+                </div>
+
+                <button 
+                  onClick={() => {
+                    setChatConfig(DEFAULT_CONFIG);
+                    setDoc(doc(db, 'config', 'chat'), DEFAULT_CONFIG);
+                  }}
+                  className="w-full py-2 bg-gray-100 text-gray-600 rounded-xl font-medium hover:bg-gray-200 transition-colors mt-4"
+                >
+                  Reset to Default
+                </button>
+              </div>
             </div>
           )}
 
@@ -769,10 +1565,10 @@ export default function OCChat() {
               <div className="flex items-center space-x-4 text-blue-600">
                 {activeChat.id !== 'ai_bot' && (
                   <>
-                    <button onClick={() => initiateCall('audio')} className="p-2 hover:bg-gray-100 rounded-full transition-colors">
+                    <button onClick={() => initiateCall(activeChat.id, activeChat.name, activeChat.photo || '', false, activeChat.type === 'group')} className="p-2 hover:bg-gray-100 rounded-full transition-colors">
                       <Phone className="w-6 h-6" fill="currentColor" />
                     </button>
-                    <button onClick={() => initiateCall('video')} className="p-2 hover:bg-gray-100 rounded-full transition-colors">
+                    <button onClick={() => initiateCall(activeChat.id, activeChat.name, activeChat.photo || '', true, activeChat.type === 'group')} className="p-2 hover:bg-gray-100 rounded-full transition-colors">
                       <Video className="w-7 h-7" fill="currentColor" />
                     </button>
                   </>
@@ -784,13 +1580,13 @@ export default function OCChat() {
             </div>
 
             {/* Chat History */}
-            <div className="flex-1 overflow-y-auto p-6 space-y-4 bg-white">
+            <div className="flex-1 overflow-y-auto p-6 space-y-4 bg-white relative">
               {messages.map((msg, index) => {
                 const isMe = msg.senderId === user?.uid;
                 const showHeader = index === 0 || messages[index - 1].senderId !== msg.senderId;
 
                 return (
-                  <div key={msg.id} className={`flex ${isMe ? 'justify-end' : 'justify-start'}`}>
+                  <div key={msg.id} className={`flex ${isMe ? 'justify-end' : 'justify-start'} group relative`}>
                     <div className={`flex max-w-[70%] ${isMe ? 'flex-row-reverse' : 'flex-row'} items-end`}>
                       {!isMe && showHeader && (
                         <div className="flex-shrink-0 mr-2 mb-1">
@@ -804,27 +1600,101 @@ export default function OCChat() {
                         </div>
                       )}
                       <div className={`${!isMe && !showHeader ? 'ml-9' : ''} flex flex-col ${isMe ? 'items-end' : 'items-start'}`}>
-                        <div
-                          className={`px-4 py-2 text-[15px] ${
-                            isMe 
-                              ? 'bg-blue-600 text-white rounded-2xl rounded-br-sm' 
-                              : 'bg-gray-100 text-gray-900 rounded-2xl rounded-bl-sm'
-                          }`}
+                        {/* Reply Context */}
+                        {msg.replyTo && (
+                          <div className={`mb-1 px-3 py-1 text-xs bg-gray-50 border-l-2 border-blue-400 rounded text-gray-500 max-w-xs truncate ${isMe ? 'mr-1' : 'ml-1'}`}>
+                            <span className="font-semibold block">{msg.replyTo.senderName}</span>
+                            {msg.replyTo.text || 'Attachment'}
+                          </div>
+                        )}
+
+                        <motion.div 
+                          className="relative group/msg"
+                          drag="x"
+                          dragConstraints={{ left: 0, right: 100 }}
+                          dragElastic={0.2}
+                          dragSnapToOrigin={true}
+                          onDragEnd={(_, info) => {
+                            if (info.offset.x > 50) {
+                              setReplyTo({ id: msg.id, text: msg.text || 'Attachment', senderName: msg.senderName });
+                            }
+                          }}
+                          onContextMenu={(e) => {
+                            e.preventDefault();
+                            setShowEmojiPicker(showEmojiPicker === msg.id ? null : msg.id);
+                          }}
                         >
-                          {msg.fileUrl && (
-                            <div className="mb-2">
-                              {msg.fileType === 'image' ? (
-                                <img src={msg.fileUrl} alt="attachment" className="max-w-xs rounded-lg" />
-                              ) : (
-                                <a href={msg.fileUrl} target="_blank" rel="noopener noreferrer" className="flex items-center space-x-2 text-sm underline">
-                                  <FileText className="w-4 h-4" />
-                                  <span>Attachment</span>
-                                </a>
-                              )}
+                          <div
+                            className={msg.fileType === 'audio' ? 'relative' : `px-4 py-2 text-[15px] shadow-sm relative ${
+                              isMe 
+                                ? 'bg-blue-600 text-white rounded-2xl rounded-br-sm' 
+                                : 'bg-gray-100 text-gray-900 rounded-2xl rounded-bl-sm'
+                            }`}
+                          >
+                            {msg.fileUrl && (
+                              <div className={msg.fileType === 'audio' ? '' : 'mb-2'}>
+                                {msg.fileType === 'image' ? (
+                                  <img src={msg.fileUrl} alt="attachment" className="max-w-xs rounded-lg cursor-pointer hover:opacity-90 transition-opacity" />
+                                ) : msg.fileType === 'audio' ? (
+                                  <VoiceMessage 
+                                    url={msg.fileUrl} 
+                                    isMe={isMe} 
+                                    waveformData={msg.waveformData}
+                                    duration={msg.duration}
+                                    timestamp={msg.timestamp}
+                                  />
+                                ) : (
+                                  <a href={msg.fileUrl} target="_blank" rel="noopener noreferrer" className="flex items-center space-x-2 text-sm underline">
+                                    <FileText className="w-4 h-4" />
+                                    <span>Attachment</span>
+                                  </a>
+                                )}
+                              </div>
+                            )}
+                            {msg.text && <p className="whitespace-pre-wrap break-words" style={{ fontSize: `${chatConfig.messageTextSize}px` }}>{msg.text}</p>}
+                            
+                            {/* Reactions */}
+                            {msg.reactions && Object.keys(msg.reactions).length > 0 && (
+                              <div className={`absolute -bottom-3 ${isMe ? 'right-0' : 'left-0'} flex -space-x-1`}>
+                                {Object.entries(msg.reactions).map(([emoji, uids]) => (
+                                  <div key={emoji} className="bg-white rounded-full px-1.5 py-0.5 text-xs shadow-sm border border-gray-100 flex items-center space-x-1">
+                                    <span>{emoji}</span>
+                                    <span className="text-[10px] text-gray-500">{(uids as string[]).length}</span>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+
+                          {/* Message Actions (Hover) */}
+                          <div className={`absolute top-1/2 -translate-y-1/2 flex items-center space-x-1 opacity-0 group-hover/msg:opacity-100 transition-opacity px-2 ${isMe ? 'right-full' : 'left-full'}`}>
+                            <button onClick={() => setReplyTo({ id: msg.id, text: msg.text || 'Attachment', senderName: msg.senderName })} className="p-1.5 hover:bg-gray-100 rounded-full text-gray-400" title="Reply">
+                              <Reply className="w-4 h-4" />
+                            </button>
+                            <button onClick={() => setShowEmojiPicker(showEmojiPicker === msg.id ? null : msg.id)} className="p-1.5 hover:bg-gray-100 rounded-full text-gray-400" title="React">
+                              <Smile className="w-4 h-4" />
+                            </button>
+                            <button onClick={() => setForwardMessage(msg)} className="p-1.5 hover:bg-gray-100 rounded-full text-gray-400" title="Forward">
+                              <Forward className="w-4 h-4" />
+                            </button>
+                          </div>
+
+                          {/* Emoji Picker Overlay */}
+                          {showEmojiPicker === msg.id && (
+                            <div className={`absolute z-50 bottom-full mb-2 bg-white rounded-full shadow-xl border border-gray-200 p-1 flex space-x-1 ${isMe ? 'right-0' : 'left-0'}`}>
+                              {['❤️', '👍', '😂', '😮', '😢', '🔥'].map(emoji => (
+                                <button
+                                  key={emoji}
+                                  onClick={() => handleReaction(msg.id, emoji)}
+                                  className="w-8 h-8 flex items-center justify-center hover:bg-gray-100 rounded-full text-lg transition-transform hover:scale-125"
+                                >
+                                  {emoji}
+                                </button>
+                              ))}
                             </div>
                           )}
-                          {msg.text && <p className="whitespace-pre-wrap break-words">{msg.text}</p>}
-                        </div>
+                        </motion.div>
+
                         {/* Time */}
                         <span className="text-[11px] text-gray-400 mt-1 px-1">
                           {msg.timestamp?.toDate ? format(msg.timestamp.toDate(), 'h:mm a') : 'Sending...'}
@@ -834,12 +1704,65 @@ export default function OCChat() {
                   </div>
                 );
               })}
+              {otherUserTyping && (
+                <div className="flex items-center space-x-2 text-gray-400 text-xs italic ml-9">
+                  <div className="flex space-x-1">
+                    <div className="w-1.5 h-1.5 bg-gray-300 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
+                    <div className="w-1.5 h-1.5 bg-gray-300 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
+                    <div className="w-1.5 h-1.5 bg-gray-300 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+                  </div>
+                  <span>{activeChat.name} is typing...</span>
+                </div>
+              )}
               <div ref={messagesEndRef} />
             </div>
 
             {/* Footer (Input) */}
             <div className="p-4 bg-white border-t border-gray-200">
-              {selectedFile && (
+              {replyTo && (
+                <div className="mb-3 flex items-center justify-between bg-gray-50 p-2 rounded-lg border-l-4 border-blue-500">
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs font-bold text-blue-600">Replying to {replyTo.senderName}</p>
+                    <p className="text-sm text-gray-500 truncate">{replyTo.text}</p>
+                  </div>
+                  <button onClick={() => setReplyTo(null)} className="p-1 text-gray-400 hover:text-gray-600">
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+              )}
+
+              {recording && (
+                <div 
+                  className="mb-3 flex items-center space-x-4 p-5 rounded-3xl border shadow-lg min-w-[320px] max-w-full text-white"
+                  style={{ backgroundColor: chatConfig.recordingBubbleColor, borderColor: 'rgba(0,0,0,0.1)' }}
+                >
+                  <div className="flex flex-col items-center justify-center space-y-1">
+                    <div className="w-4 h-4 bg-white rounded-full animate-ping" />
+                    <span className="text-sm font-bold tabular-nums">{formatTime(recordingDuration)}</span>
+                  </div>
+                  <div className="flex-1 flex items-center space-x-1.5 h-12 overflow-hidden">
+                    {waveformData.slice(-40).map((peak, i) => (
+                      <div 
+                        key={i} 
+                        className="w-1.5 bg-white rounded-full transition-all duration-100" 
+                        style={{ height: `${Math.max(15, peak * 100)}%` }} 
+                      />
+                    ))}
+                    {waveformData.length < 40 && [...Array(40 - waveformData.length)].map((_, i) => (
+                      <div key={i} className="w-1.5 bg-white/30 rounded-full h-[15%]" />
+                    ))}
+                  </div>
+                  <button 
+                    onClick={stopRecording}
+                    className="w-14 h-14 bg-white rounded-full hover:bg-gray-100 transition-all shadow-lg flex items-center justify-center active:scale-90"
+                    style={{ color: chatConfig.recordingBubbleColor }}
+                  >
+                    <Check size={32} />
+                  </button>
+                </div>
+              )}
+
+              {selectedFile && !recording && (
                 <div className="mb-3 flex items-center justify-between bg-blue-50 p-2 rounded-lg border border-blue-100 max-w-sm">
                   <div className="flex items-center space-x-2 text-sm text-blue-700">
                     <ImageIcon className="w-4 h-4" />
@@ -852,17 +1775,18 @@ export default function OCChat() {
               )}
               
               <div className="flex items-end space-x-2">
-                {/* File Share Icon (+) */}
                 <div {...getRootProps()} className="p-2 text-blue-600 hover:bg-gray-100 rounded-full cursor-pointer transition-colors mb-1">
                   <input {...getInputProps()} />
                   <Plus className="w-6 h-6" />
                 </div>
                 
-                {/* Text Box */}
                 <div className="flex-1 bg-gray-100 rounded-3xl border border-transparent focus-within:border-blue-300 focus-within:bg-white transition-all overflow-hidden flex items-center px-4 py-2">
                   <textarea
                     value={input}
-                    onChange={(e) => setInput(e.target.value)}
+                    onChange={(e) => {
+                      setInput(e.target.value);
+                      handleTyping();
+                    }}
                     onKeyDown={(e) => {
                       if (e.key === 'Enter' && !e.shiftKey) {
                         e.preventDefault();
@@ -875,14 +1799,25 @@ export default function OCChat() {
                   />
                 </div>
                 
-                {/* Send Icon */}
-                <button
-                  onClick={handleSend}
-                  disabled={(!input.trim() && !selectedFile) || uploading}
-                  className="p-2 text-blue-600 hover:bg-gray-100 rounded-full disabled:opacity-50 disabled:cursor-not-allowed transition-colors mb-1"
-                >
-                  <Send className="w-6 h-6" fill="currentColor" />
-                </button>
+                {input.trim() || selectedFile ? (
+                  <button
+                    onClick={handleSend}
+                    disabled={uploading}
+                    className="p-2 text-blue-600 hover:bg-gray-100 rounded-full disabled:opacity-50 disabled:cursor-not-allowed transition-colors mb-1"
+                  >
+                    <Send className="w-6 h-6" fill="currentColor" />
+                  </button>
+                ) : (
+                  <button
+                    onMouseDown={startRecording}
+                    onMouseUp={stopRecording}
+                    onTouchStart={startRecording}
+                    onTouchEnd={stopRecording}
+                    className={`p-2 rounded-full transition-all mb-1 ${recording ? 'bg-red-500 text-white scale-125 animate-pulse' : 'text-blue-600 hover:bg-gray-100'}`}
+                  >
+                    <Mic className="w-6 h-6" />
+                  </button>
+                )}
               </div>
             </div>
           </>
@@ -1242,6 +2177,59 @@ export default function OCChat() {
               </div>
             </motion.div>
           </motion.div>
+        )}
+      </AnimatePresence>
+      {/* Forward Message Modal */}
+      <AnimatePresence>
+        {forwardMessage && (
+          <div className="fixed inset-0 z-[150] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="bg-white rounded-2xl w-full max-w-md overflow-hidden shadow-2xl"
+            >
+              <div className="p-4 border-b border-gray-100 flex items-center justify-between">
+                <h3 className="text-lg font-semibold">Forward to...</h3>
+                <button onClick={() => setForwardMessage(null)} className="p-2 hover:bg-gray-100 rounded-full transition-colors">
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+              <div className="p-2 max-h-[400px] overflow-y-auto">
+                <div className="p-2">
+                  <h4 className="px-2 text-xs font-semibold text-gray-500 uppercase mb-2">Recent Chats</h4>
+                  {users.map(u => (
+                    <div
+                      key={u.id}
+                      onClick={() => handleForward(u.id, 'user')}
+                      className="flex items-center space-x-3 p-3 hover:bg-gray-50 rounded-xl cursor-pointer transition-colors"
+                    >
+                      {u.photoURL ? (
+                        <img src={u.photoURL} alt={u.displayName} className="w-10 h-10 rounded-full object-cover" />
+                      ) : (
+                        <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center text-gray-600 font-bold">
+                          {u.displayName?.charAt(0)?.toUpperCase()}
+                        </div>
+                      )}
+                      <span className="font-medium">{u.displayName}</span>
+                    </div>
+                  ))}
+                  {groups.map(g => (
+                    <div
+                      key={g.id}
+                      onClick={() => handleForward(g.id, 'group')}
+                      className="flex items-center space-x-3 p-3 hover:bg-gray-50 rounded-xl cursor-pointer transition-colors"
+                    >
+                      <div className="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center text-white font-bold">
+                        {g.name?.charAt(0)?.toUpperCase()}
+                      </div>
+                      <span className="font-medium">{g.name}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </motion.div>
+          </div>
         )}
       </AnimatePresence>
     </div>

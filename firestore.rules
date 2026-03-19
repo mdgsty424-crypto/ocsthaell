@@ -204,6 +204,11 @@ service cloud.firestore {
     // Rules
     // ===============================================================
 
+    match /emailSettings/{configId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
     match /settings/idCard {
       allow read: if true;
       allow write: if isAdmin() && isValidIDCardDesign();
@@ -283,14 +288,18 @@ service cloud.firestore {
       allow delete: if isAdmin();
     }
 
-    match /calls/{callId} {
+    match /chats/{chatId} {
       allow read: if isAuthenticated();
-      allow create: if isAuthenticated();
-      allow update: if isAuthenticated();
-      allow delete: if isAdmin();
+      allow write: if isAuthenticated();
+      
+      match /messages/{messageId} {
+        allow read: if isAuthenticated();
+        allow create: if isAuthenticated();
+        allow update, delete: if isAdmin();
+      }
     }
 
-    match /messages/{messageId} {
+    match /calls/{callId} {
       allow read: if isAuthenticated();
       allow create: if isAuthenticated();
       allow update: if isAuthenticated();

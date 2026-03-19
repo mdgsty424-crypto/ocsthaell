@@ -81,7 +81,12 @@ export default function Login() {
         setShowOTP(true);
         
         if (isNewUser) {
-          await sendWelcomeMail({ name: userCredential.user.displayName || 'User', userEmail: userCredential.user.email || '' });
+          const welcomeResult = await sendWelcomeMail({ name: userCredential.user.displayName || 'User', userEmail: userCredential.user.email || '' });
+          if (welcomeResult.success) {
+            console.log("Welcome email sent successfully to new user (Email Login).");
+          } else {
+            console.error("Failed to send welcome email (Email Login):", welcomeResult.error);
+          }
         }
       } else {
         // Fallback if OTP fails
@@ -143,7 +148,12 @@ export default function Login() {
         setShowOTP(true);
         
         if (isNewUser) {
-          await sendWelcomeMail({ name: userCredential.user.displayName || 'User', userEmail: userCredential.user.email || '' });
+          const welcomeResult = await sendWelcomeMail({ name: userCredential.user.displayName || 'User', userEmail: userCredential.user.email || '' });
+          if (welcomeResult.success) {
+            console.log("Welcome email sent successfully to new user (Google Login).");
+          } else {
+            console.error("Failed to send welcome email (Google Login):", welcomeResult.error);
+          }
         }
       } else {
         // Fallback if OTP fails
@@ -176,7 +186,8 @@ export default function Login() {
       userEmail: user.email || ''
     });
     
-    navigate(`/${ocId}/profile`);
+    const from = (location.state as any)?.from?.pathname || `/${ocId}/profile`;
+    navigate(from, { replace: true });
   };
 
   if (showOTP) {
@@ -351,9 +362,9 @@ export default function Login() {
         <div className="text-center">
           <p className="text-sm text-gray-400">
             Don't have an account?{' '}
-            <a href="https://registration.ocsthael.com" target="_blank" rel="noopener noreferrer" className="text-brand-blue hover:text-blue-400 font-medium inline-flex items-center">
+            <Link to="/registration" className="text-brand-blue hover:text-blue-400 font-medium inline-flex items-center">
               Get Started <ArrowRight className="w-4 h-4 ml-1" />
-            </a>
+            </Link>
           </p>
         </div>
       </motion.div>

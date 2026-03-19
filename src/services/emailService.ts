@@ -1,10 +1,57 @@
 import emailjs from '@emailjs/browser';
+import { db } from '../firebase';
+import { collection, getDocs, query, where } from 'firebase/firestore';
+
+// Default configurations (fallback)
+const DEFAULTS = {
+    support: {
+        serviceId: 'service_h3y4bu3',
+        templateSupport: 'template_knbs3lw',
+        templateResolve: 'template_qwsdu8r',
+        publicKey: 'VmaJ2hrnGEYVlmGQn'
+    },
+    auth: {
+        serviceId: 'service_7joia8l',
+        templateOTP: 'template_t1nzyk9',
+        templateSecurity: 'template_9wixb5n',
+        publicKey: 'dGeS-888dsuY81CaC'
+    },
+    info: {
+        serviceId: 'service_d6gl2h8',
+        templateInquiry: 'template_0k24sma',
+        templateWelcome: 'template_7is790g',
+        publicKey: 'CASwBIPvE2-h_FQD0'
+    },
+    teams: {
+        serviceId: 'service_82x51hh',
+        templateBonus: 'template_pgs759e',
+        templateWithdraw: 'template_tbwkvrn',
+        publicKey: '0Wn4VU_rBy5ve6v9U'
+    }
+};
+
+const getEmailConfig = async (category: string) => {
+    try {
+        const q = query(collection(db, 'emailSettings'), where('category', '==', category));
+        const snapshot = await getDocs(q);
+        if (!snapshot.empty) {
+            return snapshot.docs[0].data();
+        }
+    } catch (err) {
+        console.error(`Error fetching email config for ${category}:`, err);
+    }
+    return null;
+};
 
 // Step 1: Support & Resolution System (support@ocsthael.com)
-// Service: service_h3y4bu3, Templates: template_knbs3lw (Support), template_qwsdu8r (Resolve)
-// Public Key: VmaJ2hrnGEYVlmGQn
-
 export const sendSupportTicket = async (userData: { name: string; issueSubject: string; userId: string; email: string }) => {
+    if (!userData.email) return { success: false, error: "Recipient email is empty" };
+
+    const config = await getEmailConfig('support');
+    const serviceId = config?.serviceId || DEFAULTS.support.serviceId;
+    const templateId = config?.templateId || DEFAULTS.support.templateSupport;
+    const publicKey = config?.publicKey || DEFAULTS.support.publicKey;
+
     const templateParams = {
         to_name: userData.name,
         user_name: userData.name,
@@ -17,12 +64,7 @@ export const sendSupportTicket = async (userData: { name: string; issueSubject: 
     };
 
     try {
-        const response = await emailjs.send(
-            'service_h3y4bu3',
-            'template_knbs3lw',
-            templateParams,
-            'VmaJ2hrnGEYVlmGQn'
-        );
+        const response = await emailjs.send(serviceId, templateId, templateParams, publicKey);
         console.log('SUCCESS!', response.status, response.text);
         return { success: true, ticketNo: templateParams.ticket_no };
     } catch (err) {
@@ -32,6 +74,13 @@ export const sendSupportTicket = async (userData: { name: string; issueSubject: 
 };
 
 export const sendResolutionMail = async (userData: { name: string; ticketId: string; msg: string; userEmail: string }) => {
+    if (!userData.userEmail) return { success: false, error: "Recipient email is empty" };
+
+    const config = await getEmailConfig('support');
+    const serviceId = config?.serviceId || DEFAULTS.support.serviceId;
+    const templateId = config?.templateSecondaryId || DEFAULTS.support.templateResolve;
+    const publicKey = config?.publicKey || DEFAULTS.support.publicKey;
+
     const templateParams = {
         user_name: userData.name,
         ticket_no: userData.ticketId,
@@ -41,12 +90,7 @@ export const sendResolutionMail = async (userData: { name: string; ticketId: str
     };
 
     try {
-        const response = await emailjs.send(
-            'service_h3y4bu3',
-            'template_qwsdu8r',
-            templateParams,
-            'VmaJ2hrnGEYVlmGQn'
-        );
+        const response = await emailjs.send(serviceId, templateId, templateParams, publicKey);
         console.log("Success! Resolve mail sent.", response.status);
         return { success: true };
     } catch (err) {
@@ -56,10 +100,14 @@ export const sendResolutionMail = async (userData: { name: string; ticketId: str
 };
 
 // Step 2: Authentication & Security (auth@ocsthael.com)
-// Service: service_7joia8l, Templates: template_t1nzyk9 (OTP), template_9wixb5n (Security)
-// Public Key: dGeS-888dsuY81CaC
-
 export const sendSecurityAlert = async (userData: { name: string; device: string; city: string; userEmail: string }) => {
+    if (!userData.userEmail) return { success: false, error: "Recipient email is empty" };
+
+    const config = await getEmailConfig('auth');
+    const serviceId = config?.serviceId || DEFAULTS.auth.serviceId;
+    const templateId = config?.templateSecondaryId || DEFAULTS.auth.templateSecurity;
+    const publicKey = config?.publicKey || DEFAULTS.auth.publicKey;
+
     const templateParams = {
         user_name: userData.name,
         device_info: userData.device,
@@ -70,12 +118,7 @@ export const sendSecurityAlert = async (userData: { name: string; device: string
     };
 
     try {
-        const response = await emailjs.send(
-            'service_7joia8l',
-            'template_9wixb5n',
-            templateParams,
-            'dGeS-888dsuY81CaC'
-        );
+        const response = await emailjs.send(serviceId, templateId, templateParams, publicKey);
         console.log("Security Alert Sent!", response.status);
         return { success: true };
     } catch (err) {
@@ -85,6 +128,13 @@ export const sendSecurityAlert = async (userData: { name: string; device: string
 };
 
 export const sendAuthOTP = async (userEmail: string, userName: string) => {
+    if (!userEmail) return { success: false, error: "Recipient email is empty" };
+
+    const config = await getEmailConfig('auth');
+    const serviceId = config?.serviceId || DEFAULTS.auth.serviceId;
+    const templateId = config?.templateId || DEFAULTS.auth.templateOTP;
+    const publicKey = config?.publicKey || DEFAULTS.auth.publicKey;
+
     const generatedOTP = Math.floor(100000 + Math.random() * 900000);
 
     const templateParams = {
@@ -94,12 +144,7 @@ export const sendAuthOTP = async (userEmail: string, userName: string) => {
     };
 
     try {
-        const response = await emailjs.send(
-            'service_7joia8l',
-            'template_t1nzyk9',
-            templateParams,
-            'dGeS-888dsuY81CaC'
-        );
+        const response = await emailjs.send(serviceId, templateId, templateParams, publicKey);
         console.log('OTP Sent Successfully!', response.status);
         return { success: true, otp: generatedOTP };
     } catch (error) {
@@ -109,10 +154,14 @@ export const sendAuthOTP = async (userEmail: string, userName: string) => {
 };
 
 // Step 3: General Inquiry & Welcome (info@ocsthael.com)
-// Service: service_d6gl2h8, Templates: template_0k24sma (Inquiry), template_7is790g (Welcome)
-// Public Key: CASwBIPvE2-h_FQD0
-
 export const sendInquiryMail = async (formData: { senderName: string; topic: string; senderEmail: string }) => {
+    if (!formData.senderEmail) return { success: false, error: "Recipient email is empty" };
+
+    const config = await getEmailConfig('info');
+    const serviceId = config?.serviceId || DEFAULTS.info.serviceId;
+    const templateId = config?.templateSecondaryId || DEFAULTS.info.templateInquiry;
+    const publicKey = config?.publicKey || DEFAULTS.info.publicKey;
+
     const templateParams = {
         from_name: formData.senderName,
         subject: formData.topic,
@@ -121,12 +170,7 @@ export const sendInquiryMail = async (formData: { senderName: string; topic: str
     };
 
     try {
-        const response = await emailjs.send(
-            'service_d6gl2h8',
-            'template_0k24sma',
-            templateParams,
-            'CASwBIPvE2-h_FQD0'
-        );
+        const response = await emailjs.send(serviceId, templateId, templateParams, publicKey);
         console.log('Success! Inquiry received.', response.status);
         return { success: true };
     } catch (error) {
@@ -136,6 +180,13 @@ export const sendInquiryMail = async (formData: { senderName: string; topic: str
 };
 
 export const sendWelcomeMail = async (userData: { name: string; userEmail: string }) => {
+    if (!userData.userEmail) return { success: false, error: "Recipient email is empty" };
+
+    const config = await getEmailConfig('info');
+    const serviceId = config?.serviceId || DEFAULTS.info.serviceId;
+    const templateId = config?.templateId || DEFAULTS.info.templateWelcome;
+    const publicKey = config?.publicKey || DEFAULTS.info.publicKey;
+
     const templateParams = {
         user_name: userData.name,
         service_link: "https://ocsthael.com/services",
@@ -143,12 +194,7 @@ export const sendWelcomeMail = async (userData: { name: string; userEmail: strin
     };
 
     try {
-        const response = await emailjs.send(
-            'service_d6gl2h8',
-            'template_7is790g',
-            templateParams,
-            'CASwBIPvE2-h_FQD0'
-        );
+        const response = await emailjs.send(serviceId, templateId, templateParams, publicKey);
         console.log("Welcome Email Sent!", response.status);
         return { success: true };
     } catch (err) {
@@ -158,10 +204,14 @@ export const sendWelcomeMail = async (userData: { name: string; userEmail: strin
 };
 
 // Step 4: Team, Bonus & Finance (teams@ocsthael.com)
-// Service: service_82x51hh, Templates: template_pgs759e (Bonus), template_tbwkvrn (Withdraw)
-// Public Key: 0Wn4VU_rBy5ve6v9U
-
 export const sendBonusMail = async (memberData: { name: string; amount: string; email: string }) => {
+    if (!memberData.email) return { success: false, error: "Recipient email is empty" };
+
+    const config = await getEmailConfig('teams');
+    const serviceId = config?.serviceId || DEFAULTS.teams.serviceId;
+    const templateId = config?.templateSecondaryId || DEFAULTS.teams.templateBonus;
+    const publicKey = config?.publicKey || DEFAULTS.teams.publicKey;
+
     const templateParams = {
         member_name: memberData.name,
         bonus_amount: memberData.amount,
@@ -170,12 +220,7 @@ export const sendBonusMail = async (memberData: { name: string; amount: string; 
     };
 
     try {
-        const response = await emailjs.send(
-            'service_82x51hh',
-            'template_pgs759e',
-            templateParams,
-            '0Wn4VU_rBy5ve6v9U'
-        );
+        const response = await emailjs.send(serviceId, templateId, templateParams, publicKey);
         console.log("Bonus Email Sent Successfully!", response.status);
         return { success: true };
     } catch (err) {
@@ -185,6 +230,13 @@ export const sendBonusMail = async (memberData: { name: string; amount: string; 
 };
 
 export const sendWithdrawalSuccessMail = async (withdrawData: { userName: string; amount: string; method: string; transactionId: string; userEmail: string }) => {
+    if (!withdrawData.userEmail) return { success: false, error: "Recipient email is empty" };
+
+    const config = await getEmailConfig('teams');
+    const serviceId = config?.serviceId || DEFAULTS.teams.serviceId;
+    const templateId = config?.templateId || DEFAULTS.teams.templateWithdraw;
+    const publicKey = config?.publicKey || DEFAULTS.teams.publicKey;
+
     const templateParams = {
         member_name: withdrawData.userName,
         amount: withdrawData.amount,
@@ -195,12 +247,7 @@ export const sendWithdrawalSuccessMail = async (withdrawData: { userName: string
     };
 
     try {
-        const response = await emailjs.send(
-            'service_82x51hh',
-            'template_tbwkvrn',
-            templateParams,
-            '0Wn4VU_rBy5ve6v9U'
-        );
+        const response = await emailjs.send(serviceId, templateId, templateParams, publicKey);
         console.log("Withdrawal Notification Sent!", response.status);
         return { success: true };
     } catch (err) {
@@ -208,3 +255,34 @@ export const sendWithdrawalSuccessMail = async (withdrawData: { userName: string
         return { success: false, error: err };
     }
 };
+
+export const sendTestEmail = async (userEmail: string) => {
+    if (!userEmail) return { success: false, error: "Recipient email is empty" };
+
+    const config = await getEmailConfig('teams');
+    const serviceId = config?.serviceId || DEFAULTS.teams.serviceId;
+    const templateId = config?.templateId || DEFAULTS.teams.templateWithdraw;
+    const publicKey = config?.publicKey || DEFAULTS.teams.publicKey;
+
+    console.log("EmailService: sendTestEmail called", userEmail);
+    try {
+        const result = await emailjs.send(
+            serviceId,
+            templateId,
+            {
+                member_name: 'Test User',
+                amount: '0.00',
+                payment_method: 'Test Method',
+                txn_id: 'TEST-123',
+                email: userEmail
+            },
+            publicKey
+        );
+        console.log("EmailService: Test email sent!", result.status, result.text);
+        return { success: true, result };
+    } catch (error) {
+        console.error("EmailService: Failed to send test email:", error);
+        return { success: false, error };
+    }
+};
+

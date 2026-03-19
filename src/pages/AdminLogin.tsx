@@ -3,7 +3,7 @@ import { motion } from 'motion/react';
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword, signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
 import { auth, db } from '../firebase';
 import { doc, setDoc, getDoc, serverTimestamp } from 'firebase/firestore';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Hexagon, Lock, Mail } from 'lucide-react';
 
 export default function AdminLogin() {
@@ -13,6 +13,7 @@ export default function AdminLogin() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
 
   const handleEmailAuth = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -33,7 +34,8 @@ export default function AdminLogin() {
           role: 'admin',
           createdAt: serverTimestamp()
         });
-        navigate('/admin/dashboard');
+        const from = (location.state as any)?.from?.pathname || '/admin/dashboard';
+        navigate(from, { replace: true });
       } else {
         userCredential = await signInWithEmailAndPassword(auth, email, password);
         if (userCredential.user.email !== 'info@ocsthael.com') {
@@ -52,7 +54,8 @@ export default function AdminLogin() {
             createdAt: serverTimestamp()
           });
         }
-        navigate('/admin/dashboard');
+        const from = (location.state as any)?.from?.pathname || '/admin/dashboard';
+        navigate(from, { replace: true });
       }
     } catch (err: any) {
       if (err.code === 'auth/invalid-credential') {
@@ -95,7 +98,8 @@ export default function AdminLogin() {
         }
         await setDoc(doc(db, 'users', userCredential.user.uid), userData);
       }
-      navigate('/admin/dashboard');
+      const from = (location.state as any)?.from?.pathname || '/admin/dashboard';
+      navigate(from, { replace: true });
     } catch (err: any) {
       setError(err.message || 'Failed to log in with Google');
       console.error(err);

@@ -21,7 +21,8 @@ import ManageSupportTickets from '../components/admin/ManageSupportTickets';
 import ManageWithdrawals from '../components/admin/ManageWithdrawals';
 import ManageIDCard from '../components/admin/ManageIDCard';
 import ManageDeposits from '../components/admin/ManageDeposits';
-import { FileText, HeadphonesIcon, DollarSign, CreditCard, Wallet } from 'lucide-react';
+import ManageEmail from '../components/admin/ManageEmail';
+import { FileText, HeadphonesIcon, DollarSign, CreditCard, Wallet, Mail } from 'lucide-react';
 
 export default function AdminDashboard() {
   const { user } = useAuth();
@@ -48,6 +49,7 @@ export default function AdminDashboard() {
     { name: 'Members', path: '/admin/dashboard/users', icon: Users },
     { name: 'Deposits', path: '/admin/dashboard/deposits', icon: Wallet },
     { name: 'Withdrawals', path: '/admin/dashboard/withdrawals', icon: DollarSign },
+    { name: 'Email Settings', path: '/admin/dashboard/email', icon: Mail },
     { name: 'Support Tickets', path: '/admin/dashboard/support', icon: HeadphonesIcon },
     { name: 'Legal Pages', path: '/admin/dashboard/legal', icon: FileText },
     { name: 'SEO & Scripts', path: '/admin/dashboard/seo', icon: Search },
@@ -119,6 +121,7 @@ export default function AdminDashboard() {
             <Route path="/users" element={<ManageUsers />} />
             <Route path="/deposits" element={<ManageDeposits />} />
             <Route path="/withdrawals" element={<ManageWithdrawals />} />
+            <Route path="/email" element={<ManageEmail />} />
             <Route path="/support" element={<ManageSupportTickets />} />
             <Route path="/legal" element={<ManageLegal />} />
             <Route path="/seo" element={<ManageSEO />} />

@@ -69,7 +69,7 @@ const ManageWithdrawals = () => {
     setSendingApproval(true);
     try {
       // Send withdrawal success email
-      const emailSent = await sendWithdrawalSuccessMail({
+      const result = await sendWithdrawalSuccessMail({
         userName: withdrawal.userName,
         userEmail: withdrawal.userEmail,
         amount: withdrawal.amount.toString(),
@@ -77,7 +77,7 @@ const ManageWithdrawals = () => {
         transactionId: transactionId
       });
 
-      if (emailSent) {
+      if (result.success) {
         // Update withdrawal in Firestore
         await updateDoc(doc(db, 'withdrawals', withdrawal.id), {
           status: 'approved',
@@ -88,7 +88,7 @@ const ManageWithdrawals = () => {
         setTransactionId('');
         alert('Withdrawal approved and success email sent.');
       } else {
-        alert('Failed to send success email. Please try again.');
+        alert('Failed to send success email. Please check console for details.');
       }
     } catch (error) {
       console.error('Error approving withdrawal:', error);

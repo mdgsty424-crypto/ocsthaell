@@ -82,19 +82,19 @@ const ManageUsers = () => {
 
     setIsSendingBonus(true);
     try {
-      const success = await sendBonusMail({
+      const result = await sendBonusMail({
         name: user.displayName || 'Member',
         email: user.email,
         amount: bonusAmount
       });
 
-      if (success) {
+      if (result.success) {
         alert('Bonus email sent successfully!');
         setSendingBonusId(null);
         setBonusAmount('');
         setBonusDescription('');
       } else {
-        alert('Failed to send bonus email.');
+        alert('Failed to send bonus email. Please check console for details.');
       }
     } catch (error) {
       console.error('Error sending bonus:', error);

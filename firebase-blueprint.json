@@ -116,9 +116,28 @@
         "createdAt": { "type": "timestamp" }
       },
       "required": ["email", "role", "createdAt"]
+    },
+    "EmailConfig": {
+      "title": "Email Configuration",
+      "description": "EmailJS settings for a specific category",
+      "type": "object",
+      "properties": {
+        "category": { "type": "string", "enum": ["auth", "support", "info", "teams", "ocshopping"] },
+        "serviceId": { "type": "string" },
+        "templateId": { "type": "string" },
+        "publicKey": { "type": "string" },
+        "privateKey": { "type": "string", "description": "Optional private key if needed" },
+        "description": { "type": "string" },
+        "updatedAt": { "type": "timestamp" }
+      },
+      "required": ["category", "serviceId", "templateId", "publicKey", "updatedAt"]
     }
   },
   "firestore": {
+    "/emailSettings/{configId}": {
+      "schema": { "$ref": "#/entities/EmailConfig" },
+      "description": "Collection of email configurations"
+    },
     "/settings/idCard": {
       "schema": { "$ref": "#/entities/IDCardDesign" },
       "description": "Global ID card design settings"

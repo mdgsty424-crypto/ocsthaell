@@ -3,21 +3,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { MessageSquare, X, Send, Bot, User, Loader2 } from 'lucide-react';
 import { GoogleGenAI } from '@google/genai';
 
-// Safely access the API key, falling back to import.meta.env for Vite builds
-const getApiKey = () => {
-  try {
-    if (typeof process !== 'undefined' && process.env && process.env.GEMINI_API_KEY) {
-      return process.env.GEMINI_API_KEY;
-    }
-  } catch (e) {
-    // Ignore process is not defined error
-  }
-  return import.meta.env.VITE_GEMINI_API_KEY || '';
-};
-
-const apiKey = getApiKey();
-const ai = new GoogleGenAI({ apiKey: apiKey || 'AIzaSyBD6Kmgt4Z8QjYlZUHDSQxgIt95Z5QLdn4' });
-
+// Safely access the API key
 const SYSTEM_PROMPT = `You are the official AI Assistant for OCSTHAEL, an innovative technology-based initiative building a powerful digital ecosystem. 
 OCSTHAEL connects communication, social networking, online income, internet usage, and e-commerce into one platform.
 Our main goal is to build an independent and robust digital platform that empowers users and businesses alike.
@@ -50,24 +36,49 @@ export default function AIAssistant() {
     setIsLoading(true);
 
     try {
+      const apiKey = process.env.GEMINI_API_KEY || process.env.NEXT_PUBLIC_GEMINI_API_KEY || (import.meta as any).env?.VITE_GEMINI_API_KEY || '';
+      if (!apiKey) {
+        throw new Error("Gemini API Key is missing. Please set it in the environment variables.");
+      }
+      
+      const ai = new GoogleGenAI({ apiKey });
       const contents = messages.map(msg => ({
         role: msg.role,
         parts: [{ text: msg.text }]
       }));
       contents.push({ role: 'user', parts: [{ text: userMessage }] });
 
-      const response = await ai.models.generateContent({
-        model: 'gemini-3-flash-preview',
-        contents: contents,
-        config: {
-          systemInstruction: SYSTEM_PROMPT,
+      let response;
+      try {
+        response = await ai.models.generateContent({
+          model: 'gemini-3-flash-preview',
+          contents: contents,
+          config: {
+            systemInstruction: SYSTEM_PROMPT,
+          }
+        });
+      } catch (modelError: any) {
+        console.warn("Primary model failed, trying fallback...", modelError);
+        if (modelError.message?.includes('model') || modelError.message?.includes('not found')) {
+          response = await ai.models.generateContent({
+            model: 'gemini-flash-latest',
+            contents: contents,
+            config: {
+              systemInstruction: SYSTEM_PROMPT,
+            }
+          });
+        } else {
+          throw modelError;
         }
-      });
+      }
       
       setMessages(prev => [...prev, { role: 'model', text: response.text || 'Sorry, I could not process that.' }]);
-    } catch (error) {
+    } catch (error: any) {
       console.error("AI Error:", error);
-      setMessages(prev => [...prev, { role: 'model', text: 'Sorry, I am having trouble connecting right now. Please try again later.' }]);
+      const errorMessage = error.message?.includes('Key') 
+        ? 'API Key is missing or invalid. Please check your configuration.' 
+        : 'Sorry, I am having trouble connecting right now. Please try again later.';
+      setMessages(prev => [...prev, { role: 'model', text: errorMessage }]);
     } finally {
       setIsLoading(false);
     }

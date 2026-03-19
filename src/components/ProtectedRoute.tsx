@@ -1,5 +1,5 @@
 import React from 'react';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
 export default function ProtectedRoute({ 
@@ -12,6 +12,7 @@ export default function ProtectedRoute({
   requireTeam?: boolean
 }) {
   const { user, isAdmin, isTeam, loading } = useAuth();
+  const location = useLocation();
 
   if (loading) {
     return (
@@ -22,7 +23,7 @@ export default function ProtectedRoute({
   }
 
   if (!user) {
-    return <Navigate to="/admin/login" replace />;
+    return <Navigate to={requireAdmin ? "/admin/login" : "/login"} state={{ from: location }} replace />;
   }
 
   if (requireAdmin && !isAdmin) {

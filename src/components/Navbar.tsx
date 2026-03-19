@@ -103,9 +103,9 @@ export default function Navbar() {
                 <Link to="/login" className="text-sm font-bold text-gray-600 hover:text-brand-blue transition-colors">
                   Login
                 </Link>
-                <a href="https://registration.ocsthael.com" target="_blank" rel="noopener noreferrer" className="px-8 py-3 rounded-2xl bg-brand-blue text-white font-bold shadow-lg hover:bg-brand-blue/90 hover:-translate-y-0.5 transition-all active:scale-95">
+                <Link to="/registration" className="px-8 py-3 rounded-2xl bg-brand-blue text-white font-bold shadow-lg hover:bg-brand-blue/90 hover:-translate-y-0.5 transition-all active:scale-95">
                   Get Started
-                </a>
+                </Link>
               </div>
             )}
           </div>
@@ -164,15 +164,13 @@ export default function Navbar() {
                 >
                   Login
                 </Link>
-                <a
-                  href="https://registration.ocsthael.com"
-                  target="_blank"
-                  rel="noopener noreferrer"
+                <Link
+                  to="/registration"
                   onClick={() => setIsOpen(false)}
                   className="block px-4 py-4 rounded-2xl text-center text-base font-bold text-white bg-brand-blue shadow-lg"
                 >
                   Get Started
-                </a>
+                </Link>
               </div>
             )}
           </div>
