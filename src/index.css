@@ -188,3 +188,11 @@ body {
 .btn-anim-bounce a[class*="py-"]:hover {
   transform: translateY(-4px) scale(1.05);
 }
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}

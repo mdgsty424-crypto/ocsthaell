@@ -1,0 +1,5 @@
+{
+  "name": "OCchat Messenger",
+  "description": "A full-scale messenger clone with real-time text, audio, and video calling features.",
+  "requestFramePermissions": ["camera", "microphone", "display-capture"]
+}
