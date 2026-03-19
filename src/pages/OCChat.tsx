@@ -6,6 +6,7 @@ import { signOut } from 'firebase/auth';
 import { collection, query, orderBy, onSnapshot, addDoc, serverTimestamp, getDocs, doc, setDoc, updateDoc, where } from 'firebase/firestore';
 import { ZegoUIKitPrebuilt } from '@zegocloud/zego-uikit-prebuilt';
 import { GoogleGenAI } from '@google/genai';
+import { getGeminiApiKey } from '../services/apiKeys';
 import { Search, Phone, Video, Send, Plus, X, UserPlus, LogOut, MessageSquare, PhoneIncoming, PhoneOff, FileText, Image as ImageIcon, MoreVertical, MessageCircle, Users, UsersRound, CircleDashed, Bot, Settings, ChevronLeft, ArrowLeft, Mic, Smile, Reply, Forward, History, Trash2, Check, CheckCheck, ArrowDownLeft, ArrowUpRight, Play, Pause } from 'lucide-react';
 import { format } from 'date-fns';
 import { useDropzone } from 'react-dropzone';
@@ -802,11 +803,11 @@ export default function OCChat() {
   const triggerAIResponse = async (channelId: string, userMessage: string, userName: string, isDirectChat: boolean) => {
     console.log("AI: triggerAIResponse called", { channelId, isDirectChat });
     try {
-      const apiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY || process.env.GEMINI_API_KEY || (import.meta as any).env?.VITE_GEMINI_API_KEY;
+      const apiKey = await getGeminiApiKey();
       console.log("AI: API Key present?", !!apiKey);
       
       if (!apiKey) {
-        console.error("AI Error: API Key is missing. Please set NEXT_PUBLIC_GEMINI_API_KEY in secrets.");
+        console.error("AI Error: API Key is missing. Please set it in Admin Panel -> API Keys.");
         return;
       }
       
@@ -839,7 +840,7 @@ export default function OCChat() {
       if (error.message?.includes('model') || error.message?.includes('not found')) {
         try {
           console.log("AI: Retrying with gemini-flash-latest...");
-          const apiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY || process.env.GEMINI_API_KEY;
+          const apiKey = await getGeminiApiKey();
           const ai = new GoogleGenAI({ apiKey: apiKey! });
           const prompt = isDirectChat 
             ? `You are OCSTHAEL AI, a helpful and friendly AI assistant. The user ${userName} said: "${userMessage}". Reply directly to them.`

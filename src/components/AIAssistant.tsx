@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { MessageSquare, X, Send, Bot, User, Loader2 } from 'lucide-react';
 import { GoogleGenAI } from '@google/genai';
+import { getGeminiApiKey } from '../services/apiKeys';
 
 // Safely access the API key
 const SYSTEM_PROMPT = `You are the official AI Assistant for OCSTHAEL, an innovative technology-based initiative building a powerful digital ecosystem. 
@@ -36,9 +37,9 @@ export default function AIAssistant() {
     setIsLoading(true);
 
     try {
-      const apiKey = process.env.GEMINI_API_KEY || process.env.NEXT_PUBLIC_GEMINI_API_KEY || (import.meta as any).env?.VITE_GEMINI_API_KEY || '';
+      const apiKey = await getGeminiApiKey();
       if (!apiKey) {
-        throw new Error("Gemini API Key is missing. Please set it in the environment variables.");
+        throw new Error("Gemini API Key is missing. Please configure it in the Admin Panel.");
       }
       
       const ai = new GoogleGenAI({ apiKey });
