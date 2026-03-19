@@ -7,6 +7,7 @@ import { Save, FileText } from 'lucide-react';
 export default function ManageLegal() {
   const [termsContent, setTermsContent] = useState('');
   const [privacyContent, setPrivacyContent] = useState('');
+  const [refundContent, setRefundContent] = useState('');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState({ type: '', text: '' });
@@ -25,6 +26,11 @@ export default function ManageLegal() {
       const privacyDoc = await getDoc(doc(db, 'pages', 'privacyPolicy'));
       if (privacyDoc.exists()) {
         setPrivacyContent(privacyDoc.data().content || '');
+      }
+
+      const refundDoc = await getDoc(doc(db, 'pages', 'refundPolicy'));
+      if (refundDoc.exists()) {
+        setRefundContent(refundDoc.data().content || '');
       }
     } catch (error) {
       console.error("Error fetching legal content:", error);
@@ -62,6 +68,23 @@ export default function ManageLegal() {
     } catch (error) {
       console.error("Error saving privacy policy:", error);
       setMessage({ type: 'error', text: 'Failed to save Privacy Policy.' });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleSaveRefund = async () => {
+    setSaving(true);
+    setMessage({ type: '', text: '' });
+    try {
+      await setDoc(doc(db, 'pages', 'refundPolicy'), {
+        content: refundContent,
+        updatedAt: new Date().toISOString()
+      });
+      setMessage({ type: 'success', text: 'Refund Policy saved successfully!' });
+    } catch (error) {
+      console.error("Error saving refund policy:", error);
+      setMessage({ type: 'error', text: 'Failed to save Refund Policy.' });
     } finally {
       setSaving(false);
     }
@@ -133,6 +156,33 @@ export default function ManageLegal() {
           >
             <Save className="w-5 h-5 mr-2" />
             {saving ? 'Saving...' : 'Save Privacy Policy'}
+          </button>
+        </div>
+      </div>
+
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+        <div className="flex items-center space-x-3 mb-6">
+          <FileText className="w-6 h-6 text-brand-blue" />
+          <h3 className="text-xl font-bold text-gray-900">Refund Policy</h3>
+        </div>
+        <div className="mb-4">
+          <label className="block text-sm font-medium text-gray-700 mb-2">Content (Markdown or HTML supported)</label>
+          <textarea
+            value={refundContent}
+            onChange={(e) => setRefundContent(e.target.value)}
+            rows={15}
+            className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-blue font-mono text-sm"
+            placeholder="Enter Refund Policy content here..."
+          />
+        </div>
+        <div className="flex justify-end">
+          <button
+            onClick={handleSaveRefund}
+            disabled={saving}
+            className="flex items-center px-6 py-3 bg-brand-blue text-white rounded-xl hover:bg-blue-600 transition-colors disabled:opacity-50"
+          >
+            <Save className="w-5 h-5 mr-2" />
+            {saving ? 'Saving...' : 'Save Refund Policy'}
           </button>
         </div>
       </div>

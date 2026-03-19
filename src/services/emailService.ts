@@ -24,8 +24,8 @@ const DEFAULTS = {
     },
     teams: {
         serviceId: 'service_82x51hh',
-        templateBonus: 'template_pgs759e',
-        templateWithdraw: 'template_tbwkvrn',
+        templateBonus: 'template_tbwkvrn',
+        templateWithdraw: 'template_pgs759e',
         publicKey: '0Wn4VU_rBy5ve6v9U'
     }
 };

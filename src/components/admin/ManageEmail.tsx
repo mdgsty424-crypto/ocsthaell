@@ -1,7 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
-import { Mail, Send, CheckCircle, AlertCircle, Loader2, Save, Shield, Headphones, Info, Users, ShoppingBag } from 'lucide-react';
-import { sendTestEmail } from '../../services/emailService';
+import { Mail, Send, CheckCircle, AlertCircle, Loader2, Save, Shield, Headphones, Info, Users, ShoppingBag, Zap } from 'lucide-react';
+import { 
+  sendTestEmail, 
+  sendSupportTicket, 
+  sendResolutionMail, 
+  sendSecurityAlert, 
+  sendAuthOTP, 
+  sendInquiryMail, 
+  sendWelcomeMail, 
+  sendBonusMail, 
+  sendWithdrawalSuccessMail 
+} from '../../services/emailService';
 import { db } from '../../firebase';
 import { collection, doc, setDoc, getDocs, query } from 'firebase/firestore';
 
@@ -30,6 +40,7 @@ export default function ManageEmail() {
   const [saving, setSaving] = useState<string | null>(null);
   const [testEmail, setTestEmail] = useState('');
   const [isSending, setIsSending] = useState(false);
+  const [isSendingAll, setIsSendingAll] = useState(false);
   const [status, setStatus] = useState<{ type: 'success' | 'error', message: string } | null>(null);
 
   useEffect(() => {
@@ -99,6 +110,40 @@ export default function ManageEmail() {
       setStatus({ type: 'error', message: `An error occurred: ${error.message}` });
     } finally {
       setIsSending(false);
+    }
+  };
+
+  const handleSendAllTestEmails = async () => {
+    if (!testEmail.trim()) {
+      setStatus({ type: 'error', message: 'Please enter a recipient email first.' });
+      return;
+    }
+
+    setIsSendingAll(true);
+    setStatus(null);
+    try {
+      // 1. Support Request
+      await sendSupportTicket({ name: "Test User", issueSubject: "Test Subject", userId: "123", email: testEmail });
+      // 2. Support Resolved
+      await sendResolutionMail({ name: "Test User", ticketId: "OC-1234", msg: "Your issue has been resolved.", userEmail: testEmail });
+      // 3. Auth OTP
+      await sendAuthOTP(testEmail, "Test User");
+      // 4. Security Alert
+      await sendSecurityAlert({ name: "Test User", device: "Test Device", city: "Test City", userEmail: testEmail });
+      // 5. Withdrawal Success
+      await sendWithdrawalSuccessMail({ userName: "Test User", amount: "500", method: "bKash", transactionId: "TXN12345678", userEmail: testEmail });
+      // 6. Bonus Credit
+      await sendBonusMail({ name: "Test User", amount: "100", email: testEmail });
+      // 7. Welcome Mail
+      await sendWelcomeMail({ name: "Test User", userEmail: testEmail });
+      // 8. General Inquiry
+      await sendInquiryMail({ senderName: "Test User", topic: "Test Inquiry", senderEmail: testEmail });
+
+      setStatus({ type: 'success', message: 'All 8 test emails sent successfully! Please check your inbox.' });
+    } catch (error: any) {
+      setStatus({ type: 'error', message: `An error occurred while sending all emails: ${error.message}` });
+    } finally {
+      setIsSendingAll(false);
     }
   };
 
@@ -270,7 +315,7 @@ export default function ManageEmail() {
               </div>
               <button
                 type="submit"
-                disabled={isSending || !testEmail}
+                disabled={isSending || isSendingAll || !testEmail}
                 className="w-full py-3 bg-gradient-brand text-white rounded-xl font-bold flex items-center justify-center space-x-2 disabled:opacity-50 transition-all hover:shadow-lg active:scale-95"
               >
                 {isSending ? (
@@ -279,6 +324,22 @@ export default function ManageEmail() {
                   <>
                     <Send className="w-5 h-5" />
                     <span>Send Test Email</span>
+                  </>
+                )}
+              </button>
+              
+              <button
+                type="button"
+                onClick={handleSendAllTestEmails}
+                disabled={isSending || isSendingAll || !testEmail}
+                className="w-full py-3 bg-brand-blue text-white rounded-xl font-bold flex items-center justify-center space-x-2 disabled:opacity-50 transition-all hover:shadow-lg active:scale-95 mt-2"
+              >
+                {isSendingAll ? (
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                ) : (
+                  <>
+                    <Zap className="w-5 h-5" />
+                    <span>Send ALL 8 Test Emails</span>
                   </>
                 )}
               </button>

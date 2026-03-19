@@ -35,6 +35,7 @@ import ThemeWrapper from './components/ThemeWrapper';
 import AnimatedBackground from './components/AnimatedBackground';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import TermsOfService from './pages/TermsOfService';
+import RefundPolicy from './pages/RefundPolicy';
 import Careers from './pages/Careers';
 import Registration from './pages/Registration';
 import RegistrationSuccess from './pages/RegistrationSuccess';
@@ -82,6 +83,7 @@ export default function App() {
                   <Route path="/help-center" element={<HelpCenter />} />
                   <Route path="/privacy-policy" element={<PrivacyPolicy />} />
                   <Route path="/terms-of-service" element={<TermsOfService />} />
+                  <Route path="/refund-policy" element={<RefundPolicy />} />
                   <Route path="/careers" element={<Careers />} />
                   <Route path="/admin/login" element={<AdminLogin />} />
                   <Route 

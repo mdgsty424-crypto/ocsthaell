@@ -302,6 +302,11 @@ export default function UserDashboard() {
       return;
     }
 
+    if (amount < 20) {
+      alert("Minimum withdrawal amount is 20 TK.");
+      return;
+    }
+
     if (amount > wallet.balance) {
       alert("Insufficient balance.");
       return;

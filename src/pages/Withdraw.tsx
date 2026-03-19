@@ -51,8 +51,8 @@ export default function Withdraw() {
       return;
     }
 
-    if (amount < 100) {
-      alert("Minimum withdrawal amount is 100 TK.");
+    if (amount < 20) {
+      alert("Minimum withdrawal amount is 20 TK.");
       return;
     }
 
@@ -134,7 +134,7 @@ export default function Withdraw() {
                 <input
                   type="number"
                   required
-                  min="100"
+                  min="20"
                   placeholder="0.00"
                   value={formData.amount}
                   onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
@@ -142,7 +142,7 @@ export default function Withdraw() {
                 />
               </div>
               <p className="text-[10px] text-gray-500 mt-2 flex items-center">
-                <AlertCircle className="w-3 h-3 mr-1" /> Minimum withdrawal: 100 TK
+                <AlertCircle className="w-3 h-3 mr-1" /> Minimum withdrawal: 20 TK
               </p>
             </div>
 

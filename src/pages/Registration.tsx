@@ -5,6 +5,7 @@ import { auth, db } from '../firebase';
 import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { useNavigate, Link } from 'react-router-dom';
 import { Hexagon, Mail, Lock, User, ArrowRight, Loader2, Phone } from 'lucide-react';
+import { sendWelcomeMail, sendBonusMail } from '../services/emailService';
 
 export default function Registration() {
   const [step, setStep] = useState(1);
@@ -72,13 +73,19 @@ export default function Registration() {
         createdAt: serverTimestamp(),
         issueDate: new Date().toISOString().split('T')[0],
         wallet: {
-          balance: 0,
+          balance: 20,
           streak: 0,
           lastLogin: serverTimestamp(),
-          welcomeBonusClaimed: false,
+          welcomeBonusClaimed: true,
           streakBonusClaimed: false,
         }
       });
+
+      // Send Welcome and Bonus Emails asynchronously (don't block navigation)
+      if (user.email) {
+        sendWelcomeMail({ name: displayName, userEmail: user.email }).catch(console.error);
+        sendBonusMail({ name: displayName, amount: "20", email: user.email }).catch(console.error);
+      }
 
       // 3. Generate Token
       const token = await user.getIdToken();

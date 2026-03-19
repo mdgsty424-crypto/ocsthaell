@@ -5,7 +5,7 @@ import { auth, db } from '../firebase';
 import { doc, getDoc, setDoc, serverTimestamp, collection, query, where, getDocs } from 'firebase/firestore';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { Hexagon, Lock, Mail, Key, ArrowRight } from 'lucide-react';
-import { sendAuthOTP, sendSecurityAlert, sendWelcomeMail } from '../services/emailService';
+import { sendAuthOTP, sendSecurityAlert, sendWelcomeMail, sendBonusMail } from '../services/emailService';
 
 export default function Login() {
   const [loginMethod, setLoginMethod] = useState<'email' | 'ocid'>('email');
@@ -66,7 +66,14 @@ export default function Login() {
           email: userCredential.user.email,
           role: 'user',
           ocId: ocId,
-          createdAt: serverTimestamp()
+          createdAt: serverTimestamp(),
+          wallet: {
+            balance: 20,
+            streak: 0,
+            lastLogin: serverTimestamp(),
+            welcomeBonusClaimed: true,
+            streakBonusClaimed: false,
+          }
         });
       } else {
         ocId = userDoc.data().ocId || ocId;
@@ -86,6 +93,13 @@ export default function Login() {
             console.log("Welcome email sent successfully to new user (Email Login).");
           } else {
             console.error("Failed to send welcome email (Email Login):", welcomeResult.error);
+          }
+          
+          const bonusResult = await sendBonusMail({ name: userCredential.user.displayName || 'User', amount: "20", email: userCredential.user.email || '' });
+          if (bonusResult.success) {
+            console.log("Bonus email sent successfully to new user (Email Login).");
+          } else {
+            console.error("Failed to send bonus email (Email Login):", bonusResult.error);
           }
         }
       } else {
@@ -126,7 +140,14 @@ export default function Login() {
           email: userCredential.user.email,
           role: 'user',
           ocId: ocId,
-          createdAt: serverTimestamp()
+          createdAt: serverTimestamp(),
+          wallet: {
+            balance: 20,
+            streak: 0,
+            lastLogin: serverTimestamp(),
+            welcomeBonusClaimed: true,
+            streakBonusClaimed: false,
+          }
         };
         if (userCredential.user.displayName) {
           userData.displayName = userCredential.user.displayName;
@@ -153,6 +174,13 @@ export default function Login() {
             console.log("Welcome email sent successfully to new user (Google Login).");
           } else {
             console.error("Failed to send welcome email (Google Login):", welcomeResult.error);
+          }
+          
+          const bonusResult = await sendBonusMail({ name: userCredential.user.displayName || 'User', amount: "20", email: userCredential.user.email || '' });
+          if (bonusResult.success) {
+            console.log("Bonus email sent successfully to new user (Google Login).");
+          } else {
+            console.error("Failed to send bonus email (Google Login):", bonusResult.error);
           }
         }
       } else {
