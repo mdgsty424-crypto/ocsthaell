@@ -17,18 +17,38 @@ export interface Product {
 
 export interface Order {
   id: string;
-  buyerId: string;
-  buyerName: string;
-  sellerId: string;
-  items: { productId: string; quantity: number; price: number }[];
+  userId: string;
+  items: { id: string; quantity: number; price: number; name: string; image: string }[];
   total: number;
-  status: 'pending' | 'confirmed' | 'processing' | 'shipping' | 'delivered' | 'cancelled';
-  shippingAddress: string;
-  paymentMethod: 'bkash' | 'nagad' | 'cod' | 'wallet' | 'card' | 'bank';
-  paymentStatus: 'paid' | 'unpaid' | 'verifying';
-  trxId?: string;
+  status: 'pending' | 'confirmed' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
+  paymentMethod: string;
+  shippingAddress: {
+    fullName: string;
+    phone: string;
+    altPhone?: string;
+    district: string;
+    area: string;
+    postCode?: string;
+    detailedAddress: string;
+  };
+  trackingTimeline: { status: string; time: string; completed: boolean }[];
+  deliveryLocation?: { lat: number; lng: number };
   createdAt: any;
-  updatedAt: any;
+}
+
+export interface SellerProfile {
+  uid: string;
+  shopName: string;
+  contactPerson: string;
+  phone: string;
+  pickupAddress: {
+    area: string;
+    detailedAddress: string;
+    gps?: { lat: number; lng: number };
+  };
+  totalEarnings: number;
+  totalSales: number;
+  isVerified: boolean;
 }
 
 export interface DepositRequest {

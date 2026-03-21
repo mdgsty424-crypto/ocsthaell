@@ -36,7 +36,7 @@ export default function AdminOrders() {
             {orders.map((order) => (
               <tr key={order.id} className="border-b border-gray-800">
                 <td className="p-4 font-mono">{order.id.slice(0, 8)}</td>
-                <td className="p-4">{order.buyerName || 'Guest'}</td>
+                <td className="p-4">{order.shippingAddress?.fullName || 'Guest'}</td>
                 <td className="p-4">৳{order.total}</td>
                 <td className="p-4 uppercase">{order.paymentMethod}</td>
                 <td className="p-4">
@@ -53,8 +53,9 @@ export default function AdminOrders() {
                     <option value="pending">Pending</option>
                     <option value="confirmed">Confirmed</option>
                     <option value="processing">Processing</option>
-                    <option value="shipping">Shipping</option>
+                    <option value="shipped">Shipped</option>
                     <option value="delivered">Delivered</option>
+                    <option value="cancelled">Cancelled</option>
                   </select>
                 </td>
               </tr>

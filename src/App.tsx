@@ -5,8 +5,10 @@
 
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
+import { CartProvider } from './context/CartContext';
 import ErrorBoundary from './components/ErrorBoundary';
 import Navbar from './components/Navbar';
+import MobileLayout from './components/MobileLayout';
 import Footer from './components/Footer';
 import Home from './pages/Home';
 import About from './pages/About';
@@ -45,6 +47,8 @@ import ShopHome from './pages/shop/ShopHome';
 import ProductDetail from './pages/shop/ProductDetail';
 import Checkout from './pages/shop/Checkout';
 import MyShop from './pages/profile/MyShop';
+import Cart from './pages/shop/Cart';
+import OrderTracking from './pages/shop/OrderTracking';
 import Withdraw from './pages/Withdraw';
 import Transfer from './pages/Transfer';
 import NotFound from './pages/NotFound';
@@ -54,75 +58,81 @@ export default function App() {
   return (
     <ErrorBoundary>
       <AuthProvider>
-        <ThemeWrapper>
-          <Router>
-            <div className="min-h-screen flex flex-col relative">
-              <AnimatedBackground />
-              <Navbar />
-              <main className="flex-grow">
-                <Routes>
-                  <Route path="/" element={<Home />} />
-                  <Route path="/about" element={<About />} />
-                  <Route path="/apps" element={<Apps />} />
-                  <Route path="/apps/:id" element={<AppDetails />} />
-                  <Route path="/services" element={<Services />} />
-                  <Route path="/services/:id" element={<ServiceDetails />} />
-                  <Route path="/team" element={<Team />} />
-                  <Route path="/staff" element={<Staff />} />
-                  <Route path="/members" element={<Members />} />
-                  <Route path="/all" element={<Members />} />
-                  <Route path="/:userKey/profile" element={<UserDashboard />} />
-                  <Route path="/team/:id" element={<TeamMemberDetails />} />
-                  <Route path="/staff/:id" element={<TeamMemberDetails />} />
-                  <Route path="/gallery" element={<Gallery />} />
-                  <Route path="/news" element={<News />} />
-                  <Route path="/news/:id" element={<NewsDetails />} />
-                  <Route path="/contact" element={<Contact />} />
-                  <Route path="/login" element={<Login />} />
-                  <Route path="/registration" element={<Registration />} />
-                  <Route path="/registration-success" element={<RegistrationSuccess />} />
-                  <Route path="/dashboard" element={<DashboardRedirect />} />
-                  <Route path="/withdraw" element={<ProtectedRoute requireAdmin={false}><Withdraw /></ProtectedRoute>} />
-                  <Route path="/transfer" element={<ProtectedRoute requireAdmin={false}><Transfer /></ProtectedRoute>} />
-                  <Route path="/oc-id/:ocId/key/:token/autologin/dashboard" element={<AutoLogin />} />
-                  <Route path="/chat" element={<ProtectedRoute requireAdmin={false}><OCChat /></ProtectedRoute>} />
-                  <Route path="/admin" element={<ProtectedRoute requireAdmin={true}><AdminDashboard /></ProtectedRoute>} />
-                  <Route path="/shop" element={<ShopHome />} />
-                  <Route path="/shop/product/:id" element={<ProductDetail />} />
-                  <Route path="/shop/checkout" element={<Checkout />} />
-                  <Route path="/shop/upload" element={<ProtectedRoute requireAdmin={false}><ProductUpload /></ProtectedRoute>} />
-                  <Route path="/shop/edit/:id" element={<ProtectedRoute requireAdmin={false}><ProductUpload /></ProtectedRoute>} />
-                  <Route path="/profile/my-shop" element={<ProtectedRoute requireAdmin={false}><MyShop /></ProtectedRoute>} />
-                  <Route path="/help-center" element={<HelpCenter />} />
-                  <Route path="/privacy-policy" element={<PrivacyPolicy />} />
-                  <Route path="/terms-of-service" element={<TermsOfService />} />
-                  <Route path="/refund-policy" element={<RefundPolicy />} />
-                  <Route path="/careers" element={<Careers />} />
-                  <Route path="/admin/login" element={<AdminLogin />} />
-                  <Route 
-                    path="/admin/dashboard/*" 
-                    element={
-                      <ProtectedRoute>
-                        <AdminDashboard />
-                      </ProtectedRoute>
-                    } 
-                  />
-                  <Route 
-                    path="/team/dashboard" 
-                    element={
-                      <ProtectedRoute requireAdmin={false} requireTeam={true}>
-                        <TeamDashboard />
-                      </ProtectedRoute>
-                    } 
-                  />
-                  <Route path="*" element={<NotFound />} />
-                </Routes>
-              </main>
-              <Footer />
-              <AIAssistant />
-            </div>
-          </Router>
-        </ThemeWrapper>
+        <CartProvider>
+          <ThemeWrapper>
+            <Router>
+              <div className="min-h-screen flex flex-col relative">
+                <AnimatedBackground />
+                <Navbar />
+                <main className="flex-grow">
+                  <MobileLayout>
+                    <Routes>
+                      <Route path="/" element={<Home />} />
+                      <Route path="/about" element={<About />} />
+                      <Route path="/apps" element={<Apps />} />
+                      <Route path="/apps/:id" element={<AppDetails />} />
+                      <Route path="/services" element={<Services />} />
+                      <Route path="/services/:id" element={<ServiceDetails />} />
+                      <Route path="/team" element={<Team />} />
+                      <Route path="/staff" element={<Staff />} />
+                      <Route path="/members" element={<Members />} />
+                      <Route path="/all" element={<Members />} />
+                      <Route path="/:userKey/profile" element={<UserDashboard />} />
+                      <Route path="/team/:id" element={<TeamMemberDetails />} />
+                      <Route path="/staff/:id" element={<TeamMemberDetails />} />
+                      <Route path="/gallery" element={<Gallery />} />
+                      <Route path="/news" element={<News />} />
+                      <Route path="/news/:id" element={<NewsDetails />} />
+                      <Route path="/contact" element={<Contact />} />
+                      <Route path="/login" element={<Login />} />
+                      <Route path="/registration" element={<Registration />} />
+                      <Route path="/registration-success" element={<RegistrationSuccess />} />
+                      <Route path="/dashboard" element={<DashboardRedirect />} />
+                      <Route path="/withdraw" element={<ProtectedRoute requireAdmin={false}><Withdraw /></ProtectedRoute>} />
+                      <Route path="/transfer" element={<ProtectedRoute requireAdmin={false}><Transfer /></ProtectedRoute>} />
+                      <Route path="/oc-id/:ocId/key/:token/autologin/dashboard" element={<AutoLogin />} />
+                      <Route path="/chat" element={<ProtectedRoute requireAdmin={false}><OCChat /></ProtectedRoute>} />
+                      <Route path="/admin" element={<ProtectedRoute requireAdmin={true}><AdminDashboard /></ProtectedRoute>} />
+                      <Route path="/shop" element={<ShopHome />} />
+                      <Route path="/shop/product/:id" element={<ProductDetail />} />
+                      <Route path="/shop/cart" element={<Cart />} />
+                      <Route path="/shop/order/:id" element={<OrderTracking />} />
+                      <Route path="/shop/checkout" element={<Checkout />} />
+                      <Route path="/shop/upload" element={<ProtectedRoute requireAdmin={false}><ProductUpload /></ProtectedRoute>} />
+                      <Route path="/shop/edit/:id" element={<ProtectedRoute requireAdmin={false}><ProductUpload /></ProtectedRoute>} />
+                      <Route path="/profile/my-shop" element={<ProtectedRoute requireAdmin={false}><MyShop /></ProtectedRoute>} />
+                      <Route path="/help-center" element={<HelpCenter />} />
+                      <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+                      <Route path="/terms-of-service" element={<TermsOfService />} />
+                      <Route path="/refund-policy" element={<RefundPolicy />} />
+                      <Route path="/careers" element={<Careers />} />
+                      <Route path="/admin/login" element={<AdminLogin />} />
+                      <Route 
+                        path="/admin/dashboard/*" 
+                        element={
+                          <ProtectedRoute>
+                            <AdminDashboard />
+                          </ProtectedRoute>
+                        } 
+                      />
+                      <Route 
+                        path="/team/dashboard" 
+                        element={
+                          <ProtectedRoute requireAdmin={false} requireTeam={true}>
+                            <TeamDashboard />
+                          </ProtectedRoute>
+                        } 
+                      />
+                      <Route path="*" element={<NotFound />} />
+                    </Routes>
+                  </MobileLayout>
+                </main>
+                <Footer />
+                <AIAssistant />
+              </div>
+            </Router>
+          </ThemeWrapper>
+        </CartProvider>
       </AuthProvider>
     </ErrorBoundary>
   );

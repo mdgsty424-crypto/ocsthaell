@@ -1,176 +1,258 @@
 import React, { useState } from 'react';
-import { useAuth } from '../../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { useCart } from '../../context/CartContext';
+import { useAuth } from '../../context/AuthContext';
 import { db } from '../../firebase';
-import { Loader2, CreditCard, Truck, Phone, User, MapPin, CheckCircle, ArrowLeft, ShoppingBag, Wallet } from 'lucide-react';
-import { motion } from 'motion/react';
-import { Link } from 'react-router-dom';
+import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { 
+  ArrowLeft, 
+  MapPin, 
+  Phone, 
+  User, 
+  Truck, 
+  CreditCard, 
+  CheckCircle, 
+  Loader2,
+  Wallet,
+  Smartphone,
+  Building2
+} from 'lucide-react';
+import { motion, AnimatePresence } from 'motion/react';
 
-export default function Checkout({ cartTotal = 1000 }: { cartTotal?: number }) {
-  const { user } = useAuth();
+export default function Checkout() {
   const navigate = useNavigate();
+  const { cart, cartTotal, clearCart } = useCart();
+  const { user } = useAuth();
   const [loading, setLoading] = useState(false);
-  const [paymentMethod, setPaymentMethod] = useState<'bkash' | 'nagad' | 'cod' | 'wallet' | 'card' | 'bank'>('cod');
-  const [guestInfo, setGuestInfo] = useState({ name: '', phone: '', address: '' });
-  const [success, setSuccess] = useState(false);
+  const [step, setStep] = useState(1); // 1: Shipping, 2: Payment, 3: Success
+  const [address, setAddress] = useState({
+    fullName: user?.displayName || '',
+    phone: '',
+    altPhone: '',
+    district: '',
+    area: '',
+    postCode: '',
+    detailedAddress: ''
+  });
+  const [paymentMethod, setPaymentMethod] = useState('cod');
 
-  const handleCheckout = async () => {
-    if (!guestInfo.name || !guestInfo.phone || !guestInfo.address) {
-      return;
-    }
+  const handlePlaceOrder = async () => {
     setLoading(true);
     try {
-      await addDoc(collection(db, 'orders'), {
-        buyerId: user?.uid || null,
-        buyerName: guestInfo.name,
+      const orderData = {
+        userId: user?.uid || 'guest',
+        items: cart.map(item => ({
+          id: item.id,
+          name: item.name,
+          price: item.discountPrice || item.price,
+          quantity: item.quantity,
+          image: item.images[0]
+        })),
         total: cartTotal,
         status: 'pending',
-        shippingAddress: guestInfo.address,
         paymentMethod,
+        shippingAddress: address,
         createdAt: serverTimestamp(),
-      });
-      setSuccess(true);
-      setTimeout(() => navigate('/shop'), 3000);
+        trackingTimeline: [
+          { status: 'Order Placed', time: new Date().toISOString(), completed: true }
+        ]
+      };
+
+      await addDoc(collection(db, 'orders'), orderData);
+      clearCart();
+      setStep(3);
     } catch (err) {
-      console.error(err);
+      console.error('Error placing order:', err);
     } finally {
       setLoading(false);
     }
   };
 
-  if (success) {
+  if (step === 3) {
     return (
-      <div className="min-h-screen pt-24 pb-12 px-4 bg-white text-gray-900 flex items-center justify-center">
-        <motion.div 
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          className="text-center max-w-md bg-gray-50 p-12 rounded-3xl border border-gray-100 shadow-xl"
+      <div className="min-h-screen bg-white flex flex-col items-center justify-center px-4 text-center">
+        <motion.div
+          initial={{ scale: 0 }}
+          animate={{ scale: 1 }}
+          className="w-24 h-24 bg-emerald-50 rounded-full flex items-center justify-center mb-6"
         >
-          <div className="w-20 h-20 bg-emerald-50 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-6">
-            <CheckCircle size={48} />
-          </div>
-          <h1 className="text-3xl font-black mb-4">Order Placed!</h1>
-          <p className="text-gray-500 font-bold mb-8">Thank you for your purchase. Your order has been placed successfully and is being processed.</p>
-          <div className="flex flex-col gap-4">
-            <Link to="/shop" className="bg-brand-blue text-white py-4 rounded-xl font-black shadow-lg shadow-brand-blue/20 hover:scale-[1.02] transition-transform">
-              Continue Shopping
-            </Link>
-          </div>
+          <CheckCircle size={48} className="text-emerald-500" />
         </motion.div>
+        <h2 className="text-3xl font-black text-gray-900 mb-2">Order Placed!</h2>
+        <p className="text-gray-500 mb-8 max-w-xs">Your order has been successfully placed and is being processed.</p>
+        <button
+          onClick={() => navigate('/shop')}
+          className="w-full max-w-xs bg-gray-900 text-white py-4 rounded-2xl font-black shadow-xl shadow-black/10"
+        >
+          Back to Shop
+        </button>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen pt-24 pb-12 px-4 bg-white text-gray-900">
-      <div className="max-w-2xl mx-auto">
-        <Link to="/shop" className="inline-flex items-center gap-2 text-gray-500 hover:text-brand-blue mb-8 transition-colors font-bold">
-          <ArrowLeft size={20} /> Back to Shop
-        </Link>
+    <div className="min-h-screen bg-gray-50/50 pt-12 pb-24">
+      <div className="px-4 mb-6 flex items-center gap-4">
+        <button onClick={() => step === 1 ? navigate(-1) : setStep(1)} className="p-2 bg-white rounded-xl shadow-sm">
+          <ArrowLeft size={20} />
+        </button>
+        <h1 className="text-2xl font-black text-gray-900">Checkout</h1>
+      </div>
 
-        <div className="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm">
-          <div className="flex items-center gap-3 mb-8">
-            <div className="p-3 bg-brand-blue/5 rounded-2xl text-brand-blue">
-              <Truck size={24} />
-            </div>
-            <div>
-              <h1 className="text-2xl font-black text-gray-900">Checkout</h1>
-              <p className="text-gray-400 font-bold uppercase text-[10px] tracking-widest">Complete your order details</p>
-            </div>
-          </div>
-
-          <div className="space-y-6">
-            <div>
-              <label className="block text-xs font-bold uppercase text-gray-500 mb-2 tracking-widest flex items-center gap-2">
-                <User size={14} /> Full Name
-              </label>
-              <input 
-                className="w-full bg-gray-50 border border-gray-200 rounded-xl p-4 focus:border-brand-blue outline-none transition-all text-gray-900" 
-                placeholder="Enter your full name" 
-                onChange={e => setGuestInfo({...guestInfo, name: e.target.value})} 
-              />
-            </div>
-            <div>
-              <label className="block text-xs font-bold uppercase text-gray-500 mb-2 tracking-widest flex items-center gap-2">
-                <Phone size={14} /> Phone Number
-              </label>
-              <input 
-                className="w-full bg-gray-50 border border-gray-200 rounded-xl p-4 focus:border-brand-blue outline-none transition-all text-gray-900" 
-                placeholder="Enter your phone number" 
-                onChange={e => setGuestInfo({...guestInfo, phone: e.target.value})} 
-              />
-            </div>
-            <div>
-              <label className="block text-xs font-bold uppercase text-gray-500 mb-2 tracking-widest flex items-center gap-2">
-                <MapPin size={14} /> Delivery Address
-              </label>
-              <textarea 
-                className="w-full bg-gray-50 border border-gray-200 rounded-xl p-4 h-32 focus:border-brand-blue outline-none transition-all resize-none text-gray-900" 
-                placeholder="Enter your full delivery address" 
-                onChange={e => setGuestInfo({...guestInfo, address: e.target.value})} 
-              />
-            </div>
-          </div>
-
-          <div className="mt-12">
-            <h2 className="text-xl font-black mb-6 flex items-center gap-2 text-gray-900">
-              <CreditCard size={20} className="text-brand-blue" /> Payment Method
-            </h2>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-              {[
-                { id: 'cod', label: 'Cash on Delivery', icon: <Truck size={18} /> },
-                { id: 'bkash', label: 'bKash', icon: <Wallet size={18} /> },
-                { id: 'nagad', label: 'Nagad', icon: <Wallet size={18} /> },
-                { id: 'card', label: 'Card Payment', icon: <CreditCard size={18} /> },
-                { id: 'wallet', label: 'My Wallet', icon: <Wallet size={18} /> }
-              ].map((method) => (
-                <button
-                  key={method.id}
-                  disabled={method.id === 'wallet' && !user}
-                  onClick={() => setPaymentMethod(method.id as any)}
-                  className={`p-4 border rounded-2xl text-xs font-black transition-all flex flex-col items-center gap-2 ${
-                    paymentMethod === method.id 
-                      ? 'bg-brand-blue text-white border-brand-blue shadow-lg shadow-brand-blue/20 scale-[1.02]' 
-                      : 'bg-gray-50 text-gray-500 border-gray-100 hover:bg-gray-100'
-                  } ${method.id === 'wallet' && !user ? 'opacity-50 cursor-not-allowed' : ''}`}
-                >
-                  {method.icon}
-                  {method.label.toUpperCase()}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div className="mt-12 pt-8 border-t border-gray-100">
-            <div className="bg-gray-50 p-6 rounded-2xl border border-gray-100 mb-6">
-              <div className="flex justify-between items-center mb-2">
-                <span className="text-gray-500 font-bold uppercase text-xs tracking-widest">Subtotal</span>
-                <span className="text-gray-900 font-bold">{cartTotal} TK</span>
-              </div>
-              <div className="flex justify-between items-center mb-4">
-                <span className="text-gray-500 font-bold uppercase text-xs tracking-widest">Shipping</span>
-                <span className="text-emerald-600 font-bold">FREE</span>
-              </div>
-              <div className="flex justify-between items-center pt-4 border-t border-gray-200">
-                <span className="text-gray-900 font-black text-lg">Total Amount</span>
-                <span className="text-2xl font-black text-brand-blue">{cartTotal} TK</span>
-              </div>
-            </div>
-            
-            <button 
-              onClick={handleCheckout} 
-              disabled={loading || !guestInfo.name || !guestInfo.phone || !guestInfo.address} 
-              className="w-full bg-brand-blue text-white py-5 rounded-2xl font-black shadow-lg shadow-brand-blue/20 hover:scale-[1.02] transition-transform flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
-            >
-              {loading ? <Loader2 className="animate-spin" /> : (
-                <>
-                  <ShoppingBag size={20} /> Confirm Order
-                </>
-              )}
-            </button>
-          </div>
+      {/* Progress Stepper */}
+      <div className="px-4 mb-8">
+        <div className="flex items-center gap-4">
+          <div className={`flex-grow h-1.5 rounded-full transition-all ${step >= 1 ? 'bg-brand-blue' : 'bg-gray-200'}`} />
+          <div className={`flex-grow h-1.5 rounded-full transition-all ${step >= 2 ? 'bg-brand-blue' : 'bg-gray-200'}`} />
         </div>
+      </div>
+
+      <div className="px-4">
+        <AnimatePresence mode="wait">
+          {step === 1 ? (
+            <motion.div
+              key="shipping"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              className="space-y-6"
+            >
+              <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100">
+                <h3 className="text-sm font-black text-gray-900 uppercase tracking-widest mb-6 flex items-center gap-2">
+                  <Truck size={18} className="text-brand-blue" /> Shipping Address
+                </h3>
+                
+                <div className="space-y-4">
+                  <div className="relative">
+                    <User className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+                    <input
+                      type="text"
+                      placeholder="Full Name"
+                      className="w-full bg-gray-50 border-none rounded-2xl py-3.5 pl-12 pr-4 text-sm font-bold outline-none"
+                      value={address.fullName}
+                      onChange={e => setAddress({...address, fullName: e.target.value})}
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="relative">
+                      <Phone className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+                      <input
+                        type="tel"
+                        placeholder="Phone"
+                        className="w-full bg-gray-50 border-none rounded-2xl py-3.5 pl-12 pr-4 text-sm font-bold outline-none"
+                        value={address.phone}
+                        onChange={e => setAddress({...address, phone: e.target.value})}
+                      />
+                    </div>
+                    <div className="relative">
+                      <Phone className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+                      <input
+                        type="tel"
+                        placeholder="Alt Phone"
+                        className="w-full bg-gray-50 border-none rounded-2xl py-3.5 pl-12 pr-4 text-sm font-bold outline-none"
+                        value={address.altPhone}
+                        onChange={e => setAddress({...address, altPhone: e.target.value})}
+                      />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="relative">
+                      <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+                      <input
+                        type="text"
+                        placeholder="District"
+                        className="w-full bg-gray-50 border-none rounded-2xl py-3.5 pl-12 pr-4 text-sm font-bold outline-none"
+                        value={address.district}
+                        onChange={e => setAddress({...address, district: e.target.value})}
+                      />
+                    </div>
+                    <div className="relative">
+                      <Building2 className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+                      <input
+                        type="text"
+                        placeholder="Area"
+                        className="w-full bg-gray-50 border-none rounded-2xl py-3.5 pl-12 pr-4 text-sm font-bold outline-none"
+                        value={address.area}
+                        onChange={e => setAddress({...address, area: e.target.value})}
+                      />
+                    </div>
+                  </div>
+                  <textarea
+                    placeholder="Detailed Address (House, Road, Block...)"
+                    className="w-full bg-gray-50 border-none rounded-2xl py-3.5 px-4 text-sm font-bold outline-none min-h-[100px]"
+                    value={address.detailedAddress}
+                    onChange={e => setAddress({...address, detailedAddress: e.target.value})}
+                  />
+                </div>
+              </div>
+              
+              <button
+                onClick={() => setStep(2)}
+                disabled={!address.fullName || !address.phone || !address.district}
+                className="w-full bg-gray-900 text-white py-4 rounded-2xl font-black shadow-xl shadow-black/10 disabled:opacity-50"
+              >
+                Continue to Payment
+              </button>
+            </motion.div>
+          ) : (
+            <motion.div
+              key="payment"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              className="space-y-6"
+            >
+              <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100">
+                <h3 className="text-sm font-black text-gray-900 uppercase tracking-widest mb-6 flex items-center gap-2">
+                  <CreditCard size={18} className="text-brand-blue" /> Payment Method
+                </h3>
+
+                <div className="space-y-4">
+                  {[
+                    { id: 'cod', name: 'Cash on Delivery', icon: Truck },
+                    { id: 'bkash', name: 'bKash', icon: Smartphone },
+                    { id: 'nagad', name: 'Nagad', icon: Smartphone },
+                    { id: 'wallet', name: 'OC Wallet', icon: Wallet },
+                  ].map((method) => (
+                    <button
+                      key={method.id}
+                      onClick={() => setPaymentMethod(method.id)}
+                      className={`w-full p-4 rounded-2xl border-2 flex items-center gap-4 transition-all ${
+                        paymentMethod === method.id ? 'border-brand-blue bg-brand-blue/5' : 'border-gray-50 bg-gray-50'
+                      }`}
+                    >
+                      <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
+                        paymentMethod === method.id ? 'bg-brand-blue text-white' : 'bg-white text-gray-400'
+                      }`}>
+                        <method.icon size={20} />
+                      </div>
+                      <span className="font-black text-gray-900">{method.name}</span>
+                      {paymentMethod === method.id && (
+                        <CheckCircle size={20} className="ml-auto text-brand-blue" />
+                      )}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100">
+                <div className="flex justify-between items-center mb-2">
+                  <span className="text-gray-500 font-bold text-sm">Order Total</span>
+                  <span className="text-xl font-black text-brand-blue">{cartTotal} TK</span>
+                </div>
+                <p className="text-[10px] text-gray-400 font-bold">By placing this order, you agree to our Terms of Service.</p>
+              </div>
+
+              <button
+                onClick={handlePlaceOrder}
+                disabled={loading}
+                className="w-full bg-gray-900 text-white py-4 rounded-2xl font-black shadow-xl shadow-black/10 flex items-center justify-center gap-2"
+              >
+                {loading ? <Loader2 className="animate-spin" /> : 'Place Order'}
+              </button>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </div>
   );
