@@ -5,7 +5,8 @@ import { db } from '../../firebase';
 import { useAuth } from '../../context/AuthContext';
 import { useNavigate, useParams } from 'react-router-dom';
 import MultiImageUpload from '../../components/shop/MultiImageUpload';
-import { Loader2, ArrowLeft, Package, Tag, Info, DollarSign, Layers, CheckCircle } from 'lucide-react';
+import { Loader2, ArrowLeft, Package, Tag, Info, DollarSign, Layers, CheckCircle, Globe } from 'lucide-react';
+import { COUNTRIES, CATEGORIES } from '../../constants/locations';
 
 export default function ProductUpload() {
   const { user, isAdmin } = useAuth();
@@ -22,6 +23,11 @@ export default function ProductUpload() {
     stock: '',
     images: [] as string[],
     isOfficial: false,
+    origin: {
+      countryName: 'Bangladesh',
+      countryCode: 'BD',
+      flag: '🇧🇩'
+    }
   });
 
   useEffect(() => {
@@ -47,7 +53,8 @@ export default function ProductUpload() {
               discountPrice: data.discountPrice?.toString() || '',
               stock: data.stock?.toString() || '',
               images: data.images || [],
-              isOfficial: data.isOfficial || false
+              isOfficial: data.isOfficial || false,
+              origin: data.origin || { countryName: 'Bangladesh', countryCode: 'BD', flag: '🇧🇩' }
             });
           }
         } catch (error) {
@@ -75,6 +82,7 @@ export default function ProductUpload() {
         stock: parseInt(formData.stock),
         images: formData.images,
         isOfficial: isAdmin ? formData.isOfficial : false,
+        origin: formData.origin,
         updatedAt: serverTimestamp(),
       };
 
@@ -173,15 +181,60 @@ export default function ProductUpload() {
                     value={formData.category}
                     onChange={(e) => setFormData({ ...formData, category: e.target.value })}
                   >
-                    <option>Electronics</option>
-                    <option>Fashion</option>
-                    <option>Home</option>
-                    <option>Accessories</option>
-                    <option>Gadgets</option>
-                    <option>Software</option>
+                    {CATEGORIES.map(cat => (
+                      <option key={cat} value={cat}>{cat}</option>
+                    ))}
                   </select>
                   <Layers className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={16} />
                 </div>
+              </div>
+            </div>
+
+            <div className="grid md:grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <label className="flex items-center gap-2 text-xs font-black uppercase text-gray-500 tracking-widest">
+                  <Globe size={14} className="text-brand-blue" /> Country of Origin
+                </label>
+                <div className="relative">
+                  <select
+                    className="w-full bg-gray-50 border border-gray-200 rounded-xl p-4 focus:border-brand-blue outline-none transition-all appearance-none text-gray-900"
+                    value={formData.origin.countryCode}
+                    onChange={(e) => {
+                      const country = COUNTRIES.find(c => c.code === e.target.value);
+                      if (country) {
+                        setFormData({ 
+                          ...formData, 
+                          origin: {
+                            countryName: country.name,
+                            countryCode: country.code,
+                            flag: country.flag
+                          } 
+                        });
+                      }
+                    }}
+                  >
+                    {COUNTRIES.map(country => (
+                      <option key={country.code} value={country.code}>
+                        {country.flag} {country.name}
+                      </option>
+                    ))}
+                  </select>
+                  <Globe className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={16} />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <label className="flex items-center gap-2 text-xs font-black uppercase text-gray-500 tracking-widest">
+                  <Package size={14} className="text-brand-blue" /> Stock Quantity
+                </label>
+                <input
+                  required
+                  type="number"
+                  className="w-full bg-gray-50 border border-gray-200 rounded-xl p-4 focus:border-brand-blue outline-none transition-all text-gray-900"
+                  placeholder="0"
+                  value={formData.stock}
+                  onChange={(e) => setFormData({ ...formData, stock: e.target.value })}
+                />
               </div>
             </div>
 
@@ -199,7 +252,7 @@ export default function ProductUpload() {
               />
             </div>
 
-            <div className="grid md:grid-cols-3 gap-6">
+            <div className="grid md:grid-cols-2 gap-6">
               <div className="space-y-2">
                 <label className="flex items-center gap-2 text-xs font-black uppercase text-gray-500 tracking-widest">
                   <DollarSign size={14} className="text-brand-blue" /> Regular Price
@@ -219,7 +272,7 @@ export default function ProductUpload() {
 
               <div className="space-y-2">
                 <label className="flex items-center gap-2 text-xs font-black uppercase text-gray-500 tracking-widest">
-                  <DollarSign size={14} className="text-brand-blue" /> Sale Price
+                  <DollarSign size={14} className="text-brand-blue" /> Sale Price (Optional)
                 </label>
                 <div className="relative">
                   <input
@@ -231,20 +284,6 @@ export default function ProductUpload() {
                   />
                   <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-bold">৳</span>
                 </div>
-              </div>
-
-              <div className="space-y-2">
-                <label className="flex items-center gap-2 text-xs font-black uppercase text-gray-500 tracking-widest">
-                  <Package size={14} className="text-brand-blue" /> Stock
-                </label>
-                <input
-                  required
-                  type="number"
-                  className="w-full bg-gray-50 border border-gray-200 rounded-xl p-4 focus:border-brand-blue outline-none transition-all text-gray-900"
-                  placeholder="0"
-                  value={formData.stock}
-                  onChange={(e) => setFormData({ ...formData, stock: e.target.value })}
-                />
               </div>
             </div>
 

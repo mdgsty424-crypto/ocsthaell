@@ -163,7 +163,7 @@ export default function OrderTracking() {
               <div>
                 <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Address</p>
                 <h4 className="text-sm font-black text-gray-900 leading-tight">
-                  {order.shippingAddress.detailedAddress}, {order.shippingAddress.area}, {order.shippingAddress.district}
+                  {order.shippingAddress.detailedAddress}, {order.shippingAddress.upazila}, {order.shippingAddress.district}, {order.shippingAddress.division}
                 </h4>
               </div>
             </div>

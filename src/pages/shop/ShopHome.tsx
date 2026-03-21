@@ -1,38 +1,44 @@
 import React, { useState, useEffect } from 'react';
-import { collection, onSnapshot, query, orderBy, where } from 'firebase/firestore';
+import { collection, onSnapshot, query, orderBy } from 'firebase/firestore';
 import { db } from '../../firebase';
 import { Product } from '../../types';
 import { 
-  Search, 
   ShoppingCart, 
   Package, 
-  Tag, 
   Star, 
-  Filter, 
   ArrowRight, 
-  CheckCircle, 
   Plus, 
-  Scan, 
-  Clock, 
   Zap,
   Smartphone,
   Watch,
   Laptop,
   Shirt,
   Gamepad,
-  Grid
+  Grid,
+  Globe,
+  Home
 } from 'lucide-react';
-import { motion, AnimatePresence } from 'motion/react';
+import { motion } from 'motion/react';
 import { Link } from 'react-router-dom';
 import { useCart } from '../../context/CartContext';
+import ShopAppLayout from '../../components/shop/ShopAppLayout';
+
+import { BANGLADESH_LOCATIONS, COUNTRIES, CATEGORIES as GLOBAL_CATEGORIES } from '../../constants/locations';
 
 const CATEGORIES = [
   { id: 'All', name: 'All', icon: Grid },
-  { id: 'Electronics', name: 'Electronics', icon: Smartphone },
-  { id: 'Fashion', name: 'Fashion', icon: Shirt },
-  { id: 'Gadgets', name: 'Gadgets', icon: Watch },
-  { id: 'Computers', name: 'Computers', icon: Laptop },
-  { id: 'Gaming', name: 'Gaming', icon: Gamepad },
+  ...GLOBAL_CATEGORIES.map(cat => ({
+    id: cat,
+    name: cat,
+    icon: cat === 'Electronics' ? Smartphone : 
+          cat === 'Fashion' ? Shirt : 
+          cat === 'Gadgets' ? Watch : 
+          cat === 'Global Imports' ? Globe : 
+          cat === 'Home Decor' ? Home : 
+          cat === 'Handmade' ? Package : 
+          cat === 'Beauty' ? Star : 
+          cat === 'Sports' ? Gamepad : Grid
+  }))
 ];
 
 export default function ShopHome() {
@@ -73,40 +79,25 @@ export default function ShopHome() {
   }, []);
 
   const filteredProducts = products.filter(p => {
-    const matchesSearch = p.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                         p.description.toLowerCase().includes(searchQuery.toLowerCase());
+    const q = searchQuery.toLowerCase();
+    const matchesSearch = p.name.toLowerCase().includes(q) || 
+                         p.description.toLowerCase().includes(q) ||
+                         p.category.toLowerCase().includes(q) ||
+                         p.origin?.countryName.toLowerCase().includes(q) ||
+                         p.origin?.countryCode.toLowerCase().includes(q);
     const matchesCategory = selectedCategory === 'All' || p.category === selectedCategory;
     return matchesSearch && matchesCategory;
   });
 
   return (
-    <div className="min-h-screen bg-gray-50/50">
-      {/* Top Bar with Search & Scan */}
-      <div className="sticky top-0 z-40 bg-white px-4 pt-12 pb-4 shadow-sm">
-        <div className="flex items-center gap-3">
-          <div className="relative flex-grow">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-            <input
-              type="text"
-              placeholder="Search products, brands..."
-              className="w-full bg-gray-100 border-none rounded-2xl py-3.5 pl-12 pr-4 text-sm font-bold focus:ring-2 focus:ring-brand-blue/20 transition-all outline-none"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-          </div>
-          <button className="p-3.5 bg-gray-100 rounded-2xl text-gray-600 hover:bg-gray-200 transition-colors">
-            <Scan size={20} />
-          </button>
-        </div>
-      </div>
-
-      {/* Category Bubbles */}
-      <div className="px-4 py-6 overflow-x-auto flex gap-4 hide-scrollbar">
+    <ShopAppLayout onSearch={setSearchQuery}>
+      {/* Category Wrap Fix */}
+      <div className="px-4 py-6 flex flex-wrap gap-4 justify-center">
         {CATEGORIES.map((cat) => (
           <button
             key={cat.id}
             onClick={() => setSelectedCategory(cat.id)}
-            className={`flex flex-col items-center gap-2 flex-shrink-0 transition-all ${
+            className={`flex flex-col items-center gap-2 transition-all ${
               selectedCategory === cat.id ? 'scale-110' : 'opacity-60 grayscale'
             }`}
           >
@@ -182,7 +173,7 @@ export default function ShopHome() {
           </div>
         )}
       </div>
-    </div>
+    </ShopAppLayout>
   );
 }
 
@@ -201,11 +192,19 @@ function ProductCard({ product, onAddToCart }: { product: Product, onAddToCart: 
             className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
             referrerPolicy="no-referrer"
           />
-          {product.discountPrice && (
-            <div className="absolute top-3 left-3 bg-brand-pink text-white text-[10px] font-black px-2 py-1 rounded-lg shadow-lg">
-              -{Math.round((1 - product.discountPrice / product.price) * 100)}%
-            </div>
-          )}
+          <div className="absolute top-3 left-3 flex flex-col gap-2">
+            {product.discountPrice && (
+              <div className="bg-brand-pink text-white text-[10px] font-black px-2 py-1 rounded-lg shadow-lg">
+                -{Math.round((1 - product.discountPrice / product.price) * 100)}%
+              </div>
+            )}
+            {product.origin && (
+              <div className="bg-white/90 backdrop-blur-sm text-gray-900 text-[10px] font-black px-2 py-1 rounded-lg shadow-sm flex items-center gap-1 border border-gray-100">
+                <span>{product.origin.flag}</span>
+                <span className="uppercase tracking-tighter">{product.origin.countryCode}</span>
+              </div>
+            )}
+          </div>
         </div>
       </Link>
 

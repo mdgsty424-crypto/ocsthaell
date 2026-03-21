@@ -98,13 +98,17 @@ export default function Cart() {
             <span>{cartTotal} TK</span>
           </div>
           <div className="flex justify-between items-center text-gray-500 font-bold text-sm">
-            <span>Shipping</span>
-            <span className="text-emerald-500">FREE</span>
+            <span>Discount</span>
+            <span className="text-emerald-500">- 0 TK</span>
+          </div>
+          <div className="flex justify-between items-center text-gray-500 font-bold text-sm">
+            <span>Delivery Fee</span>
+            <span>60 TK</span>
           </div>
           <div className="h-px bg-gray-100" />
           <div className="flex justify-between items-center">
             <span className="text-lg font-black text-gray-900">Total</span>
-            <span className="text-xl font-black text-brand-blue">{cartTotal} TK</span>
+            <span className="text-xl font-black text-brand-blue">{cartTotal + 60} TK</span>
           </div>
         </div>
       </div>

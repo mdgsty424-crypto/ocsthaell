@@ -171,21 +171,32 @@ export default function MyShop() {
               {/* Pickup Address Card */}
               <div className="bg-white p-6 rounded-[2.5rem] shadow-sm border border-gray-100">
                 <h3 className="text-sm font-black text-gray-900 uppercase tracking-widest mb-6 flex items-center gap-2">
-                  <MapPin size={18} className="text-brand-blue" /> Pickup Address
+                  <MapPin size={18} className="text-brand-blue" /> Pickup Address (Fulfillment)
                 </h3>
                 {sellerProfile?.pickupAddress ? (
                   <div className="space-y-4">
-                    <div className="flex items-start gap-4">
-                      <div className="w-10 h-10 bg-gray-50 rounded-xl flex items-center justify-center text-gray-400 flex-shrink-0">
-                        <MapPin size={18} />
+                    <div className="bg-gray-50 p-4 rounded-2xl border border-gray-100">
+                      <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Warehouse / Shop Name</p>
+                      <h4 className="text-sm font-black text-gray-900">{sellerProfile.pickupAddress.warehouseName}</h4>
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="bg-gray-50 p-4 rounded-2xl border border-gray-100">
+                        <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Point Person</p>
+                        <h4 className="text-sm font-black text-gray-900">{sellerProfile.pickupAddress.pointPersonName}</h4>
                       </div>
-                      <div>
-                        <h4 className="text-sm font-black text-gray-900">{sellerProfile.pickupAddress.area}</h4>
-                        <p className="text-xs text-gray-500 font-medium">{sellerProfile.pickupAddress.detailedAddress}</p>
+                      <div className="bg-gray-50 p-4 rounded-2xl border border-gray-100">
+                        <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Mobile</p>
+                        <h4 className="text-sm font-black text-gray-900">{sellerProfile.pickupAddress.pointPersonPhone}</h4>
                       </div>
                     </div>
-                    <button className="w-full py-3 bg-gray-50 text-brand-blue text-xs font-black rounded-xl border border-gray-100">
-                      Edit Pickup Location
+                    <div className="bg-gray-50 p-4 rounded-2xl border border-gray-100">
+                      <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Full Pickup Address</p>
+                      <h4 className="text-sm font-black text-gray-900 leading-tight">
+                        {sellerProfile.pickupAddress.detailedAddress}, {sellerProfile.pickupAddress.upazila}, {sellerProfile.pickupAddress.district}, {sellerProfile.pickupAddress.division}
+                      </h4>
+                    </div>
+                    <button className="w-full py-4 bg-gray-900 text-white text-xs font-black rounded-2xl shadow-lg shadow-black/10">
+                      Update Pickup Location
                     </button>
                   </div>
                 ) : (
