@@ -3,6 +3,7 @@ import { useAuth } from '../../context/AuthContext';
 import { db } from '../../firebase';
 import { collection, query, where, onSnapshot, doc, updateDoc, deleteDoc, orderBy } from 'firebase/firestore';
 import { Product, Order, SellerProfile } from '../../types';
+import { BANGLADESH_LOCATIONS } from '../../constants/locations';
 import { 
   Package, 
   DollarSign, 
@@ -18,7 +19,9 @@ import {
   User,
   LayoutDashboard,
   Settings,
-  Store
+  Store,
+  Building2,
+  Loader2
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Link, useNavigate } from 'react-router-dom';
@@ -31,6 +34,46 @@ export default function MyShop() {
   const [sellerProfile, setSellerProfile] = useState<SellerProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'dashboard' | 'products' | 'orders' | 'settings'>('dashboard');
+  const [updatingProfile, setUpdatingProfile] = useState(false);
+  const [pickupForm, setPickupForm] = useState({
+    warehouseName: '',
+    pointPersonName: '',
+    pointPersonPhone: '',
+    division: '',
+    district: '',
+    upazila: '',
+    detailedAddress: ''
+  });
+
+  useEffect(() => {
+    if (sellerProfile?.pickupAddress) {
+      setPickupForm({
+        warehouseName: sellerProfile.pickupAddress.warehouseName || '',
+        pointPersonName: sellerProfile.pickupAddress.pointPersonName || '',
+        pointPersonPhone: sellerProfile.pickupAddress.pointPersonPhone || '',
+        division: sellerProfile.pickupAddress.division || '',
+        district: sellerProfile.pickupAddress.district || '',
+        upazila: sellerProfile.pickupAddress.upazila || '',
+        detailedAddress: sellerProfile.pickupAddress.detailedAddress || ''
+      });
+    }
+  }, [sellerProfile]);
+
+  const handleUpdatePickup = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!user) return;
+    setUpdatingProfile(true);
+    try {
+      await updateDoc(doc(db, 'sellerProfiles', user.uid), {
+        pickupAddress: pickupForm
+      });
+      alert('Pickup address updated successfully!');
+    } catch (err) {
+      console.error('Error updating pickup address:', err);
+    } finally {
+      setUpdatingProfile(false);
+    }
+  };
 
   useEffect(() => {
     if (!user) return;
@@ -195,14 +238,20 @@ export default function MyShop() {
                         {sellerProfile.pickupAddress.detailedAddress}, {sellerProfile.pickupAddress.upazila}, {sellerProfile.pickupAddress.district}, {sellerProfile.pickupAddress.division}
                       </h4>
                     </div>
-                    <button className="w-full py-4 bg-gray-900 text-white text-xs font-black rounded-2xl shadow-lg shadow-black/10">
+                    <button 
+                      onClick={() => setActiveTab('settings')}
+                      className="w-full py-4 bg-gray-900 text-white text-xs font-black rounded-2xl shadow-lg shadow-black/10"
+                    >
                       Update Pickup Location
                     </button>
                   </div>
                 ) : (
                   <div className="text-center py-6">
                     <p className="text-gray-400 text-xs font-bold mb-4">No pickup address set yet.</p>
-                    <button className="px-6 py-3 bg-brand-blue text-white text-xs font-black rounded-xl shadow-lg shadow-brand-blue/20">
+                    <button 
+                      onClick={() => setActiveTab('settings')}
+                      className="px-6 py-3 bg-brand-blue text-white text-xs font-black rounded-xl shadow-lg shadow-brand-blue/20"
+                    >
                       Set Pickup Address
                     </button>
                   </div>
@@ -291,6 +340,141 @@ export default function MyShop() {
                   </div>
                 </div>
               ))}
+            </motion.div>
+          )}
+
+          {activeTab === 'settings' && (
+            <motion.div
+              key="settings"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              className="space-y-6"
+            >
+              <div className="bg-white p-6 rounded-[2.5rem] shadow-sm border border-gray-100">
+                <h3 className="text-sm font-black text-gray-900 uppercase tracking-widest mb-6 flex items-center gap-2">
+                  <Building2 size={18} className="text-brand-blue" /> Pickup Address Settings
+                </h3>
+                
+                <form onSubmit={handleUpdatePickup} className="space-y-4">
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Warehouse / Shop Name</label>
+                    <input
+                      required
+                      type="text"
+                      className="w-full bg-gray-50 border-none rounded-2xl py-3.5 px-4 text-sm font-bold outline-none focus:ring-2 ring-brand-blue/20"
+                      value={pickupForm.warehouseName}
+                      onChange={e => setPickupForm({...pickupForm, warehouseName: e.target.value})}
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Point Person</label>
+                      <input
+                        required
+                        type="text"
+                        className="w-full bg-gray-50 border-none rounded-2xl py-3.5 px-4 text-sm font-bold outline-none focus:ring-2 ring-brand-blue/20"
+                        value={pickupForm.pointPersonName}
+                        onChange={e => setPickupForm({...pickupForm, pointPersonName: e.target.value})}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Phone</label>
+                      <input
+                        required
+                        type="tel"
+                        className="w-full bg-gray-50 border-none rounded-2xl py-3.5 px-4 text-sm font-bold outline-none focus:ring-2 ring-brand-blue/20"
+                        value={pickupForm.pointPersonPhone}
+                        onChange={e => setPickupForm({...pickupForm, pointPersonPhone: e.target.value})}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-4">
+                    <div className="relative">
+                      <select
+                        required
+                        className="w-full bg-gray-50 border-none rounded-2xl py-3.5 px-4 text-sm font-bold outline-none appearance-none focus:ring-2 ring-brand-blue/20"
+                        value={pickupForm.division}
+                        onChange={e => setPickupForm({...pickupForm, division: e.target.value, district: '', upazila: ''})}
+                      >
+                        <option value="">Select Division</option>
+                        {Object.keys(BANGLADESH_LOCATIONS).map(div => (
+                          <option key={div} value={div}>{div}</option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div className="relative">
+                      <select
+                        required
+                        className="w-full bg-gray-50 border-none rounded-2xl py-3.5 px-4 text-sm font-bold outline-none appearance-none focus:ring-2 ring-brand-blue/20 disabled:opacity-50"
+                        value={pickupForm.district}
+                        disabled={!pickupForm.division}
+                        onChange={e => setPickupForm({...pickupForm, district: e.target.value, upazila: ''})}
+                      >
+                        <option value="">Select District</option>
+                        {pickupForm.division && Object.keys((BANGLADESH_LOCATIONS as any)[pickupForm.division]).map(dist => (
+                          <option key={dist} value={dist}>{dist}</option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div className="relative">
+                      <select
+                        required
+                        className="w-full bg-gray-50 border-none rounded-2xl py-3.5 px-4 text-sm font-bold outline-none appearance-none focus:ring-2 ring-brand-blue/20 disabled:opacity-50"
+                        value={pickupForm.upazila}
+                        disabled={!pickupForm.district}
+                        onChange={e => setPickupForm({...pickupForm, upazila: e.target.value})}
+                      >
+                        <option value="">Select Upazila</option>
+                        {pickupForm.division && pickupForm.district && (BANGLADESH_LOCATIONS as any)[pickupForm.division][pickupForm.district].map((upz: string) => (
+                          <option key={upz} value={upz}>{upz}</option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Detailed Address</label>
+                    <textarea
+                      required
+                      rows={3}
+                      className="w-full bg-gray-50 border-none rounded-2xl py-3.5 px-4 text-sm font-bold outline-none focus:ring-2 ring-brand-blue/20 resize-none"
+                      value={pickupForm.detailedAddress}
+                      onChange={e => setPickupForm({...pickupForm, detailedAddress: e.target.value})}
+                    />
+                  </div>
+
+                  <button
+                    type="submit"
+                    disabled={updatingProfile}
+                    className="w-full py-4 bg-brand-blue text-white text-xs font-black rounded-2xl shadow-lg shadow-brand-blue/20 flex items-center justify-center gap-2"
+                  >
+                    {updatingProfile ? <Loader2 className="animate-spin" size={18} /> : 'Save Changes'}
+                  </button>
+                </form>
+              </div>
+
+              <div className="bg-white p-6 rounded-[2.5rem] shadow-sm border border-gray-100">
+                <h3 className="text-sm font-black text-gray-900 uppercase tracking-widest mb-6">Location Data</h3>
+                <button 
+                  onClick={() => {
+                    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(BANGLADESH_LOCATIONS, null, 2));
+                    const downloadAnchorNode = document.createElement('a');
+                    downloadAnchorNode.setAttribute("href",     dataStr);
+                    downloadAnchorNode.setAttribute("download", "bangladesh_locations.json");
+                    document.body.appendChild(downloadAnchorNode);
+                    downloadAnchorNode.click();
+                    downloadAnchorNode.remove();
+                  }}
+                  className="w-full py-4 bg-gray-50 text-gray-600 text-xs font-black rounded-2xl border border-gray-100 flex items-center justify-center gap-2"
+                >
+                  Download All Areas (JSON)
+                </button>
+              </div>
             </motion.div>
           )}
         </AnimatePresence>
