@@ -25,7 +25,10 @@ import ManageIDCard from '../components/admin/ManageIDCard';
 import ManageDeposits from '../components/admin/ManageDeposits';
 import ManageEmail from '../components/admin/ManageEmail';
 import ManageAPIKeys from '../components/admin/ManageAPIKeys';
-import { FileText, HeadphonesIcon, DollarSign, CreditCard, Wallet, Mail, Key } from 'lucide-react';
+import AdminOrders from './admin/Orders';
+import DepositVerification from './admin/DepositVerification';
+import ManageProducts from './admin/ManageProducts';
+import { FileText, HeadphonesIcon, DollarSign, CreditCard, Wallet, Mail, Key, ShoppingCart, CheckCircle, Package } from 'lucide-react';
 
 export default function AdminDashboard() {
   const { user } = useAuth();
@@ -52,6 +55,9 @@ export default function AdminDashboard() {
     { name: 'News', path: '/admin/dashboard/news', icon: Newspaper },
     { name: 'Team & Staff', path: '/admin/dashboard/team', icon: Users },
     { name: 'Members', path: '/admin/dashboard/users', icon: Users },
+    { name: 'Products', path: '/admin/dashboard/products', icon: Package },
+    { name: 'Orders', path: '/admin/dashboard/orders', icon: ShoppingCart },
+    { name: 'Deposit Requests', path: '/admin/dashboard/deposits-verify', icon: CheckCircle },
     { name: 'Deposits', path: '/admin/dashboard/deposits', icon: Wallet },
     { name: 'Withdrawals', path: '/admin/dashboard/withdrawals', icon: DollarSign },
     { name: 'Email Settings', path: '/admin/dashboard/email', icon: Mail },
@@ -127,6 +133,9 @@ export default function AdminDashboard() {
             <Route path="/news" element={<ManageNews />} />
             <Route path="/team" element={<ManageTeam />} />
             <Route path="/users" element={<ManageUsers />} />
+            <Route path="/products" element={<ManageProducts />} />
+            <Route path="/orders" element={<AdminOrders />} />
+            <Route path="/deposits-verify" element={<DepositVerification />} />
             <Route path="/deposits" element={<ManageDeposits />} />
             <Route path="/withdrawals" element={<ManageWithdrawals />} />
             <Route path="/email" element={<ManageEmail />} />

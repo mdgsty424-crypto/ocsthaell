@@ -26,7 +26,6 @@ import Contact from './pages/Contact';
 import Login from './pages/Login';
 import OCChat from './pages/OCChat';
 import AdminLogin from './pages/AdminLogin';
-import AdminDashboard from './pages/AdminDashboard';
 import TeamDashboard from './pages/TeamDashboard';
 import ProtectedRoute from './components/ProtectedRoute';
 import AIAssistant from './components/AIAssistant';
@@ -40,7 +39,14 @@ import Careers from './pages/Careers';
 import Registration from './pages/Registration';
 import RegistrationSuccess from './pages/RegistrationSuccess';
 import DashboardRedirect from './pages/DashboardRedirect';
+import AdminDashboard from './pages/AdminDashboard';
+import ProductUpload from './pages/shop/ProductUpload';
+import ShopHome from './pages/shop/ShopHome';
+import ProductDetail from './pages/shop/ProductDetail';
+import Checkout from './pages/shop/Checkout';
+import MyShop from './pages/profile/MyShop';
 import Withdraw from './pages/Withdraw';
+import Transfer from './pages/Transfer';
 import NotFound from './pages/NotFound';
 import AutoLogin from './components/AutoLogin';
 
@@ -77,9 +83,15 @@ export default function App() {
                   <Route path="/registration-success" element={<RegistrationSuccess />} />
                   <Route path="/dashboard" element={<DashboardRedirect />} />
                   <Route path="/withdraw" element={<ProtectedRoute requireAdmin={false}><Withdraw /></ProtectedRoute>} />
+                  <Route path="/transfer" element={<ProtectedRoute requireAdmin={false}><Transfer /></ProtectedRoute>} />
                   <Route path="/oc-id/:ocId/key/:token/autologin/dashboard" element={<AutoLogin />} />
                   <Route path="/chat" element={<ProtectedRoute requireAdmin={false}><OCChat /></ProtectedRoute>} />
-                  <Route path="/shop" element={<Navigate to="/apps/oc-shopping" replace />} />
+                  <Route path="/admin" element={<ProtectedRoute requireAdmin={true}><AdminDashboard /></ProtectedRoute>} />
+                  <Route path="/shop" element={<ShopHome />} />
+                  <Route path="/shop/product/:id" element={<ProductDetail />} />
+                  <Route path="/shop/checkout" element={<Checkout />} />
+                  <Route path="/shop/upload" element={<ProtectedRoute requireAdmin={false}><ProductUpload /></ProtectedRoute>} />
+                  <Route path="/profile/my-shop" element={<ProtectedRoute requireAdmin={false}><MyShop /></ProtectedRoute>} />
                   <Route path="/help-center" element={<HelpCenter />} />
                   <Route path="/privacy-policy" element={<PrivacyPolicy />} />
                   <Route path="/terms-of-service" element={<TermsOfService />} />

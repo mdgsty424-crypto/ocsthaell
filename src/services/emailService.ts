@@ -256,6 +256,33 @@ export const sendWithdrawalSuccessMail = async (withdrawData: { userName: string
     }
 };
 
+export const sendWithdrawalRejectedMail = async (withdrawData: { userName: string; amount: string; reason: string; userEmail: string }) => {
+    if (!withdrawData.userEmail) return { success: false, error: "Recipient email is empty" };
+
+    const config = await getEmailConfig('teams');
+    const serviceId = config?.serviceId || DEFAULTS.teams.serviceId;
+    // Assuming a template for rejection exists or using a generic one
+    const templateId = config?.templateSecondaryId || DEFAULTS.teams.templateWithdraw; 
+    const publicKey = config?.publicKey || DEFAULTS.teams.publicKey;
+
+    const templateParams = {
+        member_name: withdrawData.userName,
+        amount: withdrawData.amount,
+        reason: withdrawData.reason,
+        history_link: "https://ocsthael.com/account/history",
+        email: withdrawData.userEmail
+    };
+
+    try {
+        const response = await emailjs.send(serviceId, templateId, templateParams, publicKey);
+        console.log("Withdrawal Rejection Notification Sent!", response.status);
+        return { success: true };
+    } catch (err) {
+        console.log("Error!", err);
+        return { success: false, error: err };
+    }
+};
+
 export const sendTestEmail = async (userEmail: string) => {
     if (!userEmail) return { success: false, error: "Recipient email is empty" };
 

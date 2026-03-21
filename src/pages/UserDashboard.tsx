@@ -639,7 +639,6 @@ export default function UserDashboard() {
                             src={formData.photoURL} 
                             alt="ID" 
                             className="w-full h-full object-cover" 
-                            crossOrigin="anonymous"
                           />
                         ) : (
                           <div className="w-full h-full flex items-center justify-center text-gray-300">
