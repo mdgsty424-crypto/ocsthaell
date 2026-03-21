@@ -73,6 +73,22 @@ service cloud.firestore {
     //   - imageUrl: string (required, url)
     //   - createdAt: timestamp (required, immutable)
     //
+    // Collection: products
+    // Document ID: auto-generated
+    // Fields:
+    //   - name: string (required, max 200 chars)
+    //   - description: string (required, max 2000 chars)
+    //   - category: string (required)
+    //   - price: number (required)
+    //   - discountPrice: number (optional)
+    //   - stock: number (required)
+    //   - images: list (required, max 10)
+    //   - isOfficial: boolean (required)
+    //   - sellerId: string (required, matches auth.uid)
+    //   - sellerName: string (required)
+    //   - rating: number (required)
+    //   - createdAt: timestamp (required, immutable)
+    //
     // ===============================================================
 
     // ===============================================================
@@ -173,6 +189,22 @@ service cloud.firestore {
              request.resource.data.name is string && request.resource.data.name.size() > 0 && request.resource.data.name.size() <= 100 &&
              request.resource.data.role is string && request.resource.data.role.size() <= 100 &&
              isValidUrl(request.resource.data.imageUrl) &&
+             request.resource.data.createdAt is timestamp;
+    }
+
+    function isValidProduct() {
+      return request.resource.data.keys().hasAll(['name', 'description', 'category', 'price', 'stock', 'images', 'isOfficial', 'sellerId', 'sellerName', 'rating', 'createdAt']) &&
+             request.resource.data.name is string && request.resource.data.name.size() <= 200 &&
+             request.resource.data.description is string && request.resource.data.description.size() <= 2000 &&
+             request.resource.data.category is string &&
+             request.resource.data.price is number && request.resource.data.price >= 0 &&
+             (!('discountPrice' in request.resource.data) || request.resource.data.discountPrice == null || request.resource.data.discountPrice is number) &&
+             request.resource.data.stock is number && request.resource.data.stock >= 0 &&
+             request.resource.data.images is list && request.resource.data.images.size() <= 10 &&
+             request.resource.data.isOfficial is bool &&
+             request.resource.data.sellerId is string &&
+             request.resource.data.sellerName is string &&
+             request.resource.data.rating is number &&
              request.resource.data.createdAt is timestamp;
     }
 
@@ -304,6 +336,18 @@ service cloud.firestore {
       allow create: if isAuthenticated();
       allow update: if isAuthenticated();
       allow delete: if isAdmin();
+    }
+
+    match /products/{productId} {
+      allow read: if true;
+      allow create: if isAuthenticated() && 
+                    request.resource.data.sellerId == request.auth.uid && 
+                    isValidProduct() &&
+                    (!request.resource.data.isOfficial || isAdmin());
+      allow update: if isAuthenticated() && 
+                    (isAdmin() || (resource.data.sellerId == request.auth.uid && areImmutableFieldsUnchanged(['sellerId', 'createdAt']))) &&
+                    isValidProduct();
+      allow delete: if isAdmin() || (isAuthenticated() && resource.data.sellerId == request.auth.uid);
     }
   }
 }

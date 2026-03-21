@@ -8,7 +8,7 @@ import MultiImageUpload from '../../components/shop/MultiImageUpload';
 import { Loader2 } from 'lucide-react';
 
 export default function ProductUpload() {
-  const { user } = useAuth();
+  const { user, isAdmin } = useAuth();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
@@ -36,6 +36,7 @@ export default function ProductUpload() {
         sellerId: user.uid,
         sellerName: user.displayName || 'Seller',
         rating: 0,
+        isOfficial: isAdmin ? formData.isOfficial : false,
         createdAt: serverTimestamp(),
       });
       alert('Product uploaded successfully!');
@@ -97,14 +98,18 @@ export default function ProductUpload() {
             required
           />
           <MultiImageUpload images={formData.images} onChange={(images) => setFormData({ ...formData, images })} />
-          <label className="flex items-center gap-2">
-            <input
-              type="checkbox"
-              checked={formData.isOfficial}
-              onChange={(e) => setFormData({ ...formData, isOfficial: e.target.checked })}
-            />
-            Official Product (Admin)
-          </label>
+          
+          {isAdmin && (
+            <label className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                checked={formData.isOfficial}
+                onChange={(e) => setFormData({ ...formData, isOfficial: e.target.checked })}
+              />
+              Official Product (Admin)
+            </label>
+          )}
+
           <button
             type="submit"
             disabled={loading}
