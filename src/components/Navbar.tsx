@@ -19,7 +19,7 @@ const navLinks = [
   { name: 'Gallery', path: '/gallery' },
   { name: 'News', path: '/news' },
   { name: 'Chat', path: '/chat' },
-  { name: 'Shop', path: '/apps/oc-shopping' },
+  { name: 'Shop', path: '/shop' },
   { name: 'Contact', path: '/contact' },
 ];
 
@@ -39,6 +39,9 @@ export default function Navbar() {
   const filteredNavLinks = [...navLinks];
   if (isTeam && !isAdmin) {
     filteredNavLinks.push({ name: 'Team Workspace', path: '/team/dashboard' });
+  }
+  if (user) {
+    filteredNavLinks.push({ name: 'My Shop', path: '/profile/my-shop' });
   }
 
   useEffect(() => {

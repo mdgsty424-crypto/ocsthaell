@@ -91,6 +91,7 @@ export default function App() {
                   <Route path="/shop/product/:id" element={<ProductDetail />} />
                   <Route path="/shop/checkout" element={<Checkout />} />
                   <Route path="/shop/upload" element={<ProtectedRoute requireAdmin={false}><ProductUpload /></ProtectedRoute>} />
+                  <Route path="/shop/edit/:id" element={<ProtectedRoute requireAdmin={false}><ProductUpload /></ProtectedRoute>} />
                   <Route path="/profile/my-shop" element={<ProtectedRoute requireAdmin={false}><MyShop /></ProtectedRoute>} />
                   <Route path="/help-center" element={<HelpCenter />} />
                   <Route path="/privacy-policy" element={<PrivacyPolicy />} />

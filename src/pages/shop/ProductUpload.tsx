@@ -1,16 +1,18 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
-import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
+import { doc, setDoc, serverTimestamp, getDoc, updateDoc } from 'firebase/firestore';
 import { db } from '../../firebase';
 import { useAuth } from '../../context/AuthContext';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import MultiImageUpload from '../../components/shop/MultiImageUpload';
-import { Loader2 } from 'lucide-react';
+import { Loader2, ArrowLeft, Package, Tag, Info, DollarSign, Layers, CheckCircle } from 'lucide-react';
 
 export default function ProductUpload() {
   const { user, isAdmin } = useAuth();
   const navigate = useNavigate();
+  const { id } = useParams<{ id: string }>();
   const [loading, setLoading] = useState(false);
+  const [fetching, setFetching] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     description: '',
@@ -22,102 +24,261 @@ export default function ProductUpload() {
     isOfficial: false,
   });
 
+  useEffect(() => {
+    if (id) {
+      const fetchProduct = async () => {
+        setFetching(true);
+        try {
+          const docRef = doc(db, 'products', id);
+          const docSnap = await getDoc(docRef);
+          if (docSnap.exists()) {
+            const data = docSnap.data();
+            // Security check: only owner or admin can edit
+            if (data.sellerId !== user?.uid && !isAdmin) {
+              alert('You do not have permission to edit this product');
+              navigate('/profile/my-shop');
+              return;
+            }
+            setFormData({
+              name: data.name || '',
+              description: data.description || '',
+              category: data.category || 'Electronics',
+              price: data.price?.toString() || '',
+              discountPrice: data.discountPrice?.toString() || '',
+              stock: data.stock?.toString() || '',
+              images: data.images || [],
+              isOfficial: data.isOfficial || false
+            });
+          }
+        } catch (error) {
+          console.error('Error fetching product:', error);
+        } finally {
+          setFetching(false);
+        }
+      };
+      fetchProduct();
+    }
+  }, [id, user, isAdmin, navigate]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) return;
     setLoading(true);
 
     try {
-      await setDoc(doc(db, 'products', Date.now().toString()), {
-        ...formData,
+      const productData = {
+        name: formData.name,
+        description: formData.description,
+        category: formData.category,
         price: parseFloat(formData.price),
         discountPrice: formData.discountPrice ? parseFloat(formData.discountPrice) : null,
         stock: parseInt(formData.stock),
-        sellerId: user.uid,
-        sellerName: user.displayName || 'Seller',
-        rating: 0,
+        images: formData.images,
         isOfficial: isAdmin ? formData.isOfficial : false,
-        createdAt: serverTimestamp(),
-      });
-      alert('Product uploaded successfully!');
+        updatedAt: serverTimestamp(),
+      };
+
+      if (id) {
+        await updateDoc(doc(db, 'products', id), productData);
+        alert('Product updated successfully!');
+      } else {
+        const productId = Date.now().toString();
+        await setDoc(doc(db, 'products', productId), {
+          ...productData,
+          sellerId: user.uid,
+          sellerName: user.displayName || user.email?.split('@')[0] || 'Seller',
+          rating: 5,
+          createdAt: serverTimestamp(),
+        });
+        alert('Product uploaded successfully!');
+      }
+      
       navigate('/shop');
-    } catch (err) {
-      console.error(err);
-      alert('Upload failed');
+    } catch (err: any) {
+      console.error("Product operation error details:", err);
+      alert(`Operation failed: ${err.message || 'Unknown error'}`);
     } finally {
       setLoading(false);
     }
   };
 
+  if (fetching) {
+    return (
+      <div className="min-h-screen pt-24 flex items-center justify-center bg-[#05070a] text-white">
+        <div className="flex flex-col items-center gap-4">
+          <Loader2 className="w-12 h-12 text-brand-blue animate-spin" />
+          <p className="text-gray-500 font-bold">Fetching product data...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen pt-24 pb-12 px-4 bg-[#05070a] text-white">
-      <div className="max-w-2xl mx-auto bg-[#0a0f19] p-8 rounded-2xl border border-gray-800">
-        <h1 className="text-2xl font-bold mb-6">Upload New Product</h1>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <input
-            type="text"
-            placeholder="Product Title"
-            className="w-full bg-[#05070a] border border-gray-700 rounded-lg px-4 py-3"
-            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-            required
-          />
-          <textarea
-            placeholder="Description"
-            className="w-full bg-[#05070a] border border-gray-700 rounded-lg px-4 py-3"
-            onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-            required
-          />
-          <select
-            className="w-full bg-[#05070a] border border-gray-700 rounded-lg px-4 py-3"
-            onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-          >
-            <option>Electronics</option>
-            <option>Fashion</option>
-            <option>Home</option>
-          </select>
-          <div className="grid grid-cols-2 gap-4">
-            <input
-              type="number"
-              placeholder="Real Price"
-              className="w-full bg-[#05070a] border border-gray-700 rounded-lg px-4 py-3"
-              onChange={(e) => setFormData({ ...formData, price: e.target.value })}
-              required
-            />
-            <input
-              type="number"
-              placeholder="Discount Price"
-              className="w-full bg-[#05070a] border border-gray-700 rounded-lg px-4 py-3"
-              onChange={(e) => setFormData({ ...formData, discountPrice: e.target.value })}
-            />
-          </div>
-          <input
-            type="number"
-            placeholder="Stock Quantity"
-            className="w-full bg-[#05070a] border border-gray-700 rounded-lg px-4 py-3"
-            onChange={(e) => setFormData({ ...formData, stock: e.target.value })}
-            required
-          />
-          <MultiImageUpload images={formData.images} onChange={(images) => setFormData({ ...formData, images })} />
-          
-          {isAdmin && (
-            <label className="flex items-center gap-2">
-              <input
-                type="checkbox"
-                checked={formData.isOfficial}
-                onChange={(e) => setFormData({ ...formData, isOfficial: e.target.checked })}
-              />
-              Official Product (Admin)
-            </label>
-          )}
+      <div className="max-w-3xl mx-auto">
+        <button 
+          onClick={() => navigate(-1)} 
+          className="flex items-center gap-2 text-gray-500 hover:text-white mb-8 transition-colors"
+        >
+          <ArrowLeft size={20} /> Back
+        </button>
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full bg-brand-blue py-3 rounded-lg font-bold"
-          >
-            {loading ? <Loader2 className="animate-spin mx-auto" /> : 'Upload Product'}
-          </button>
-        </form>
+        <div className="bg-[#0a0f19] p-8 rounded-3xl border border-gray-800 shadow-2xl">
+          <div className="flex items-center gap-4 mb-8">
+            <div className="p-3 bg-brand-blue/10 rounded-2xl">
+              <Package className="text-brand-blue" size={32} />
+            </div>
+            <div>
+              <h1 className="text-3xl font-black">{id ? 'Edit Product' : 'Upload Product'}</h1>
+              <p className="text-gray-500 font-bold uppercase text-[10px] tracking-[0.2em]">
+                {id ? 'Update your product details' : 'List your product in the shop'}
+              </p>
+            </div>
+          </div>
+
+          <form onSubmit={handleSubmit} className="space-y-8">
+            {/* Image Section */}
+            <div className="space-y-4">
+              <label className="flex items-center gap-2 text-xs font-black uppercase text-gray-500 tracking-widest">
+                <Layers size={14} /> Product Images
+              </label>
+              <MultiImageUpload 
+                images={formData.images} 
+                onChange={(images) => setFormData({ ...formData, images })} 
+              />
+              <p className="text-[10px] text-gray-600 italic">Upload at least one high-quality image of your product.</p>
+            </div>
+
+            <div className="grid md:grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <label className="flex items-center gap-2 text-xs font-black uppercase text-gray-500 tracking-widest">
+                  <Tag size={14} /> Product Name
+                </label>
+                <input
+                  required
+                  className="w-full bg-[#05070a] border border-gray-800 rounded-xl p-4 focus:border-brand-blue outline-none transition-all"
+                  placeholder="e.g. Premium Wireless Headphones"
+                  value={formData.name}
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="flex items-center gap-2 text-xs font-black uppercase text-gray-500 tracking-widest">
+                  <Layers size={14} /> Category
+                </label>
+                <select
+                  className="w-full bg-[#05070a] border border-gray-800 rounded-xl p-4 focus:border-brand-blue outline-none transition-all appearance-none"
+                  value={formData.category}
+                  onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                >
+                  <option>Electronics</option>
+                  <option>Fashion</option>
+                  <option>Home</option>
+                  <option>Accessories</option>
+                  <option>Gadgets</option>
+                  <option>Software</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <label className="flex items-center gap-2 text-xs font-black uppercase text-gray-500 tracking-widest">
+                <Info size={14} /> Description
+              </label>
+              <textarea
+                required
+                rows={4}
+                className="w-full bg-[#05070a] border border-gray-800 rounded-xl p-4 focus:border-brand-blue outline-none transition-all resize-none"
+                placeholder="Tell customers about your product..."
+                value={formData.description}
+                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+              />
+            </div>
+
+            <div className="grid md:grid-cols-3 gap-6">
+              <div className="space-y-2">
+                <label className="flex items-center gap-2 text-xs font-black uppercase text-gray-500 tracking-widest">
+                  <DollarSign size={14} /> Regular Price
+                </label>
+                <input
+                  required
+                  type="number"
+                  className="w-full bg-[#05070a] border border-gray-800 rounded-xl p-4 focus:border-brand-blue outline-none transition-all"
+                  placeholder="0.00"
+                  value={formData.price}
+                  onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="flex items-center gap-2 text-xs font-black uppercase text-gray-500 tracking-widest">
+                  <DollarSign size={14} /> Sale Price (Optional)
+                </label>
+                <input
+                  type="number"
+                  className="w-full bg-[#05070a] border border-gray-800 rounded-xl p-4 focus:border-brand-blue outline-none transition-all"
+                  placeholder="0.00"
+                  value={formData.discountPrice}
+                  onChange={(e) => setFormData({ ...formData, discountPrice: e.target.value })}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="flex items-center gap-2 text-xs font-black uppercase text-gray-500 tracking-widest">
+                  <Package size={14} /> Stock Quantity
+                </label>
+                <input
+                  required
+                  type="number"
+                  className="w-full bg-[#05070a] border border-gray-800 rounded-xl p-4 focus:border-brand-blue outline-none transition-all"
+                  placeholder="0"
+                  value={formData.stock}
+                  onChange={(e) => setFormData({ ...formData, stock: e.target.value })}
+                />
+              </div>
+            </div>
+
+            {isAdmin && (
+              <div className="bg-brand-blue/5 p-6 rounded-2xl border border-brand-blue/20">
+                <label className="flex items-center gap-3 cursor-pointer group">
+                  <div className="relative">
+                    <input
+                      type="checkbox"
+                      className="sr-only"
+                      checked={formData.isOfficial}
+                      onChange={(e) => setFormData({ ...formData, isOfficial: e.target.checked })}
+                    />
+                    <div className={`w-12 h-6 rounded-full transition-colors ${formData.isOfficial ? 'bg-brand-blue' : 'bg-gray-800'}`}></div>
+                    <div className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full transition-transform ${formData.isOfficial ? 'translate-x-6' : ''}`}></div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <CheckCircle className={formData.isOfficial ? 'text-brand-blue' : 'text-gray-600'} size={18} />
+                    <div>
+                      <span className="font-bold block">Mark as Official Product</span>
+                      <span className="text-[10px] text-gray-500 uppercase font-black">Admin Only Feature</span>
+                    </div>
+                  </div>
+                </label>
+              </div>
+            )}
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full bg-brand-blue py-5 rounded-2xl font-black text-lg shadow-xl shadow-brand-blue/20 hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50 disabled:hover:scale-100"
+            >
+              {loading ? (
+                <div className="flex items-center justify-center gap-2">
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                  <span>Processing...</span>
+                </div>
+              ) : (
+                id ? 'Update Product' : 'Publish Product'
+              )}
+            </button>
+          </form>
+        </div>
       </div>
     </div>
   );

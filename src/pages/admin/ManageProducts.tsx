@@ -2,7 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { collection, onSnapshot, doc, updateDoc, deleteDoc } from 'firebase/firestore';
 import { db } from '../../firebase';
 import { Product } from '../../types';
-import { Edit, Trash2, Star, CheckCircle } from 'lucide-react';
+import { Edit, Trash2, Star, CheckCircle, Plus, Package } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 export default function ManageProducts() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -31,7 +32,16 @@ export default function ManageProducts() {
 
   return (
     <div className="p-6 bg-[#05070a] min-h-screen text-white">
-      <h1 className="text-2xl font-bold mb-6">Product Control Center</h1>
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-2xl font-bold">Product Control Center</h1>
+        <Link 
+          to="/shop/upload" 
+          className="bg-brand-blue hover:bg-brand-blue/90 px-4 py-2 rounded-xl flex items-center gap-2 font-bold transition-all shadow-lg shadow-brand-blue/20"
+        >
+          <Plus className="w-5 h-5" />
+          Upload Product
+        </Link>
+      </div>
       
       <div className="overflow-x-auto bg-[#0a0f19] rounded-xl border border-gray-800">
         <table className="w-full text-left">
@@ -50,10 +60,16 @@ export default function ManageProducts() {
               <tr key={product.id} className="border-b border-gray-800 hover:bg-[#111827]/50 transition-colors">
                 <td className="p-4">
                   <div className="flex items-center gap-3">
-                    <img src={product.images[0]} alt="" className="w-10 h-10 rounded object-cover" />
+                    <div className="w-10 h-10 rounded bg-gray-800 flex items-center justify-center overflow-hidden border border-gray-700">
+                      {product.images && product.images.length > 0 ? (
+                        <img src={product.images[0]} alt="" className="w-full h-full object-cover" />
+                      ) : (
+                        <Package className="w-5 h-5 text-gray-600" />
+                      )}
+                    </div>
                     <div>
-                      <p className="font-medium">{product.name}</p>
-                      <p className="text-xs text-gray-500">{product.category}</p>
+                      <p className="font-medium text-sm">{product.name}</p>
+                      <p className="text-[10px] text-gray-500 uppercase tracking-wider">{product.category}</p>
                     </div>
                   </div>
                 </td>

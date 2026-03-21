@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { jsPDF } from 'jspdf';
-import { Save, User, Mail, Phone, Briefcase, ShieldCheck, Wallet, ArrowUpRight, Gift, Calendar, QrCode, LogOut, CreditCard, MapPin, Droplets, Info, Hexagon, ArrowRight, MessageSquare, Download, Loader2, FileText, Image as ImageIcon } from 'lucide-react';
+import { Save, User, Mail, Phone, Briefcase, ShieldCheck, Wallet, ArrowUpRight, Gift, Calendar, QrCode, LogOut, CreditCard, MapPin, Droplets, Info, Hexagon, ArrowRight, MessageSquare, Download, Loader2, FileText, Image as ImageIcon, Plus, ShoppingCart } from 'lucide-react';
 import { doc, getDoc, updateDoc, setDoc, collection, query, where, getDocs, addDoc, serverTimestamp } from 'firebase/firestore';
 import { updateProfile, signOut, signInWithCustomToken } from 'firebase/auth';
 import { useNavigate, useParams, Link } from 'react-router-dom';
@@ -971,6 +971,35 @@ export default function UserDashboard() {
                   >
                     Open Chat Center <ArrowRight className="w-4 h-4 ml-2" />
                   </Link>
+                </motion.div>
+
+                {/* Seller Section */}
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="bg-gradient-to-br from-[#0a0f19] to-[#111827] rounded-2xl p-6 border border-brand-blue/20 shadow-lg shadow-brand-blue/5"
+                >
+                  <div className="flex items-center justify-between mb-4">
+                    <h2 className="text-xl font-bold flex items-center">
+                      <ShoppingCart className="w-5 h-5 mr-2 text-brand-blue" /> Seller Hub
+                    </h2>
+                    <span className="text-[10px] font-black uppercase tracking-widest bg-brand-blue/20 text-brand-blue px-2 py-1 rounded">Marketplace</span>
+                  </div>
+                  <p className="text-sm text-gray-400 mb-6">Start selling your products in the OCSTHAEL Shop and earn money.</p>
+                  <div className="space-y-3">
+                    <Link
+                      to="/shop/upload"
+                      className="w-full py-4 bg-brand-blue text-white rounded-xl font-bold hover:bg-brand-blue/90 transition-all flex items-center justify-center shadow-lg shadow-brand-blue/20"
+                    >
+                      <Plus className="w-5 h-5 mr-2" /> Upload New Product
+                    </Link>
+                    <Link
+                      to="/profile/my-shop"
+                      className="w-full py-3 bg-gray-800/50 text-gray-300 rounded-xl font-bold hover:bg-gray-800 transition-all flex items-center justify-center border border-gray-700"
+                    >
+                      Manage My Shop
+                    </Link>
+                  </div>
                 </motion.div>
               </>
             )}
