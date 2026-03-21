@@ -104,7 +104,7 @@ export default function ProductUpload() {
 
   if (fetching) {
     return (
-      <div className="min-h-screen pt-24 flex items-center justify-center bg-[#05070a] text-white">
+      <div className="min-h-screen pt-24 flex items-center justify-center bg-white text-gray-900">
         <div className="flex flex-col items-center gap-4">
           <Loader2 className="w-12 h-12 text-brand-blue animate-spin" />
           <p className="text-gray-500 font-bold">Fetching product data...</p>
@@ -114,22 +114,22 @@ export default function ProductUpload() {
   }
 
   return (
-    <div className="min-h-screen pt-24 pb-12 px-4 bg-[#05070a] text-white">
+    <div className="min-h-screen pt-24 pb-12 px-4 bg-white text-gray-900">
       <div className="max-w-3xl mx-auto">
         <button 
           onClick={() => navigate(-1)} 
-          className="flex items-center gap-2 text-gray-500 hover:text-white mb-8 transition-colors"
+          className="flex items-center gap-2 text-gray-500 hover:text-brand-blue mb-8 transition-colors font-bold"
         >
-          <ArrowLeft size={20} /> Back
+          <ArrowLeft size={20} /> Back to Shop
         </button>
 
-        <div className="bg-[#0a0f19] p-8 rounded-3xl border border-gray-800 shadow-2xl">
+        <div className="bg-white p-8 rounded-3xl border border-gray-100 shadow-xl">
           <div className="flex items-center gap-4 mb-8">
             <div className="p-3 bg-brand-blue/10 rounded-2xl">
               <Package className="text-brand-blue" size={32} />
             </div>
             <div>
-              <h1 className="text-3xl font-black">{id ? 'Edit Product' : 'Upload Product'}</h1>
+              <h1 className="text-3xl font-black text-gray-900">{id ? 'Edit Product' : 'Upload Product'}</h1>
               <p className="text-gray-500 font-bold uppercase text-[10px] tracking-[0.2em]">
                 {id ? 'Update your product details' : 'List your product in the shop'}
               </p>
@@ -140,23 +140,23 @@ export default function ProductUpload() {
             {/* Image Section */}
             <div className="space-y-4">
               <label className="flex items-center gap-2 text-xs font-black uppercase text-gray-500 tracking-widest">
-                <Layers size={14} /> Product Images
+                <Layers size={14} className="text-brand-blue" /> Product Images
               </label>
               <MultiImageUpload 
                 images={formData.images} 
                 onChange={(images) => setFormData({ ...formData, images })} 
               />
-              <p className="text-[10px] text-gray-600 italic">Upload at least one high-quality image of your product.</p>
+              <p className="text-[10px] text-gray-400 italic">Upload at least one high-quality image of your product.</p>
             </div>
 
             <div className="grid md:grid-cols-2 gap-6">
               <div className="space-y-2">
                 <label className="flex items-center gap-2 text-xs font-black uppercase text-gray-500 tracking-widest">
-                  <Tag size={14} /> Product Name
+                  <Tag size={14} className="text-brand-blue" /> Product Name
                 </label>
                 <input
                   required
-                  className="w-full bg-[#05070a] border border-gray-800 rounded-xl p-4 focus:border-brand-blue outline-none transition-all"
+                  className="w-full bg-gray-50 border border-gray-200 rounded-xl p-4 focus:border-brand-blue outline-none transition-all text-gray-900"
                   placeholder="e.g. Premium Wireless Headphones"
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
@@ -165,31 +165,34 @@ export default function ProductUpload() {
 
               <div className="space-y-2">
                 <label className="flex items-center gap-2 text-xs font-black uppercase text-gray-500 tracking-widest">
-                  <Layers size={14} /> Category
+                  <Layers size={14} className="text-brand-blue" /> Category
                 </label>
-                <select
-                  className="w-full bg-[#05070a] border border-gray-800 rounded-xl p-4 focus:border-brand-blue outline-none transition-all appearance-none"
-                  value={formData.category}
-                  onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                >
-                  <option>Electronics</option>
-                  <option>Fashion</option>
-                  <option>Home</option>
-                  <option>Accessories</option>
-                  <option>Gadgets</option>
-                  <option>Software</option>
-                </select>
+                <div className="relative">
+                  <select
+                    className="w-full bg-gray-50 border border-gray-200 rounded-xl p-4 focus:border-brand-blue outline-none transition-all appearance-none text-gray-900"
+                    value={formData.category}
+                    onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                  >
+                    <option>Electronics</option>
+                    <option>Fashion</option>
+                    <option>Home</option>
+                    <option>Accessories</option>
+                    <option>Gadgets</option>
+                    <option>Software</option>
+                  </select>
+                  <Layers className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={16} />
+                </div>
               </div>
             </div>
 
             <div className="space-y-2">
               <label className="flex items-center gap-2 text-xs font-black uppercase text-gray-500 tracking-widest">
-                <Info size={14} /> Description
+                <Info size={14} className="text-brand-blue" /> Description
               </label>
               <textarea
                 required
                 rows={4}
-                className="w-full bg-[#05070a] border border-gray-800 rounded-xl p-4 focus:border-brand-blue outline-none transition-all resize-none"
+                className="w-full bg-gray-50 border border-gray-200 rounded-xl p-4 focus:border-brand-blue outline-none transition-all resize-none text-gray-900"
                 placeholder="Tell customers about your product..."
                 value={formData.description}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
@@ -199,39 +202,45 @@ export default function ProductUpload() {
             <div className="grid md:grid-cols-3 gap-6">
               <div className="space-y-2">
                 <label className="flex items-center gap-2 text-xs font-black uppercase text-gray-500 tracking-widest">
-                  <DollarSign size={14} /> Regular Price
+                  <DollarSign size={14} className="text-brand-blue" /> Regular Price
                 </label>
-                <input
-                  required
-                  type="number"
-                  className="w-full bg-[#05070a] border border-gray-800 rounded-xl p-4 focus:border-brand-blue outline-none transition-all"
-                  placeholder="0.00"
-                  value={formData.price}
-                  onChange={(e) => setFormData({ ...formData, price: e.target.value })}
-                />
+                <div className="relative">
+                  <input
+                    required
+                    type="number"
+                    className="w-full bg-gray-50 border border-gray-200 rounded-xl p-4 pl-10 focus:border-brand-blue outline-none transition-all text-gray-900"
+                    placeholder="0.00"
+                    value={formData.price}
+                    onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+                  />
+                  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-bold">৳</span>
+                </div>
               </div>
 
               <div className="space-y-2">
                 <label className="flex items-center gap-2 text-xs font-black uppercase text-gray-500 tracking-widest">
-                  <DollarSign size={14} /> Sale Price (Optional)
+                  <DollarSign size={14} className="text-brand-blue" /> Sale Price
                 </label>
-                <input
-                  type="number"
-                  className="w-full bg-[#05070a] border border-gray-800 rounded-xl p-4 focus:border-brand-blue outline-none transition-all"
-                  placeholder="0.00"
-                  value={formData.discountPrice}
-                  onChange={(e) => setFormData({ ...formData, discountPrice: e.target.value })}
-                />
+                <div className="relative">
+                  <input
+                    type="number"
+                    className="w-full bg-gray-50 border border-gray-200 rounded-xl p-4 pl-10 focus:border-brand-blue outline-none transition-all text-gray-900"
+                    placeholder="0.00"
+                    value={formData.discountPrice}
+                    onChange={(e) => setFormData({ ...formData, discountPrice: e.target.value })}
+                  />
+                  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-bold">৳</span>
+                </div>
               </div>
 
               <div className="space-y-2">
                 <label className="flex items-center gap-2 text-xs font-black uppercase text-gray-500 tracking-widest">
-                  <Package size={14} /> Stock Quantity
+                  <Package size={14} className="text-brand-blue" /> Stock
                 </label>
                 <input
                   required
                   type="number"
-                  className="w-full bg-[#05070a] border border-gray-800 rounded-xl p-4 focus:border-brand-blue outline-none transition-all"
+                  className="w-full bg-gray-50 border border-gray-200 rounded-xl p-4 focus:border-brand-blue outline-none transition-all text-gray-900"
                   placeholder="0"
                   value={formData.stock}
                   onChange={(e) => setFormData({ ...formData, stock: e.target.value })}
@@ -240,7 +249,7 @@ export default function ProductUpload() {
             </div>
 
             {isAdmin && (
-              <div className="bg-brand-blue/5 p-6 rounded-2xl border border-brand-blue/20">
+              <div className="bg-brand-blue/5 p-6 rounded-2xl border border-brand-blue/10">
                 <label className="flex items-center gap-3 cursor-pointer group">
                   <div className="relative">
                     <input
@@ -249,13 +258,13 @@ export default function ProductUpload() {
                       checked={formData.isOfficial}
                       onChange={(e) => setFormData({ ...formData, isOfficial: e.target.checked })}
                     />
-                    <div className={`w-12 h-6 rounded-full transition-colors ${formData.isOfficial ? 'bg-brand-blue' : 'bg-gray-800'}`}></div>
+                    <div className={`w-12 h-6 rounded-full transition-colors ${formData.isOfficial ? 'bg-brand-blue' : 'bg-gray-200'}`}></div>
                     <div className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full transition-transform ${formData.isOfficial ? 'translate-x-6' : ''}`}></div>
                   </div>
                   <div className="flex items-center gap-2">
-                    <CheckCircle className={formData.isOfficial ? 'text-brand-blue' : 'text-gray-600'} size={18} />
+                    <CheckCircle className={formData.isOfficial ? 'text-brand-blue' : 'text-gray-400'} size={18} />
                     <div>
-                      <span className="font-bold block">Mark as Official Product</span>
+                      <span className="font-bold block text-gray-900">Mark as Official Product</span>
                       <span className="text-[10px] text-gray-500 uppercase font-black">Admin Only Feature</span>
                     </div>
                   </div>
@@ -266,15 +275,18 @@ export default function ProductUpload() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-brand-blue py-5 rounded-2xl font-black text-lg shadow-xl shadow-brand-blue/20 hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50 disabled:hover:scale-100"
+              className="w-full bg-brand-blue text-white py-5 rounded-2xl font-black text-lg shadow-xl shadow-brand-blue/20 hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50 disabled:hover:scale-100 flex items-center justify-center gap-2"
             >
               {loading ? (
-                <div className="flex items-center justify-center gap-2">
+                <>
                   <Loader2 className="w-5 h-5 animate-spin" />
                   <span>Processing...</span>
-                </div>
+                </>
               ) : (
-                id ? 'Update Product' : 'Publish Product'
+                <>
+                  <CheckCircle size={20} />
+                  {id ? 'Update Product' : 'Publish Product'}
+                </>
               )}
             </button>
           </form>

@@ -46,30 +46,30 @@ export default function ShopHome() {
   const officialProducts = products.filter(p => p.isOfficial).slice(0, 4);
 
   return (
-    <div className="min-h-screen pt-24 pb-12 px-4 bg-[#05070a] text-white">
+    <div className="min-h-screen pt-24 pb-12 px-4 bg-white text-gray-900">
       <div className="max-w-7xl mx-auto">
         {/* Hero Section */}
-        <div className="relative rounded-3xl overflow-hidden mb-12 bg-gradient-to-r from-brand-blue/20 to-brand-pink/20 border border-white/10 p-8 md:p-12">
+        <div className="relative rounded-3xl overflow-hidden mb-12 bg-gradient-to-r from-brand-blue/5 to-brand-pink/5 border border-gray-100 p-8 md:p-12 shadow-sm">
           <div className="relative z-10 max-w-2xl">
             <motion.h1 
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="text-4xl md:text-6xl font-black mb-4 tracking-tighter"
+              className="text-4xl md:text-6xl font-black mb-4 tracking-tighter text-gray-900"
             >
               OCSTHAEL <span className="text-brand-blue">MARKET</span>
             </motion.h1>
-            <p className="text-gray-400 text-lg mb-8">Discover exclusive products, official gear, and community favorites in our next-gen marketplace.</p>
+            <p className="text-gray-600 text-lg mb-8">Discover exclusive products, official gear, and community favorites in our next-gen marketplace.</p>
             <div className="flex flex-wrap gap-4">
-              <button className="px-8 py-3 bg-brand-blue rounded-xl font-bold shadow-lg shadow-brand-blue/20 hover:scale-105 transition-transform">
-                Shop Now
+              <button className="px-8 py-3 bg-brand-blue text-white rounded-xl font-bold shadow-lg shadow-brand-blue/20 hover:scale-105 transition-transform flex items-center gap-2">
+                <ShoppingCart size={20} /> Shop Now
               </button>
-              <Link to="/shop/upload" className="px-8 py-3 bg-white/5 border border-white/10 rounded-xl font-bold hover:bg-white/10 transition-colors">
-                Start Selling
+              <Link to="/shop/upload" className="px-8 py-3 bg-white border border-gray-200 text-gray-700 rounded-xl font-bold hover:bg-gray-50 transition-colors flex items-center gap-2">
+                <Package size={20} /> Start Selling
               </Link>
             </div>
           </div>
-          <div className="absolute top-0 right-0 w-1/2 h-full opacity-20 pointer-events-none">
-            <div className="absolute inset-0 bg-gradient-to-l from-[#05070a] to-transparent z-10" />
+          <div className="absolute top-0 right-0 w-1/2 h-full opacity-10 pointer-events-none">
+            <div className="absolute inset-0 bg-gradient-to-l from-white to-transparent z-10" />
             <ShoppingCart className="w-full h-full text-brand-blue rotate-12" />
           </div>
         </div>
@@ -83,12 +83,12 @@ export default function ShopHome() {
               placeholder="Search for products, brands, or categories..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-[#0a0f19] border border-gray-800 rounded-2xl pl-12 pr-4 py-4 focus:border-brand-blue outline-none transition-all"
+              className="w-full bg-gray-50 border border-gray-200 rounded-2xl pl-12 pr-4 py-4 focus:border-brand-blue outline-none transition-all text-gray-900"
             />
           </div>
           <button 
             onClick={() => setShowFilters(!showFilters)}
-            className={`flex items-center gap-2 px-6 py-4 rounded-2xl border transition-all ${showFilters ? 'bg-brand-blue border-brand-blue text-white' : 'bg-[#0a0f19] border-gray-800 text-gray-400 hover:border-gray-600'}`}
+            className={`flex items-center gap-2 px-6 py-4 rounded-2xl border transition-all ${showFilters ? 'bg-brand-blue border-brand-blue text-white' : 'bg-gray-50 border-gray-200 text-gray-600 hover:border-gray-400'}`}
           >
             <Filter size={20} />
             <span className="font-bold">Filters</span>
@@ -103,14 +103,16 @@ export default function ShopHome() {
               exit={{ opacity: 0, height: 0 }}
               className="overflow-hidden mb-8"
             >
-              <div className="bg-[#0a0f19] p-6 rounded-2xl border border-gray-800">
-                <h3 className="text-sm font-bold uppercase tracking-widest text-gray-500 mb-4">Categories</h3>
+              <div className="bg-gray-50 p-6 rounded-2xl border border-gray-200">
+                <h3 className="text-sm font-bold uppercase tracking-widest text-gray-500 mb-4 flex items-center gap-2">
+                  <Tag size={14} /> Categories
+                </h3>
                 <div className="flex flex-wrap gap-2">
                   {CATEGORIES.map(cat => (
                     <button
                       key={cat}
                       onClick={() => setSelectedCategory(cat)}
-                      className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${selectedCategory === cat ? 'bg-brand-blue text-white' : 'bg-[#05070a] text-gray-400 hover:text-white border border-gray-800'}`}
+                      className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${selectedCategory === cat ? 'bg-brand-blue text-white' : 'bg-white text-gray-600 hover:text-brand-blue border border-gray-200'}`}
                     >
                       {cat}
                     </button>
@@ -126,7 +128,9 @@ export default function ShopHome() {
           <section className="mb-12">
             <div className="flex justify-between items-end mb-6">
               <div>
-                <h2 className="text-2xl font-bold">Featured Products</h2>
+                <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+                  <Star className="text-brand-mango fill-current" size={24} /> Featured Products
+                </h2>
                 <p className="text-gray-500">Handpicked favorites from our team</p>
               </div>
             </div>
@@ -142,7 +146,8 @@ export default function ShopHome() {
         <section>
           <div className="flex justify-between items-end mb-6">
             <div>
-              <h2 className="text-2xl font-bold">
+              <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+                <Package className="text-brand-blue" size={24} />
                 {searchQuery ? `Results for "${searchQuery}"` : selectedCategory !== 'All' ? `${selectedCategory}` : 'All Products'}
               </h2>
               <p className="text-gray-500">{filteredProducts.length} items found</p>
@@ -152,7 +157,7 @@ export default function ShopHome() {
           {loading ? (
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
               {[1, 2, 3, 4, 5, 6, 7, 8].map(i => (
-                <div key={i} className="aspect-[3/4] bg-[#0a0f19] rounded-2xl animate-pulse border border-gray-800" />
+                <div key={i} className="aspect-[3/4] bg-gray-50 rounded-2xl animate-pulse border border-gray-200" />
               ))}
             </div>
           ) : filteredProducts.length > 0 ? (
@@ -162,15 +167,15 @@ export default function ShopHome() {
               ))}
             </div>
           ) : (
-            <div className="text-center py-24 bg-[#0a0f19] rounded-3xl border border-gray-800">
-              <Package size={64} className="mx-auto mb-4 text-gray-700" />
-              <h3 className="text-xl font-bold mb-2">No products found</h3>
+            <div className="text-center py-24 bg-gray-50 rounded-3xl border border-gray-200">
+              <Package size={64} className="mx-auto mb-4 text-gray-300" />
+              <h3 className="text-xl font-bold mb-2 text-gray-900">No products found</h3>
               <p className="text-gray-500 mb-8">Try adjusting your search or filters to find what you're looking for.</p>
               <button 
                 onClick={() => {setSearchQuery(''); setSelectedCategory('All');}}
-                className="text-brand-blue font-bold hover:underline"
+                className="text-brand-blue font-bold hover:underline flex items-center gap-2 mx-auto"
               >
-                Clear all filters
+                <ArrowRight size={16} /> Clear all filters
               </button>
             </div>
           )}
@@ -188,10 +193,10 @@ function ProductCard({ product, featured = false }: { product: Product, featured
       layout
       initial={{ opacity: 0, scale: 0.9 }}
       animate={{ opacity: 1, scale: 1 }}
-      className={`group relative bg-[#0a0f19] rounded-2xl border border-gray-800 overflow-hidden hover:border-brand-blue/50 transition-all ${featured ? 'md:col-span-1' : ''}`}
+      className={`group relative bg-white rounded-2xl border border-gray-100 overflow-hidden hover:shadow-xl hover:border-brand-blue/30 transition-all ${featured ? 'md:col-span-1' : ''}`}
     >
       <Link to={`/shop/product/${product.id}`}>
-        <div className="relative aspect-square overflow-hidden bg-[#05070a]">
+        <div className="relative aspect-square overflow-hidden bg-gray-50">
           <img 
             src={product.images[0] || 'https://picsum.photos/seed/product/400/400'} 
             alt={product.name} 
@@ -210,16 +215,16 @@ function ProductCard({ product, featured = false }: { product: Product, featured
           )}
         </div>
         <div className="p-4">
-          <div className="flex items-center gap-1 text-[10px] text-gray-500 uppercase font-bold tracking-widest mb-1">
+          <div className="flex items-center gap-1 text-[10px] text-gray-400 uppercase font-bold tracking-widest mb-1">
             <Tag size={10} /> {product.category}
           </div>
-          <h3 className="font-bold text-sm mb-2 line-clamp-1 group-hover:text-brand-blue transition-colors">{product.name}</h3>
+          <h3 className="font-bold text-sm mb-2 line-clamp-1 text-gray-900 group-hover:text-brand-blue transition-colors">{product.name}</h3>
           <div className="flex items-center justify-between">
             <div>
               <div className="flex items-center gap-2">
-                <span className="text-lg font-black text-white">{product.discountPrice || product.price} TK</span>
+                <span className="text-lg font-black text-gray-900">{product.discountPrice || product.price} TK</span>
                 {product.discountPrice && (
-                  <span className="text-xs text-gray-500 line-through">{product.price} TK</span>
+                  <span className="text-xs text-gray-400 line-through">{product.price} TK</span>
                 )}
               </div>
             </div>
@@ -231,7 +236,7 @@ function ProductCard({ product, featured = false }: { product: Product, featured
         </div>
       </Link>
       <div className="px-4 pb-4">
-        <button className="w-full py-2 bg-white/5 hover:bg-brand-blue hover:text-white border border-white/10 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2">
+        <button className="w-full py-2 bg-gray-50 hover:bg-brand-blue hover:text-white border border-gray-100 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 text-gray-600">
           <ShoppingCart size={14} /> Add to Cart
         </button>
       </div>
