@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { ArrowRight, Youtube, Facebook, Image as ImageIcon, MousePointer2, ChevronDown, Users, TrendingUp, Globe, Hexagon, Layers, Zap, Shield, Code, Smartphone, Cloud, Calendar, Target, Eye, ShieldCheck, DollarSign, Briefcase, MessageSquare, ShoppingCart, BookOpen, Music, Video, Map, Bot, Mail, MapPin, Send, Phone } from 'lucide-react';
+import { ArrowRight, Youtube, Facebook, Image as ImageIcon, MousePointer2, ChevronDown, Users, TrendingUp, Globe, Hexagon, Layers, Zap, Shield, Code, Smartphone, Cloud, Calendar, Target, Eye, ShieldCheck, DollarSign, Briefcase, MessageSquare, ShoppingCart, BookOpen, Music, Video, Map, Bot, Mail, MapPin, Send, Phone, Newspaper, User, Headphones, LogIn, UserCheck } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { collection, onSnapshot, query, limit, where } from 'firebase/firestore';
 import { db } from '../firebase';
@@ -293,6 +293,45 @@ export default function Home() {
             />
           </div>
           <span className="text-[10px] uppercase tracking-widest font-bold text-gray-900">Scroll Down</span>
+        </div>
+      </section>
+
+      {/* Quick Access Icons Section */}
+      <section className="py-12 bg-white border-b border-gray-100">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-7 lg:grid-cols-14 gap-4">
+            {[
+              { name: 'About', path: '/about', icon: BookOpen, color: 'text-brand-blue', bg: 'bg-brand-blue/10' },
+              { name: 'Apps', path: '/apps', icon: Layers, color: 'text-brand-pink', bg: 'bg-brand-pink/10' },
+              { name: 'Services', path: '/services', icon: Zap, color: 'text-brand-mango', bg: 'bg-brand-mango/10' },
+              { name: 'Team', path: '/team', icon: Users, color: 'text-brand-blue', bg: 'bg-brand-blue/10' },
+              { name: 'Staff', path: '/staff', icon: UserCheck, color: 'text-brand-pink', bg: 'bg-brand-pink/10' },
+              { name: 'Members', path: '/members', icon: User, color: 'text-brand-mango', bg: 'bg-brand-mango/10' },
+              { name: 'Gallery', path: '/gallery', icon: ImageIcon, color: 'text-brand-blue', bg: 'bg-brand-blue/10' },
+              { name: 'News', path: '/news', icon: Newspaper, color: 'text-brand-pink', bg: 'bg-brand-pink/10' },
+              { name: 'Chat', path: '/chat', icon: MessageSquare, color: 'text-brand-mango', bg: 'bg-brand-mango/10' },
+              { name: 'Shop', path: '/shop', icon: ShoppingCart, color: 'text-brand-blue', bg: 'bg-brand-blue/10' },
+              { name: 'Contact', path: '/contact', icon: Mail, color: 'text-brand-pink', bg: 'bg-brand-pink/10' },
+              { name: 'Help', path: '/help-center', icon: Headphones, color: 'text-brand-mango', bg: 'bg-brand-mango/10' },
+              { name: 'Careers', path: '/careers', icon: Briefcase, color: 'text-brand-blue', bg: 'bg-brand-blue/10' },
+              { name: 'Login', path: '/login', icon: LogIn, color: 'text-brand-pink', bg: 'bg-brand-pink/10' },
+            ].map((item, idx) => (
+              <Link 
+                key={idx} 
+                to={item.path}
+                className="flex flex-col items-center gap-2 group"
+              >
+                <motion.div 
+                  whileHover={{ scale: 1.1, y: -5 }}
+                  whileTap={{ scale: 0.95 }}
+                  className={`w-12 h-12 rounded-xl ${item.bg} flex items-center justify-center transition-all shadow-sm group-hover:shadow-md border border-transparent group-hover:border-white`}
+                >
+                  <item.icon className={`w-5 h-5 ${item.color}`} />
+                </motion.div>
+                <span className="text-[9px] font-bold text-gray-500 uppercase tracking-widest group-hover:text-brand-blue transition-colors text-center">{item.name}</span>
+              </Link>
+            ))}
+          </div>
         </div>
       </section>
 
