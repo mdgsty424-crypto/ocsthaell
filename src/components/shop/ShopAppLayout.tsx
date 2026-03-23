@@ -134,7 +134,7 @@ const ShopAppLayout: React.FC<ShopAppLayoutProps> = ({ children, onSearch }) => 
               
               <button 
                 onClick={() => setIsSearchFocused(false)}
-                className="w-full mt-6 py-3 bg-gray-900 text-white text-xs font-black rounded-2xl"
+                className="w-full mt-6 py-3 bg-brand-blue text-white text-xs font-black rounded-2xl"
               >
                 Close
               </button>

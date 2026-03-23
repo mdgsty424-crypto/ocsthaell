@@ -18,35 +18,39 @@ export default function AdminOrders() {
   };
 
   return (
-    <div className="p-6 bg-[#05070a] min-h-screen text-white">
-      <h1 className="text-2xl font-bold mb-6">Admin Order Management</h1>
-      <div className="overflow-x-auto bg-[#0a0f19] rounded-xl border border-gray-800">
+    <div className="p-6 bg-white min-h-screen text-gray-900">
+      <h1 className="text-2xl font-bold mb-6 text-gray-900">Admin Order Management</h1>
+      <div className="overflow-x-auto bg-white rounded-xl border border-gray-100 shadow-sm">
         <table className="w-full text-left">
-          <thead className="bg-[#111827] border-b border-gray-800">
+          <thead className="bg-gray-50 border-b border-gray-100">
             <tr>
-              <th className="p-4">Order ID</th>
-              <th className="p-4">Customer</th>
-              <th className="p-4">Amount</th>
-              <th className="p-4">Payment</th>
-              <th className="p-4">Status</th>
-              <th className="p-4">Actions</th>
+              <th className="p-4 text-gray-700 font-semibold">Order ID</th>
+              <th className="p-4 text-gray-700 font-semibold">Customer</th>
+              <th className="p-4 text-gray-700 font-semibold">Amount</th>
+              <th className="p-4 text-gray-700 font-semibold">Payment</th>
+              <th className="p-4 text-gray-700 font-semibold">Status</th>
+              <th className="p-4 text-gray-700 font-semibold">Actions</th>
             </tr>
           </thead>
           <tbody>
             {orders.map((order) => (
-              <tr key={order.id} className="border-b border-gray-800">
-                <td className="p-4 font-mono">{order.id.slice(0, 8)}</td>
-                <td className="p-4">{order.shippingAddress?.fullName || 'Guest'}</td>
-                <td className="p-4">৳{order.total}</td>
-                <td className="p-4 uppercase">{order.paymentMethod}</td>
+              <tr key={order.id} className="border-b border-gray-50 hover:bg-gray-50 transition-colors">
+                <td className="p-4 font-mono text-sm text-gray-600">{order.id.slice(0, 8)}</td>
+                <td className="p-4 text-gray-900">{order.shippingAddress?.fullName || 'Guest'}</td>
+                <td className="p-4 text-gray-900 font-medium">৳{order.total}</td>
+                <td className="p-4 uppercase text-xs text-gray-500 font-bold">{order.paymentMethod}</td>
                 <td className="p-4">
-                  <span className={`px-2 py-1 rounded-full text-xs ${order.status === 'pending' ? 'bg-yellow-900 text-yellow-200' : 'bg-green-900 text-green-200'}`}>
+                  <span className={`px-2 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${
+                    order.status === 'pending' ? 'bg-yellow-100 text-yellow-700' : 
+                    order.status === 'delivered' ? 'bg-green-100 text-green-700' :
+                    'bg-blue-100 text-blue-700'
+                  }`}>
                     {order.status}
                   </span>
                 </td>
                 <td className="p-4">
                   <select 
-                    className="bg-[#05070a] border border-gray-700 rounded p-1"
+                    className="bg-gray-50 border border-gray-200 rounded p-1 text-sm text-gray-700 focus:border-brand-blue outline-none"
                     value={order.status}
                     onChange={(e) => updateStatus(order.id, e.target.value)}
                   >

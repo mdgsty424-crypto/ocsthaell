@@ -42,19 +42,19 @@ export default function DepositVerification() {
   };
 
   return (
-    <div className="p-6 bg-[#05070a] min-h-screen text-white">
-      <h2 className="text-xl font-bold mb-4">OC-PAY Deposit Requests</h2>
+    <div className="p-6 bg-white min-h-screen text-gray-900">
+      <h2 className="text-xl font-bold mb-4 text-gray-900">OC-PAY Deposit Requests</h2>
       <div className="space-y-4">
         {requests.map(req => (
-          <div key={req.id} className="bg-[#0a0f19] p-4 rounded-lg shadow border-l-4 border-yellow-500 flex justify-between items-center">
+          <div key={req.id} className="bg-white p-4 rounded-lg shadow-sm border border-gray-100 border-l-4 border-l-yellow-500 flex justify-between items-center">
             <div>
-              <p className="font-bold">User: {req.userName}</p>
+              <p className="font-bold text-gray-900">User: {req.userName}</p>
               <p className="text-sm text-gray-500">Method: {req.method} | Amount: ৳{req.amount}</p>
-              <p className="text-sm font-mono bg-[#05070a] px-2 py-1 mt-1 rounded">TrxID: {req.trxId}</p>
+              <p className="text-sm font-mono bg-gray-50 text-gray-700 px-2 py-1 mt-1 rounded border border-gray-100">TrxID: {req.trxId}</p>
             </div>
             <div className="flex space-x-2">
-              <button onClick={() => handleAction(req.id, 'approved')} className="bg-green-600 text-white px-4 py-2 rounded-lg text-sm">Approve</button>
-              <button onClick={() => handleAction(req.id, 'rejected')} className="bg-red-900 text-red-200 px-4 py-2 rounded-lg text-sm">Reject</button>
+              <button onClick={() => handleAction(req.id, 'approved')} className="bg-green-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-green-700 transition-colors">Approve</button>
+              <button onClick={() => handleAction(req.id, 'rejected')} className="bg-red-100 text-red-700 px-4 py-2 rounded-lg text-sm hover:bg-red-200 transition-colors">Reject</button>
             </div>
           </div>
         ))}

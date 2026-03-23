@@ -28,13 +28,16 @@ export default function Navbar() {
   const location = useLocation();
   const [logoUrl, setLogoUrl] = useState<string | null>(null);
   const [isScrolled, setIsScrolled] = useState(false);
-  const { user, isAdmin, isTeam, ocId } = useAuth();
+  const { user, isAdmin, isTeam, ocId, profileData } = useAuth();
 
   const getDashboardPath = () => {
     if (isAdmin) return "/admin/dashboard";
     if (isTeam) return "/team/dashboard";
     return `/${ocId}/profile`;
   };
+
+  const userDisplayName = profileData?.displayName || profileData?.name || user?.displayName || 'User';
+  const userPhotoURL = profileData?.photoURL || profileData?.imageUrl || profileData?.image || profileData?.profilePhoto || profileData?.avatar || profileData?.profilePicture || profileData?.memberPhoto || user?.photoURL;
 
   const filteredNavLinks = [...navLinks];
   if (isTeam && !isAdmin) {
@@ -77,7 +80,7 @@ export default function Navbar() {
               <Logo variant="horizontal" className="scale-110" />
             )}
           </Link>
-
+          
           {/* Desktop Nav */}
           <div className="hidden md:flex items-center space-x-4 lg:space-x-6">
             {filteredNavLinks.map((link) => (
@@ -97,9 +100,20 @@ export default function Navbar() {
               </Link>
             ))}
             {user ? (
-              <Link to={getDashboardPath()} className="px-6 py-2.5 rounded-2xl bg-gray-100 text-gray-900 font-bold hover:bg-gray-200 transition-all flex items-center">
-                <User className="w-4 h-4 mr-2" />
-                Dashboard
+              <Link to={getDashboardPath()} className="flex items-center gap-3 pl-4 border-l border-gray-100">
+                <div className="text-right hidden lg:block">
+                  <p className="text-xs font-bold text-gray-900 truncate max-w-[120px]">{userDisplayName}</p>
+                  <p className="text-[10px] text-gray-400 font-mono">{ocId}</p>
+                </div>
+                <div className="w-10 h-10 rounded-xl overflow-hidden bg-gray-100 border border-gray-200 shadow-sm group hover:border-brand-blue transition-colors">
+                  {userPhotoURL ? (
+                    <img src={userPhotoURL} alt="Profile" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-gray-400">
+                      <User className="w-5 h-5" />
+                    </div>
+                  )}
+                </div>
               </Link>
             ) : (
               <div className="flex items-center space-x-4">
@@ -134,6 +148,23 @@ export default function Navbar() {
           className="md:hidden bg-white border-t border-gray-100"
         >
           <div className="px-4 pt-4 pb-8 space-y-2">
+            {user && (
+              <div className="flex items-center gap-4 px-4 py-4 mb-2 bg-gray-50 rounded-2xl border border-gray-100">
+                <div className="w-12 h-12 rounded-xl overflow-hidden bg-white border border-gray-200">
+                  {userPhotoURL ? (
+                    <img src={userPhotoURL} alt="Profile" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-gray-400">
+                      <User className="w-6 h-6" />
+                    </div>
+                  )}
+                </div>
+                <div>
+                  <p className="text-sm font-bold text-gray-900">{userDisplayName}</p>
+                  <p className="text-xs text-gray-400 font-mono">{ocId}</p>
+                </div>
+              </div>
+            )}
             {filteredNavLinks.map((link) => (
               <Link
                 key={link.name}
@@ -153,7 +184,7 @@ export default function Navbar() {
               <Link
                 to={getDashboardPath()}
                 onClick={() => setIsOpen(false)}
-                className="block px-4 py-4 rounded-2xl text-center text-base font-bold text-gray-900 bg-gray-100 flex items-center justify-center"
+                className="block px-4 py-4 rounded-2xl text-center text-base font-bold text-white bg-brand-blue shadow-lg flex items-center justify-center"
               >
                 <User className="w-5 h-5 mr-2" />
                 Dashboard

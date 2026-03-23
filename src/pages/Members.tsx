@@ -56,13 +56,13 @@ export default function Members() {
   );
 
   return (
-    <div className="min-h-screen pt-24 pb-12 px-4 sm:px-6 lg:px-8 bg-[#05070a]">
+    <div className="min-h-screen pt-24 pb-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
         <div className="text-center mb-12">
           <motion.h1 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="text-4xl md:text-5xl font-display font-bold text-white mb-4"
+            className="text-4xl md:text-5xl font-display font-bold text-gray-900 mb-4"
           >
             Registered <span className="text-transparent bg-clip-text bg-gradient-brand">Members</span>
           </motion.h1>
@@ -91,7 +91,7 @@ export default function Members() {
             placeholder="Search members by name, occupation, or email..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="block w-full pl-12 pr-4 py-4 bg-[#0a0f19] border border-gray-800 rounded-2xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-brand-blue focus:border-transparent shadow-sm transition-all"
+            className="block w-full pl-12 pr-4 py-4 bg-white border border-gray-200 rounded-2xl text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-brand-blue focus:border-transparent shadow-sm transition-all"
           />
         </motion.div>
 
@@ -107,10 +107,10 @@ export default function Members() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.05 }}
-                className="bg-[#0a0f19] rounded-2xl shadow-sm border border-gray-800 overflow-hidden hover:shadow-md hover:border-gray-700 transition-all group flex flex-col"
+                className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-md hover:border-gray-300 transition-all group flex flex-col"
               >
                 <div className="p-6 flex flex-col items-center text-center flex-grow">
-                  <div className="w-24 h-24 rounded-full overflow-hidden bg-gray-800 mb-4 border-4 border-[#05070a] shadow-sm group-hover:scale-105 transition-transform duration-300">
+                  <div className="w-24 h-24 rounded-full overflow-hidden bg-gray-100 mb-4 border-4 border-gray-50 shadow-sm group-hover:scale-105 transition-transform duration-300">
                     {member.photoURL || (member as any).imageUrl || (member as any).image || (member as any).profilePhoto || (member as any).avatar || (member as any).profilePicture || (member as any).memberPhoto ? (
                       <img 
                         src={member.photoURL || (member as any).imageUrl || (member as any).image || (member as any).profilePhoto || (member as any).avatar || (member as any).profilePicture || (member as any).memberPhoto} 
@@ -120,14 +120,16 @@ export default function Members() {
                         crossOrigin="anonymous" 
                       />
                     ) : (
-                      <div className="w-full h-full flex items-center justify-center text-gray-500 bg-gray-800">
+                      <div className="w-full h-full flex items-center justify-center text-gray-400 bg-gray-50">
                         <Users className="w-10 h-10" />
                       </div>
                     )}
                   </div>
-                  <h3 className="text-lg font-bold text-white mb-0.5">{member.displayName || (member as any).name || 'Anonymous User'}</h3>
+                  <h3 className="text-lg font-bold text-gray-900 mb-0.5">
+                    {member.displayName || (member as any).name || (member.email ? member.email.split('@')[0] : 'User')}
+                  </h3>
                   {(member as any).nameBengali && (
-                    <p className="text-sm text-gray-400 mb-1 font-medium">{(member as any).nameBengali}</p>
+                    <p className="text-sm text-gray-500 mb-1 font-medium">{(member as any).nameBengali}</p>
                   )}
                   <p className="text-xs text-gray-500 mb-2 font-mono">{member.ocId || 'No OC-ID'}</p>
                   
@@ -138,7 +140,7 @@ export default function Members() {
                     </div>
                   )}
 
-                  <div className="w-full pt-4 mt-2 border-t border-gray-800 space-y-2 text-left">
+                  <div className="w-full pt-4 mt-2 border-t border-gray-100 space-y-2 text-left">
                     {member.email && (
                       <div className="flex items-center text-sm text-gray-400">
                         <Mail className="w-4 h-4 mr-2 flex-shrink-0" />
@@ -157,7 +159,7 @@ export default function Members() {
                     </div>
                   </div>
                 </div>
-                <div className="p-4 border-t border-gray-800 bg-[#05070a]/50">
+                <div className="p-4 border-t border-gray-100 bg-gray-50/50">
                   <Link 
                     to={`/${member.ocId || member.id}/profile`}
                     className="flex items-center justify-center w-full py-2 px-4 bg-brand-blue/10 text-brand-blue hover:bg-brand-blue hover:text-white rounded-xl transition-colors font-medium text-sm"
@@ -173,9 +175,9 @@ export default function Members() {
 
         {!loading && filteredMembers.length === 0 && (
           <div className="text-center py-20">
-            <Users className="w-16 h-16 text-gray-700 mx-auto mb-4" />
-            <h3 className="text-xl font-medium text-white mb-2">No members found</h3>
-            <p className="text-gray-400">Try adjusting your search terms.</p>
+            <Users className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+            <h3 className="text-xl font-medium text-gray-900 mb-2">No members found</h3>
+            <p className="text-gray-500">Try adjusting your search terms.</p>
           </div>
         )}
       </div>

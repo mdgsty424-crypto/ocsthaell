@@ -288,7 +288,7 @@ export default function ProductDetail() {
               <button
                 type="submit"
                 disabled={submittingReview}
-                className="w-full bg-gray-900 text-white py-4 rounded-2xl font-black shadow-lg shadow-black/10 flex items-center justify-center gap-2"
+                className="w-full bg-brand-blue text-white py-4 rounded-2xl font-black shadow-lg shadow-brand-blue/20 flex items-center justify-center gap-2"
               >
                 {submittingReview ? 'Submitting...' : 'Post Review'}
               </button>

@@ -117,7 +117,7 @@ export default function Cart() {
       <div className="fixed bottom-24 left-0 right-0 px-4 z-40">
         <Link
           to="/shop/checkout"
-          className="w-full bg-gray-900 text-white py-4 rounded-2xl font-black shadow-xl shadow-black/10 flex items-center justify-center gap-2 group active:scale-95 transition-all"
+          className="w-full bg-brand-blue text-white py-4 rounded-2xl font-black shadow-xl shadow-brand-blue/20 flex items-center justify-center gap-2 group active:scale-95 transition-all"
         >
           Checkout Now <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
         </Link>

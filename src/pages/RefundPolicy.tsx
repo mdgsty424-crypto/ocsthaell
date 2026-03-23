@@ -27,24 +27,24 @@ export default function RefundPolicy() {
   }, []);
 
   return (
-    <div className="pt-24 pb-16 min-h-screen bg-[#05070a] text-white">
+    <div className="pt-24 pb-16 min-h-screen bg-white text-gray-900">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-[#0a0f19] rounded-2xl shadow-sm border border-gray-800 p-8 md:p-12"
+          className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 md:p-12"
         >
-          <div className="flex items-center space-x-4 mb-8 pb-8 border-b border-gray-800">
+          <div className="flex items-center space-x-4 mb-8 pb-8 border-b border-gray-100">
             <div className="w-16 h-16 bg-brand-blue/10 rounded-2xl flex items-center justify-center">
               <RefreshCcw className="w-8 h-8 text-brand-blue" />
             </div>
             <div>
-              <h1 className="text-3xl font-display font-bold text-white">Refund Policy</h1>
-              <p className="text-gray-400 mt-1">Last Updated: March 2026</p>
+              <h1 className="text-3xl font-display font-bold text-gray-900">Refund Policy</h1>
+              <p className="text-gray-500 mt-1">Last Updated: March 2026</p>
             </div>
           </div>
 
-          <div className="prose prose-lg prose-invert max-w-none text-gray-300 space-y-8">
+          <div className="prose prose-lg max-w-none text-gray-600 space-y-8">
             {loading ? (
               <div className="flex justify-center items-center py-12">
                 <div className="w-8 h-8 border-4 border-brand-blue border-t-transparent rounded-full animate-spin"></div>
@@ -59,13 +59,13 @@ export default function RefundPolicy() {
                   Welcome to our Refund Policy. This page outlines the conditions under which refunds are provided.
                 </p>
                 <section>
-                  <h2 className="text-2xl font-bold text-white mb-4">1. General Policy</h2>
+                  <h2 className="text-2xl font-bold text-gray-900 mb-4">1. General Policy</h2>
                   <p className="mb-4">
                     All transactions are final unless otherwise specified in this policy. We strive to provide the best service possible, but we understand that issues may arise.
                   </p>
                 </section>
                 <section>
-                  <h2 className="text-2xl font-bold text-white mb-4">2. Eligibility for Refunds</h2>
+                  <h2 className="text-2xl font-bold text-gray-900 mb-4">2. Eligibility for Refunds</h2>
                   <p className="mb-4">
                     Refunds may be granted under the following circumstances:
                   </p>
@@ -76,7 +76,7 @@ export default function RefundPolicy() {
                   </ul>
                 </section>
                 <section>
-                  <h2 className="text-2xl font-bold text-white mb-4">3. How to Request a Refund</h2>
+                  <h2 className="text-2xl font-bold text-gray-900 mb-4">3. How to Request a Refund</h2>
                   <p className="mb-4">
                     To request a refund, please contact our support team with your transaction details and the reason for your request.
                   </p>

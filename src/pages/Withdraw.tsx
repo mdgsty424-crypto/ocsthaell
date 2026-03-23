@@ -93,18 +93,18 @@ export default function Withdraw() {
 
   if (loading) {
     return (
-      <div className="min-h-screen pt-24 flex items-center justify-center bg-[#05070a]">
+      <div className="min-h-screen pt-24 flex items-center justify-center bg-white">
         <Loader2 className="w-12 h-12 text-brand-blue animate-spin" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#05070a] text-white pt-24 pb-12 px-4">
+    <div className="min-h-screen bg-white text-gray-900 pt-24 pb-12 px-4">
       <div className="max-w-md mx-auto">
         <button
           onClick={() => navigate(-1)}
-          className="flex items-center text-gray-400 hover:text-white mb-8 transition-colors"
+          className="flex items-center text-gray-500 hover:text-gray-900 mb-8 transition-colors"
         >
           <ArrowLeft className="w-5 h-5 mr-2" /> Back to Dashboard
         </button>
@@ -112,7 +112,7 @@ export default function Withdraw() {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-[#0a0f19] rounded-3xl p-8 border border-gray-800 shadow-2xl relative overflow-hidden"
+          className="bg-white rounded-3xl p-8 border border-gray-100 shadow-2xl relative overflow-hidden"
         >
           <div className="absolute top-0 left-0 w-full h-1 bg-gradient-brand"></div>
           
@@ -121,16 +121,16 @@ export default function Withdraw() {
               <Wallet className="w-8 h-8 text-brand-blue" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold">Withdraw Funds</h1>
-              <p className="text-gray-400 text-sm">Available: {balance.toFixed(2)} TK</p>
+              <h1 className="text-2xl font-bold text-gray-900">Withdraw Funds</h1>
+              <p className="text-gray-500 text-sm">Available: {balance.toFixed(2)} TK</p>
             </div>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
-              <label className="block text-sm font-medium text-gray-400 mb-2">Withdrawal Amount (TK)</label>
+              <label className="block text-sm font-medium text-gray-500 mb-2">Withdrawal Amount (TK)</label>
               <div className="relative">
-                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 font-bold">TK</span>
+                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-bold">TK</span>
                 <input
                   type="number"
                   required
@@ -138,16 +138,16 @@ export default function Withdraw() {
                   placeholder="0.00"
                   value={formData.amount}
                   onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
-                  className="w-full bg-[#111827] border border-gray-800 rounded-xl pl-12 pr-4 py-4 text-white focus:outline-none focus:border-brand-blue transition-colors"
+                  className="w-full bg-gray-50 border border-gray-200 rounded-xl pl-12 pr-4 py-4 text-gray-900 focus:outline-none focus:border-brand-blue transition-colors placeholder-gray-400"
                 />
               </div>
-              <p className="text-[10px] text-gray-500 mt-2 flex items-center">
+              <p className="text-[10px] text-gray-400 mt-2 flex items-center">
                 <AlertCircle className="w-3 h-3 mr-1" /> Minimum withdrawal: 20 TK
               </p>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-400 mb-2">Payment Method</label>
+              <label className="block text-sm font-medium text-gray-500 mb-2">Payment Method</label>
               <div className="grid grid-cols-2 gap-3">
                 <button
                   type="button"
@@ -155,7 +155,7 @@ export default function Withdraw() {
                   className={`p-4 rounded-xl border flex flex-col items-center gap-2 transition-all ${
                     formData.method === 'bkash' 
                       ? 'bg-brand-blue/10 border-brand-blue text-brand-blue' 
-                      : 'bg-[#111827] border-gray-800 text-gray-500 hover:border-gray-700'
+                      : 'bg-gray-50 border-gray-200 text-gray-500 hover:border-gray-300'
                   }`}
                 >
                   <CreditCard className="w-6 h-6" />
@@ -167,7 +167,7 @@ export default function Withdraw() {
                   className={`p-4 rounded-xl border flex flex-col items-center gap-2 transition-all ${
                     formData.method === 'recharge' 
                       ? 'bg-brand-pink/10 border-brand-pink text-brand-pink' 
-                      : 'bg-[#111827] border-gray-800 text-gray-500 hover:border-gray-700'
+                      : 'bg-gray-50 border-gray-200 text-gray-500 hover:border-gray-300'
                   }`}
                 >
                   <Smartphone className="w-6 h-6" />
@@ -178,11 +178,11 @@ export default function Withdraw() {
 
             {formData.method === 'recharge' && (
               <div>
-                <label className="block text-sm font-medium text-gray-400 mb-2">Select Operator</label>
+                <label className="block text-sm font-medium text-gray-500 mb-2">Select Operator</label>
                 <select
                   value={formData.operator}
                   onChange={(e) => setFormData({ ...formData, operator: e.target.value })}
-                  className="w-full bg-[#111827] border border-gray-800 rounded-xl px-4 py-4 text-white focus:outline-none focus:border-brand-blue transition-colors"
+                  className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-4 text-gray-900 focus:outline-none focus:border-brand-blue transition-colors"
                 >
                   <option value="grameenphone">Grameenphone</option>
                   <option value="banglalink">Banglalink</option>
@@ -194,7 +194,7 @@ export default function Withdraw() {
             )}
 
             <div>
-              <label className="block text-sm font-medium text-gray-400 mb-2">
+              <label className="block text-sm font-medium text-gray-500 mb-2">
                 {formData.method === 'recharge' ? 'Mobile Number' : 'bKash Number'}
               </label>
               <input
@@ -203,7 +203,7 @@ export default function Withdraw() {
                 placeholder="01XXXXXXXXX"
                 value={formData.phone}
                 onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                className="w-full bg-[#111827] border border-gray-800 rounded-xl px-4 py-4 text-white focus:outline-none focus:border-brand-blue transition-colors"
+                className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-4 text-gray-900 focus:outline-none focus:border-brand-blue transition-colors placeholder-gray-400"
               />
             </div>
 

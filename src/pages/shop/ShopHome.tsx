@@ -239,7 +239,7 @@ function ProductCard({ product, onAddToCart }: { product: Product, onAddToCart: 
               e.preventDefault();
               onAddToCart();
             }}
-            className="w-10 h-10 bg-gray-900 text-white rounded-2xl flex items-center justify-center hover:bg-brand-blue transition-all active:scale-90 shadow-lg shadow-black/5"
+            className="w-10 h-10 bg-brand-blue text-white rounded-2xl flex items-center justify-center hover:bg-brand-blue/80 transition-all active:scale-90 shadow-lg shadow-brand-blue/20"
           >
             <Plus size={20} />
           </button>

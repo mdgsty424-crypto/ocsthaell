@@ -134,7 +134,7 @@ export default function MyShop() {
             <p className="text-xs font-bold text-gray-400">Seller Dashboard</p>
           </div>
         </div>
-        <Link to="/shop/upload" className="p-3 bg-gray-900 text-white rounded-2xl shadow-lg active:scale-90 transition-all">
+        <Link to="/shop/upload" className="p-3 bg-brand-blue text-white rounded-2xl shadow-lg active:scale-90 transition-all">
           <Plus size={24} />
         </Link>
       </div>
@@ -169,7 +169,7 @@ export default function MyShop() {
             key={tab.id}
             onClick={() => setActiveTab(tab.id as any)}
             className={`px-6 py-3 rounded-2xl font-black text-xs whitespace-nowrap flex items-center gap-2 transition-all ${
-              activeTab === tab.id ? 'bg-gray-900 text-white shadow-lg' : 'bg-white text-gray-500 border border-gray-100'
+              activeTab === tab.id ? 'bg-brand-blue text-white shadow-lg shadow-brand-blue/20' : 'bg-white text-gray-500 border border-gray-100'
             }`}
           >
             <tab.icon size={16} /> {tab.label}
@@ -240,7 +240,7 @@ export default function MyShop() {
                     </div>
                     <button 
                       onClick={() => setActiveTab('settings')}
-                      className="w-full py-4 bg-gray-900 text-white text-xs font-black rounded-2xl shadow-lg shadow-black/10"
+                      className="w-full py-4 bg-brand-blue text-white text-xs font-black rounded-2xl shadow-lg shadow-brand-blue/20"
                     >
                       Update Pickup Location
                     </button>
@@ -331,7 +331,7 @@ export default function MyShop() {
                   </div>
 
                   <div className="flex gap-2">
-                    <button className="flex-grow py-3 bg-gray-900 text-white text-xs font-black rounded-xl shadow-lg shadow-black/10">
+                    <button className="flex-grow py-3 bg-brand-blue text-white text-xs font-black rounded-xl shadow-lg shadow-brand-blue/20">
                       Process Order
                     </button>
                     <button onClick={() => navigate(`/shop/order/${order.id}`)} className="px-4 py-3 bg-white text-gray-600 border border-gray-100 rounded-xl">

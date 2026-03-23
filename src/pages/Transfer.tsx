@@ -105,48 +105,48 @@ export default function Transfer() {
   };
 
   return (
-    <div className="min-h-screen pt-24 pb-12 px-4 bg-[#05070a] text-white">
-      <div className="max-w-md mx-auto bg-[#0a0f19] p-8 rounded-2xl border border-gray-800">
-        <h1 className="text-2xl font-bold mb-6 flex items-center gap-2">
+    <div className="min-h-screen pt-24 pb-12 px-4 bg-white text-gray-900">
+      <div className="max-w-md mx-auto bg-white p-8 rounded-2xl border border-gray-100 shadow-xl">
+        <h1 className="text-2xl font-bold mb-6 flex items-center gap-2 text-gray-900">
           <Wallet className="text-brand-blue" /> Transfer Money
         </h1>
         {showScanner ? (
           <div className="relative">
-            <button onClick={() => setShowScanner(false)} className="absolute top-2 right-2 z-20 bg-gray-800 p-2 rounded-full"><X className="w-5 h-5" /></button>
+            <button onClick={() => setShowScanner(false)} className="absolute top-2 right-2 z-20 bg-gray-100 p-2 rounded-full text-gray-600"><X className="w-5 h-5" /></button>
             <Scanner onScan={handleScan} />
           </div>
         ) : (
           <form onSubmit={handleTransfer} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-400 mb-1">Recipient OC ID or Email</label>
+              <label className="block text-sm font-medium text-gray-500 mb-1">Recipient OC ID or Email</label>
               <div className="flex gap-2">
                 <input
                   type="text"
                   value={recipientId}
                   onChange={(e) => setRecipientId(e.target.value)}
-                  className="flex-1 bg-[#05070a] border border-gray-700 rounded-lg px-4 py-3 focus:border-brand-blue outline-none"
+                  className="flex-1 bg-gray-50 border border-gray-200 rounded-lg px-4 py-3 text-gray-900 focus:border-brand-blue outline-none transition-colors"
                   required
                 />
-                <button type="button" onClick={() => setShowScanner(true)} className="bg-gray-800 p-3 rounded-lg"><QrCode className="w-6 h-6" /></button>
+                <button type="button" onClick={() => setShowScanner(true)} className="bg-gray-100 p-3 rounded-lg text-gray-600 hover:bg-gray-200 transition-colors"><QrCode className="w-6 h-6" /></button>
               </div>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-400 mb-1">Amount</label>
+              <label className="block text-sm font-medium text-gray-500 mb-1">Amount</label>
               <input
                 type="number"
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
-                className="w-full bg-[#05070a] border border-gray-700 rounded-lg px-4 py-3 focus:border-brand-blue outline-none"
+                className="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-3 text-gray-900 focus:border-brand-blue outline-none transition-colors"
                 required
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-400 mb-1">Password</label>
+              <label className="block text-sm font-medium text-gray-500 mb-1">Password</label>
               <input
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full bg-[#05070a] border border-gray-700 rounded-lg px-4 py-3 focus:border-brand-blue outline-none"
+                className="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-3 text-gray-900 focus:border-brand-blue outline-none transition-colors"
                 required
               />
             </div>

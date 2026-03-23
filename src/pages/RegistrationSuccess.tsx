@@ -35,11 +35,11 @@ export default function RegistrationSuccess() {
   if (!ocId) return null;
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#05070a] px-4">
+    <div className="min-h-screen flex items-center justify-center bg-white px-4">
       <motion.div
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
-        className="max-w-md w-full bg-[#0a0f19] rounded-3xl p-10 text-center border border-gray-800 shadow-2xl"
+        className="max-w-md w-full bg-white rounded-3xl p-10 text-center border border-gray-100 shadow-2xl"
       >
         <div className="flex justify-center mb-6">
           <div className="w-20 h-20 bg-green-500/20 rounded-full flex items-center justify-center">
@@ -47,21 +47,21 @@ export default function RegistrationSuccess() {
           </div>
         </div>
         
-        <h2 className="text-3xl font-display font-bold text-white mb-4">
+        <h2 className="text-3xl font-display font-bold text-gray-900 mb-4">
           Registration Successful!
         </h2>
         
-        <div className="bg-[#111827] p-6 rounded-2xl border border-gray-800 mb-8">
-          <p className="text-gray-400 text-sm mb-2">Your Unique OC-ID</p>
+        <div className="bg-gray-50 p-6 rounded-2xl border border-gray-100 mb-8">
+          <p className="text-gray-500 text-sm mb-2">Your Unique OC-ID</p>
           <p className="text-2xl font-mono font-bold text-brand-blue">{ocId}</p>
         </div>
 
         <div className="space-y-4">
-          <p className="text-gray-400">
-            Redirecting to your dashboard in <span className="text-white font-bold">{countdown}</span> seconds...
+          <p className="text-gray-500">
+            Redirecting to your dashboard in <span className="text-gray-900 font-bold">{countdown}</span> seconds...
           </p>
           
-          <div className="w-full bg-gray-800 h-1 rounded-full overflow-hidden">
+          <div className="w-full bg-gray-100 h-1 rounded-full overflow-hidden">
             <motion.div 
               initial={{ width: '0%' }}
               animate={{ width: '100%' }}
@@ -78,7 +78,7 @@ export default function RegistrationSuccess() {
           </button>
         </div>
 
-        <div className="mt-8 flex items-center justify-center text-gray-500 text-xs">
+        <div className="mt-8 flex items-center justify-center text-gray-400 text-xs">
           <Loader2 className="w-3 h-3 animate-spin mr-2" />
           Securing your session...
         </div>

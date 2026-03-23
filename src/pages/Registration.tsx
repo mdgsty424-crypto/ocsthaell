@@ -107,11 +107,11 @@ export default function Registration() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#05070a] px-4 pt-20 pb-10">
+    <div className="min-h-screen flex items-center justify-center px-4 pt-20 pb-10">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="max-w-2xl w-full bg-[#0a0f19] rounded-3xl p-10 relative overflow-hidden shadow-2xl border border-gray-800"
+        className="max-w-2xl w-full bg-white rounded-3xl p-10 relative overflow-hidden shadow-2xl border border-gray-100"
       >
         <div className="absolute top-0 left-0 w-full h-2 bg-gradient-brand"></div>
         
@@ -119,7 +119,7 @@ export default function Registration() {
           <div className="flex justify-center mb-6">
             <Hexagon className="w-16 h-16 text-brand-blue drop-shadow-lg" />
           </div>
-          <h2 className="text-3xl font-display font-bold text-white mb-2">
+          <h2 className="text-3xl font-display font-bold text-gray-900 mb-2">
             {step === 1 ? 'Create Account' : step === 2 ? 'Personal Details' : 'Address & Identity'}
           </h2>
           <p className="text-gray-400 text-sm">
@@ -146,49 +146,49 @@ export default function Registration() {
                     placeholder="Full Name"
                     value={displayName}
                     onChange={(e) => setDisplayName(e.target.value)}
-                    className="w-full bg-[#111827] border border-gray-800 rounded-xl pl-12 pr-4 py-4 text-white placeholder-gray-500 focus:outline-none focus:border-brand-blue transition-colors"
+                    className="w-full bg-gray-50 border border-gray-200 rounded-xl pl-12 pr-4 py-4 text-gray-900 placeholder-gray-500 focus:outline-none focus:border-brand-blue transition-colors"
                   />
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-400 mb-2">Mobile Number</label>
+                <label className="block text-sm font-medium text-gray-500 mb-2">Mobile Number</label>
                 <div className="relative">
-                  <Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
+                  <Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                   <input
                     type="tel"
                     required
                     placeholder="01XXXXXXXXX"
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
-                    className="w-full bg-[#111827] border border-gray-800 rounded-xl pl-12 pr-4 py-4 text-white placeholder-gray-500 focus:outline-none focus:border-brand-blue transition-colors"
+                    className="w-full bg-gray-50 border border-gray-200 rounded-xl pl-12 pr-4 py-4 text-gray-900 placeholder-gray-500 focus:outline-none focus:border-brand-blue transition-colors"
                   />
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-400 mb-2">Email Address</label>
+                <label className="block text-sm font-medium text-gray-500 mb-2">Email Address</label>
                 <div className="relative">
-                  <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
+                  <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                   <input
                     type="email"
                     required
                     placeholder="Email address"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="w-full bg-[#111827] border border-gray-800 rounded-xl pl-12 pr-4 py-4 text-white placeholder-gray-500 focus:outline-none focus:border-brand-blue transition-colors"
+                    className="w-full bg-gray-50 border border-gray-200 rounded-xl pl-12 pr-4 py-4 text-gray-900 placeholder-gray-500 focus:outline-none focus:border-brand-blue transition-colors"
                   />
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-400 mb-2">Password</label>
+                <label className="block text-sm font-medium text-gray-500 mb-2">Password</label>
                 <div className="relative">
-                  <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
+                  <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                   <input
                     type="password"
                     required
                     placeholder="Password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="w-full bg-[#111827] border border-gray-800 rounded-xl pl-12 pr-4 py-4 text-white placeholder-gray-500 focus:outline-none focus:border-brand-blue transition-colors"
+                    className="w-full bg-gray-50 border border-gray-200 rounded-xl pl-12 pr-4 py-4 text-gray-900 placeholder-gray-500 focus:outline-none focus:border-brand-blue transition-colors"
                   />
                 </div>
               </div>
@@ -199,25 +199,25 @@ export default function Registration() {
             <motion.div initial={{ x: 20, opacity: 0 }} animate={{ x: 0, opacity: 1 }} className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-400 mb-2">নাম (বাংলায়)</label>
+                  <label className="block text-sm font-medium text-gray-500 mb-2">নাম (বাংলায়)</label>
                   <input
                     type="text"
                     required
                     placeholder="নাম (বাংলায়)"
                     value={nameBengali}
                     onChange={(e) => setNameBengali(e.target.value)}
-                    className="w-full bg-[#111827] border border-gray-800 rounded-xl px-4 py-4 text-white placeholder-gray-500 focus:outline-none focus:border-brand-blue transition-colors"
+                    className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-4 text-gray-900 placeholder-gray-500 focus:outline-none focus:border-brand-blue transition-colors"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-400 mb-2">পিতার নাম</label>
+                  <label className="block text-sm font-medium text-gray-500 mb-2">পিতার নাম</label>
                   <input
                     type="text"
                     required
                     placeholder="পিতার নাম"
                     value={fatherName}
                     onChange={(e) => setFatherName(e.target.value)}
-                    className="w-full bg-[#111827] border border-gray-800 rounded-xl px-4 py-4 text-white placeholder-gray-500 focus:outline-none focus:border-brand-blue transition-colors"
+                    className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-4 text-gray-900 placeholder-gray-500 focus:outline-none focus:border-brand-blue transition-colors"
                   />
                 </div>
                 <div className="md:col-span-2">
@@ -228,32 +228,32 @@ export default function Registration() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-400 mb-2">মাতার নাম</label>
+                  <label className="block text-sm font-medium text-gray-500 mb-2">মাতার নাম</label>
                   <input
                     type="text"
                     required
                     placeholder="মাতার নাম"
                     value={motherName}
                     onChange={(e) => setMotherName(e.target.value)}
-                    className="w-full bg-[#111827] border border-gray-800 rounded-xl px-4 py-4 text-white placeholder-gray-500 focus:outline-none focus:border-brand-blue transition-colors"
+                    className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-4 text-gray-900 placeholder-gray-500 focus:outline-none focus:border-brand-blue transition-colors"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-400 mb-2">Date of Birth</label>
+                  <label className="block text-sm font-medium text-gray-500 mb-2">Date of Birth</label>
                   <input
                     type="date"
                     required
                     value={dob}
                     onChange={(e) => setDob(e.target.value)}
-                    className="w-full bg-[#111827] border border-gray-800 rounded-xl px-4 py-4 text-white placeholder-gray-500 focus:outline-none focus:border-brand-blue transition-colors"
+                    className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-4 text-gray-900 placeholder-gray-500 focus:outline-none focus:border-brand-blue transition-colors"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-400 mb-2">Sex</label>
+                  <label className="block text-sm font-medium text-gray-500 mb-2">Sex</label>
                   <select
                     value={sex}
                     onChange={(e) => setSex(e.target.value)}
-                    className="w-full bg-[#111827] border border-gray-800 rounded-xl px-4 py-4 text-white focus:outline-none focus:border-brand-blue transition-colors"
+                    className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-4 text-gray-900 focus:outline-none focus:border-brand-blue transition-colors"
                   >
                     <option value="Male">Male</option>
                     <option value="Female">Female</option>
@@ -261,11 +261,11 @@ export default function Registration() {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-400 mb-2">Blood Group</label>
+                  <label className="block text-sm font-medium text-gray-500 mb-2">Blood Group</label>
                   <select
                     value={bloodGroup}
                     onChange={(e) => setBloodGroup(e.target.value)}
-                    className="w-full bg-[#111827] border border-gray-800 rounded-xl px-4 py-4 text-white focus:outline-none focus:border-brand-blue transition-colors"
+                    className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-4 text-gray-900 focus:outline-none focus:border-brand-blue transition-colors"
                   >
                     {['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'].map(bg => (
                       <option key={bg} value={bg}>{bg}</option>
@@ -279,79 +279,79 @@ export default function Registration() {
           {step === 3 && (
             <motion.div initial={{ x: 20, opacity: 0 }} animate={{ x: 0, opacity: 1 }} className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-400 mb-2">জন্মস্থান</label>
+                <label className="block text-sm font-medium text-gray-500 mb-2">জন্মস্থান</label>
                 <input
                   type="text"
                   required
                   placeholder="জন্মস্থান"
                   value={birthPlace}
                   onChange={(e) => setBirthPlace(e.target.value)}
-                  className="w-full bg-[#111827] border border-gray-800 rounded-xl px-4 py-4 text-white placeholder-gray-500 focus:outline-none focus:border-brand-blue transition-colors"
+                  className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-4 text-gray-900 placeholder-gray-500 focus:outline-none focus:border-brand-blue transition-colors"
                 />
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-400 mb-2">বাসা/হোল্ডিং</label>
+                  <label className="block text-sm font-medium text-gray-500 mb-2">বাসা/হোল্ডিং</label>
                   <input
                     type="text"
                     required
                     placeholder="বাসা/হোল্ডিং"
                     value={address.house}
                     onChange={(e) => setAddress({ ...address, house: e.target.value })}
-                    className="w-full bg-[#111827] border border-gray-800 rounded-xl px-4 py-4 text-white placeholder-gray-500 focus:outline-none focus:border-brand-blue transition-colors"
+                    className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-4 text-gray-900 placeholder-gray-500 focus:outline-none focus:border-brand-blue transition-colors"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-400 mb-2">গ্রাম-রাস্তা</label>
+                  <label className="block text-sm font-medium text-gray-500 mb-2">গ্রাম-রাস্তা</label>
                   <input
                     type="text"
                     required
                     placeholder="গ্রাম-রাস্তা"
                     value={address.village}
                     onChange={(e) => setAddress({ ...address, village: e.target.value })}
-                    className="w-full bg-[#111827] border border-gray-800 rounded-xl px-4 py-4 text-white placeholder-gray-500 focus:outline-none focus:border-brand-blue transition-colors"
+                    className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-4 text-gray-900 placeholder-gray-500 focus:outline-none focus:border-brand-blue transition-colors"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-400 mb-2">ডাকঘর</label>
+                  <label className="block text-sm font-medium text-gray-500 mb-2">ডাকঘর</label>
                   <input
                     type="text"
                     required
                     placeholder="ডাকঘর"
                     value={address.postOffice}
                     onChange={(e) => setAddress({ ...address, postOffice: e.target.value })}
-                    className="w-full bg-[#111827] border border-gray-800 rounded-xl px-4 py-4 text-white placeholder-gray-500 focus:outline-none focus:border-brand-blue transition-colors"
+                    className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-4 text-gray-900 placeholder-gray-500 focus:outline-none focus:border-brand-blue transition-colors"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-400 mb-2">উপজেলা/চকরিয়া</label>
+                  <label className="block text-sm font-medium text-gray-500 mb-2">উপজেলা/চকরিয়া</label>
                   <input
                     type="text"
                     required
                     placeholder="উপজেলা"
                     value={address.upazila}
                     onChange={(e) => setAddress({ ...address, upazila: e.target.value })}
-                    className="w-full bg-[#111827] border border-gray-800 rounded-xl px-4 py-4 text-white placeholder-gray-500 focus:outline-none focus:border-brand-blue transition-colors"
+                    className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-4 text-gray-900 placeholder-gray-500 focus:outline-none focus:border-brand-blue transition-colors"
                   />
                 </div>
                 <div className="md:col-span-2">
-                  <label className="block text-sm font-medium text-gray-400 mb-2">জেলা/কক্সবাজার</label>
+                  <label className="block text-sm font-medium text-gray-500 mb-2">জেলা/কক্সবাজার</label>
                   <input
                     type="text"
                     required
                     placeholder="জেলা"
                     value={address.district}
                     onChange={(e) => setAddress({ ...address, district: e.target.value })}
-                    className="w-full bg-[#111827] border border-gray-800 rounded-xl px-4 py-4 text-white placeholder-gray-500 focus:outline-none focus:border-brand-blue transition-colors"
+                    className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-4 text-gray-900 placeholder-gray-500 focus:outline-none focus:border-brand-blue transition-colors"
                   />
                 </div>
                 <div className="md:col-span-2">
-                  <label className="block text-sm font-medium text-gray-400 mb-2">Bio / About Me (Optional)</label>
+                  <label className="block text-sm font-medium text-gray-500 mb-2">Bio / About Me (Optional)</label>
                   <textarea
                     placeholder="Tell us about yourself..."
                     value={bio}
                     onChange={(e) => setBio(e.target.value)}
-                    className="w-full bg-[#111827] border border-gray-800 rounded-xl px-4 py-4 text-white placeholder-gray-500 focus:outline-none focus:border-brand-blue transition-colors resize-none"
+                    className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-4 text-gray-900 placeholder-gray-500 focus:outline-none focus:border-brand-blue transition-colors resize-none"
                     rows={3}
                   />
                 </div>
@@ -371,7 +371,7 @@ export default function Registration() {
               <button
                 type="button"
                 onClick={() => setStep(step - 1)}
-                className="flex-1 py-4 px-6 rounded-xl bg-gray-800 text-white font-semibold hover:bg-gray-700 transition-all shadow-lg"
+                className="flex-1 py-4 px-6 rounded-xl bg-gray-100 text-gray-700 font-semibold hover:bg-gray-200 transition-all shadow-md"
               >
                 Back
               </button>

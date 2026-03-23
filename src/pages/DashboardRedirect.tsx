@@ -26,7 +26,7 @@ export default function DashboardRedirect() {
   }, [user, ocId, navigate, location]);
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#05070a] text-white">
+    <div className="min-h-screen flex items-center justify-center bg-white text-gray-900">
       <Loader2 className="w-12 h-12 animate-spin text-brand-blue" />
     </div>
   );

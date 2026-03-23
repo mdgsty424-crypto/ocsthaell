@@ -1833,7 +1833,7 @@ export default function OCChat() {
         {/* ZegoCloud Call Container (Video/Audio Grid) */}
         <div 
           ref={callContainerRef} 
-          className={`fixed inset-0 z-[200] bg-gray-900 ${inCall ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}
+          className={`fixed inset-0 z-[200] bg-white ${inCall ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}
         />
       </div>
       </div>
@@ -1866,13 +1866,13 @@ export default function OCChat() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-gray-900/95 backdrop-blur-md z-[100] flex flex-col items-center justify-center"
+            className="fixed inset-0 bg-white/95 backdrop-blur-md z-[100] flex flex-col items-center justify-center"
           >
             <div className="relative mb-8">
               {outgoingCall.receiverPhoto ? (
-                <img src={outgoingCall.receiverPhoto} alt={outgoingCall.receiverName} className="w-40 h-40 rounded-full border-4 border-gray-700 object-cover shadow-2xl z-10 relative" />
+                <img src={outgoingCall.receiverPhoto} alt={outgoingCall.receiverName} className="w-40 h-40 rounded-full border-4 border-gray-100 object-cover shadow-2xl z-10 relative" />
               ) : (
-                <div className="w-40 h-40 rounded-full border-4 border-gray-700 bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-6xl font-bold text-white shadow-2xl z-10 relative">
+                <div className="w-40 h-40 rounded-full border-4 border-gray-100 bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-6xl font-bold text-white shadow-2xl z-10 relative">
                   {outgoingCall.receiverName?.charAt(0)?.toUpperCase() || 'U'}
                 </div>
               )}
@@ -1880,8 +1880,8 @@ export default function OCChat() {
               <div className="absolute inset-0 rounded-full border-4 border-blue-400 animate-ping opacity-20 scale-125" style={{ animationDelay: '0.2s' }}></div>
             </div>
             
-            <h2 className="text-4xl font-bold text-white mb-2">{outgoingCall.receiverName}</h2>
-            <p className="text-gray-400 text-lg flex items-center justify-center mb-16">
+            <h2 className="text-4xl font-bold text-gray-900 mb-2">{outgoingCall.receiverName}</h2>
+            <p className="text-gray-500 text-lg flex items-center justify-center mb-16">
               {outgoingCall.type === 'video' ? <Video className="w-5 h-5 mr-2" /> : <Phone className="w-5 h-5 mr-2" />}
               Calling...
             </p>
@@ -1893,7 +1893,7 @@ export default function OCChat() {
               >
                 <PhoneOff className="w-8 h-8" />
               </button>
-              <span className="text-white font-medium">End Call</span>
+              <span className="text-gray-900 font-medium">End Call</span>
             </div>
           </motion.div>
         )}
@@ -1906,14 +1906,14 @@ export default function OCChat() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-gray-900/95 backdrop-blur-md z-[100] flex flex-col items-center justify-center"
+            className="fixed inset-0 bg-white/95 backdrop-blur-md z-[100] flex flex-col items-center justify-center"
           >
             {/* Big Logo */}
             <div className="relative mb-8">
               {incomingCall.callerPhoto ? (
-                <img src={incomingCall.callerPhoto} alt={incomingCall.callerName} className="w-40 h-40 rounded-full border-4 border-gray-700 object-cover shadow-2xl z-10 relative" />
+                <img src={incomingCall.callerPhoto} alt={incomingCall.callerName} className="w-40 h-40 rounded-full border-4 border-gray-100 object-cover shadow-2xl z-10 relative" />
               ) : (
-                <div className="w-40 h-40 rounded-full border-4 border-gray-700 bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-6xl font-bold text-white shadow-2xl z-10 relative">
+                <div className="w-40 h-40 rounded-full border-4 border-gray-100 bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-6xl font-bold text-white shadow-2xl z-10 relative">
                   {incomingCall.callerName?.charAt(0)?.toUpperCase() || 'U'}
                 </div>
               )}
@@ -1923,8 +1923,8 @@ export default function OCChat() {
             </div>
             
             {/* Name & Status */}
-            <h2 className="text-4xl font-bold text-white mb-2">{incomingCall.callerName}</h2>
-            <p className="text-gray-400 text-lg flex items-center justify-center mb-16">
+            <h2 className="text-4xl font-bold text-gray-900 mb-2">{incomingCall.callerName}</h2>
+            <p className="text-gray-500 text-lg flex items-center justify-center mb-16">
               {incomingCall.type === 'video' ? <Video className="w-5 h-5 mr-2" /> : <Phone className="w-5 h-5 mr-2" />}
               Incoming {incomingCall.type} call...
             </p>
@@ -1938,7 +1938,7 @@ export default function OCChat() {
                 >
                   <PhoneOff className="w-8 h-8" />
                 </button>
-                <span className="text-white font-medium">Decline</span>
+                <span className="text-gray-900 font-medium">Decline</span>
               </div>
               
               <div className="flex flex-col items-center">
@@ -1948,7 +1948,7 @@ export default function OCChat() {
                 >
                   <PhoneIncoming className="w-8 h-8" />
                 </button>
-                <span className="text-white font-medium">Accept</span>
+                <span className="text-gray-900 font-medium">Accept</span>
               </div>
             </div>
           </motion.div>

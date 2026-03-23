@@ -143,7 +143,7 @@ export default function UserDashboard() {
         }
 
         setFormData({
-          displayName: userData.displayName || userData.name || '',
+          displayName: userData.displayName || userData.name || user.displayName || user.email?.split('@')[0] || 'User',
           nameBengali: userData.nameBengali || '',
           fatherName: userData.fatherName || '',
           motherName: userData.motherName || '',
@@ -484,7 +484,7 @@ export default function UserDashboard() {
 
   if (loading) {
     return (
-      <div className="min-h-screen pt-24 pb-12 flex items-center justify-center bg-[#05070a]">
+      <div className="min-h-screen pt-24 pb-12 flex items-center justify-center">
         <div className="w-12 h-12 border-4 border-brand-blue border-t-transparent rounded-full animate-spin"></div>
       </div>
     );
@@ -492,7 +492,7 @@ export default function UserDashboard() {
 
   if (!profileUser) {
     return (
-      <div className="min-h-screen pt-32 px-4 text-center bg-[#05070a] text-white">
+      <div className="min-h-screen pt-32 px-4 text-center text-gray-900">
         <h1 className="text-4xl font-bold mb-4">Profile Not Found</h1>
         <Link to="/" className="text-brand-blue hover:underline">
           Return to Home
@@ -504,23 +504,23 @@ export default function UserDashboard() {
   const profileUrl = `https://ocsthael.com/${ocId}/profile`;
 
   return (
-    <div className="min-h-screen pt-24 pb-12 px-4 sm:px-6 lg:px-8 bg-[#05070a] text-white">
+    <div className="min-h-screen pt-24 pb-12 px-4 sm:px-6 lg:px-8 text-gray-900">
       <div className="max-w-6xl mx-auto space-y-8">
         
         {/* Header */}
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-[#0a0f19] p-6 rounded-2xl border border-gray-800">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white p-6 rounded-2xl border border-gray-200 shadow-sm">
           <div>
-            <h1 className="text-3xl font-display font-bold text-white mb-2">
+            <h1 className="text-3xl font-display font-bold text-gray-900 mb-2">
               {isOwnProfile ? 'My Dashboard' : `${formData.displayName}'s Profile`}
             </h1>
-            <p className="text-gray-400">
+            <p className="text-gray-600">
               {isOwnProfile ? 'Manage your profile, wallet, and settings.' : 'View user information and ID card.'}
             </p>
           </div>
           {isOwnProfile && (
             <button
               onClick={handleSignOut}
-              className="px-4 py-2 bg-red-500/10 hover:bg-red-500/20 text-red-400 rounded-lg font-medium transition-colors flex items-center"
+              className="px-4 py-2 bg-red-50 hover:bg-red-100 text-red-600 rounded-lg font-medium transition-colors flex items-center border border-red-100"
             >
               <LogOut className="w-4 h-4 mr-2" /> Sign Out
             </button>
@@ -530,16 +530,16 @@ export default function UserDashboard() {
         {/* Digital ID Card Section */}
         <div className="flex flex-col items-center gap-6">
           {isOwnProfile && (
-            <div className="flex bg-[#111827] rounded-xl p-1 mb-2 border border-gray-800">
+            <div className="flex bg-gray-100 rounded-xl p-1 mb-2 border border-gray-200">
               <button
                 onClick={() => setShowBack(false)}
-                className={`px-6 py-2 rounded-lg font-bold transition-all ${!showBack ? 'bg-brand-blue text-white' : 'text-gray-400'}`}
+                className={`px-6 py-2 rounded-lg font-bold transition-all ${!showBack ? 'bg-brand-blue text-white shadow-sm' : 'text-gray-500'}`}
               >
                 Front Side
               </button>
               <button
                 onClick={() => setShowBack(true)}
-                className={`px-6 py-2 rounded-lg font-bold transition-all ${showBack ? 'bg-brand-blue text-white' : 'text-gray-400'}`}
+                className={`px-6 py-2 rounded-lg font-bold transition-all ${showBack ? 'bg-brand-blue text-white shadow-sm' : 'text-gray-500'}`}
               >
                 Back Side
               </button>
@@ -858,34 +858,34 @@ export default function UserDashboard() {
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="bg-[#0a0f19] rounded-2xl p-6 border border-gray-800"
+                  className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm"
                 >
                   <div className="flex items-center justify-between mb-6">
-                    <h2 className="text-xl font-bold flex items-center">
+                    <h2 className="text-xl font-bold flex items-center text-gray-900">
                       <Wallet className="w-5 h-5 mr-2 text-brand-blue" /> My Wallet
                     </h2>
                     <span className="text-xs font-bold bg-brand-blue/20 text-brand-blue px-2 py-1 rounded-md">Active</span>
                   </div>
                   
                   <div className="mb-6">
-                    <p className="text-gray-400 text-sm mb-1">Available Balance</p>
-                    <h3 className="text-4xl font-black text-white">{wallet.balance.toFixed(2)} <span className="text-xl text-gray-500">TK</span></h3>
+                    <p className="text-gray-500 text-sm mb-1">Available Balance</p>
+                    <h3 className="text-4xl font-black text-gray-900">{wallet.balance.toFixed(2)} <span className="text-xl text-gray-400">TK</span></h3>
                   </div>
 
                   <div className="grid grid-cols-2 gap-4 mb-6">
-                    <div className="bg-[#111827] p-3 rounded-xl border border-gray-800">
+                    <div className="bg-gray-50 p-3 rounded-xl border border-gray-100">
                       <div className="flex items-center text-brand-mango mb-1">
                         <Calendar className="w-4 h-4 mr-1" />
                         <span className="text-xs font-bold uppercase">Streak</span>
                       </div>
-                      <p className="text-xl font-bold">{wallet.streak} <span className="text-sm text-gray-400 font-normal">Days</span></p>
+                      <p className="text-xl font-bold text-gray-900">{wallet.streak} <span className="text-sm text-gray-500 font-normal">Days</span></p>
                     </div>
-                    <div className="bg-[#111827] p-3 rounded-xl border border-gray-800">
+                    <div className="bg-gray-50 p-3 rounded-xl border border-gray-100">
                       <div className="flex items-center text-brand-pink mb-1">
                         <Gift className="w-4 h-4 mr-1" />
                         <span className="text-xs font-bold uppercase">Next Reward</span>
                       </div>
-                      <p className="text-sm font-medium text-gray-300">500 TK at 30 days</p>
+                      <p className="text-sm font-medium text-gray-600">500 TK at 30 days</p>
                     </div>
                   </div>
 
@@ -901,49 +901,49 @@ export default function UserDashboard() {
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="bg-[#0a0f19] rounded-2xl p-6 border border-gray-800"
+                  className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm"
                 >
                   <div className="flex items-center justify-between mb-6">
-                    <h2 className="text-xl font-bold flex items-center">
+                    <h2 className="text-xl font-bold flex items-center text-gray-900">
                       <CreditCard className="w-5 h-5 mr-2 text-green-500" /> Deposit Money
                     </h2>
                   </div>
                   
                   <form onSubmit={handleDeposit} className="space-y-4">
-                    <div className="bg-blue-500/10 p-4 rounded-xl border border-blue-500/20 mb-4 flex justify-between items-center">
+                    <div className="bg-blue-50 p-4 rounded-xl border border-blue-100 mb-4 flex justify-between items-center">
                       <div>
-                        <p className="text-xs text-blue-400 font-bold uppercase mb-1">bKash Personal</p>
-                        <p className="text-lg font-bold text-white">01869657287</p>
-                        <p className="text-[10px] text-gray-400 mt-1">Send money to this number and enter TxID below.</p>
+                        <p className="text-xs text-blue-600 font-bold uppercase mb-1">bKash Personal</p>
+                        <p className="text-lg font-bold text-gray-900">01869657287</p>
+                        <p className="text-[10px] text-gray-500 mt-1">Send money to this number and enter TxID below.</p>
                       </div>
                       <button 
                         type="button"
                         onClick={() => copyToClipboard('01869657287')}
-                        className="p-2 bg-blue-500/20 text-blue-400 rounded-lg hover:bg-blue-500/30 transition-all"
+                        className="p-2 bg-blue-100 text-blue-600 rounded-lg hover:bg-blue-200 transition-all"
                       >
                         Copy
                       </button>
                     </div>
 
                     <div>
-                      <label className="block text-xs font-medium text-gray-400 mb-1 uppercase">Amount (TK)</label>
+                      <label className="block text-xs font-medium text-gray-500 mb-1 uppercase">Amount (TK)</label>
                       <input
                         type="number"
                         placeholder="Enter amount"
                         value={depositForm.amount}
                         onChange={(e) => setDepositForm({ ...depositForm, amount: e.target.value })}
-                        className="w-full bg-[#111827] border border-gray-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-brand-blue"
+                        className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-gray-900 focus:outline-none focus:border-brand-blue"
                         required
                       />
                     </div>
                     <div>
-                      <label className="block text-xs font-medium text-gray-400 mb-1 uppercase">Transaction ID (TxID)</label>
+                      <label className="block text-xs font-medium text-gray-500 mb-1 uppercase">Transaction ID (TxID)</label>
                       <input
                         type="text"
                         placeholder="Enter bKash TxID"
                         value={depositForm.txid}
                         onChange={(e) => setDepositForm({ ...depositForm, txid: e.target.value })}
-                        className="w-full bg-[#111827] border border-gray-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-brand-blue font-mono"
+                        className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-gray-900 focus:outline-none focus:border-brand-blue font-mono"
                         required
                       />
                     </div>
@@ -961,12 +961,12 @@ export default function UserDashboard() {
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="bg-[#0a0f19] rounded-2xl p-6 border border-gray-800"
+                  className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm"
                 >
-                  <h2 className="text-xl font-bold mb-4 flex items-center">
+                  <h2 className="text-xl font-bold mb-4 flex items-center text-gray-900">
                     <Mail className="w-5 h-5 mr-2 text-brand-pink" /> Communication
                   </h2>
-                  <p className="text-sm text-gray-400 mb-6">Chat with other users and join groups in the ecosystem.</p>
+                  <p className="text-sm text-gray-500 mb-6">Chat with other users and join groups in the ecosystem.</p>
                   <Link
                     to="/chat"
                     className="w-full py-3 bg-brand-pink/10 text-brand-pink rounded-xl font-bold hover:bg-brand-pink/20 transition-all flex items-center justify-center"
@@ -979,15 +979,15 @@ export default function UserDashboard() {
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="bg-gradient-to-br from-[#0a0f19] to-[#111827] rounded-2xl p-6 border border-brand-blue/20 shadow-lg shadow-brand-blue/5"
+                  className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm"
                 >
                   <div className="flex items-center justify-between mb-4">
-                    <h2 className="text-xl font-bold flex items-center">
+                    <h2 className="text-xl font-bold flex items-center text-gray-900">
                       <ShoppingCart className="w-5 h-5 mr-2 text-brand-blue" /> Seller Hub
                     </h2>
                     <span className="text-[10px] font-black uppercase tracking-widest bg-brand-blue/20 text-brand-blue px-2 py-1 rounded">Marketplace</span>
                   </div>
-                  <p className="text-sm text-gray-400 mb-6">Start selling your products in the OCSTHAEL Shop and earn money.</p>
+                  <p className="text-sm text-gray-500 mb-6">Start selling your products in the OCSTHAEL Shop and earn money.</p>
                   <div className="space-y-3">
                     <Link
                       to="/shop/upload"
@@ -997,7 +997,7 @@ export default function UserDashboard() {
                     </Link>
                     <Link
                       to="/profile/my-shop"
-                      className="w-full py-3 bg-gray-800/50 text-gray-300 rounded-xl font-bold hover:bg-gray-800 transition-all flex items-center justify-center border border-gray-700"
+                      className="w-full py-3 bg-gray-50 text-gray-700 rounded-xl font-bold hover:bg-gray-100 transition-all flex items-center justify-center border border-gray-200"
                     >
                       Manage My Shop
                     </Link>
@@ -1010,18 +1010,18 @@ export default function UserDashboard() {
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="bg-[#0a0f19] rounded-2xl p-6 border border-gray-800 text-center"
+                className="bg-white rounded-2xl p-6 border border-gray-100 text-center shadow-sm"
               >
-                <div className="w-24 h-24 rounded-full overflow-hidden mx-auto mb-4 border-4 border-gray-800">
+                <div className="w-24 h-24 rounded-full overflow-hidden mx-auto mb-4 border-4 border-gray-50">
                   {formData.photoURL || (profileUser as any)?.imageUrl || (profileUser as any)?.image || (profileUser as any)?.profilePhoto || (profileUser as any)?.avatar || (profileUser as any)?.profilePicture || (profileUser as any)?.memberPhoto ? (
                     <img src={formData.photoURL || (profileUser as any)?.imageUrl || (profileUser as any)?.image || (profileUser as any)?.profilePhoto || (profileUser as any)?.avatar || (profileUser as any)?.profilePicture || (profileUser as any)?.memberPhoto} alt="Profile" className="w-full h-full object-cover" referrerPolicy="no-referrer" crossOrigin="anonymous" />
                   ) : (
-                    <div className="w-full h-full flex items-center justify-center bg-gray-800 text-gray-600">
+                    <div className="w-full h-full flex items-center justify-center bg-gray-50 text-gray-400">
                       <User className="w-12 h-12" />
                     </div>
                   )}
                 </div>
-                <h3 className="text-xl font-bold mb-1">{formData.displayName}</h3>
+                <h3 className="text-xl font-bold mb-1 text-gray-900">{formData.displayName}</h3>
                 <p className="text-brand-blue font-mono text-sm mb-4">{ocId}</p>
                 <div className="flex justify-center gap-2">
                   <Link
@@ -1039,11 +1039,11 @@ export default function UserDashboard() {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="lg:col-span-2 bg-[#0a0f19] rounded-2xl border border-gray-800 overflow-hidden"
+            className="lg:col-span-2 bg-white rounded-2xl border border-gray-100 overflow-hidden shadow-sm"
           >
             <div className="p-8">
               <div className="flex items-center justify-between mb-8">
-                <h2 className="text-2xl font-bold flex items-center">
+                <h2 className="text-2xl font-bold flex items-center text-gray-900">
                   <ShieldCheck className="w-6 h-6 mr-2 text-brand-blue" /> 
                   {isOwnProfile ? 'Profile Settings' : 'User Information'}
                 </h2>
@@ -1060,7 +1060,7 @@ export default function UserDashboard() {
 
               {/* Bio Section for Public View */}
               {!isOwnProfile && formData.bio && (
-                <div className="mb-8 p-6 bg-[#111827] rounded-2xl border border-gray-800 italic text-gray-300">
+                <div className="mb-8 p-6 bg-gray-50 rounded-2xl border border-gray-100 italic text-gray-700">
                   <p className="text-sm font-bold text-brand-blue uppercase mb-2 not-italic">About Me</p>
                   "{formData.bio}"
                 </div>
@@ -1069,18 +1069,18 @@ export default function UserDashboard() {
               <form onSubmit={handleSubmit} className="space-y-8">
                 {/* Profile Picture */}
                 {isOwnProfile && (
-                  <div className="flex flex-col sm:flex-row items-center gap-8 bg-[#111827] p-6 rounded-2xl border border-gray-800">
-                    <div className="w-24 h-24 rounded-full overflow-hidden bg-gray-800 border-2 border-brand-blue relative flex-shrink-0">
+                  <div className="flex flex-col sm:flex-row items-center gap-8 bg-gray-50 p-6 rounded-2xl border border-gray-100">
+                    <div className="w-24 h-24 rounded-full overflow-hidden bg-gray-200 border-2 border-brand-blue relative flex-shrink-0">
                       {formData.photoURL || (profileUser as any)?.imageUrl || (profileUser as any)?.image || (profileUser as any)?.profilePhoto || (profileUser as any)?.avatar || (profileUser as any)?.profilePicture || (profileUser as any)?.memberPhoto ? (
                         <img src={formData.photoURL || (profileUser as any)?.imageUrl || (profileUser as any)?.image || (profileUser as any)?.profilePhoto || (profileUser as any)?.avatar || (profileUser as any)?.profilePicture || (profileUser as any)?.memberPhoto} alt="Profile" className="w-full h-full object-cover" referrerPolicy="no-referrer" crossOrigin="anonymous" />
                       ) : (
-                        <div className="w-full h-full flex items-center justify-center text-gray-600">
+                        <div className="w-full h-full flex items-center justify-center text-gray-400">
                           <User className="w-10 h-10" />
                         </div>
                       )}
                     </div>
                     <div className="flex-grow w-full">
-                      <label className="block text-sm font-medium text-gray-400 mb-2">Change Profile Photo</label>
+                      <label className="block text-sm font-medium text-gray-500 mb-2">Change Profile Photo</label>
                       <ImageUpload
                         value={formData.photoURL}
                         onChange={handleImageUpload}
@@ -1091,16 +1091,16 @@ export default function UserDashboard() {
 
                 {/* Signature Upload */}
                 {isOwnProfile && (
-                  <div className="flex flex-col sm:flex-row items-center gap-8 bg-[#111827] p-6 rounded-2xl border border-gray-800">
-                    <div className="w-32 h-16 bg-white/10 border border-gray-700 rounded-xl flex items-center justify-center overflow-hidden flex-shrink-0">
+                  <div className="flex flex-col sm:flex-row items-center gap-8 bg-gray-50 p-6 rounded-2xl border border-gray-100">
+                    <div className="w-32 h-16 bg-white border border-gray-200 rounded-xl flex items-center justify-center overflow-hidden flex-shrink-0">
                       {formData.signatureURL ? (
-                        <img src={formData.signatureURL} alt="Signature" className="max-h-full max-w-full object-contain invert brightness-200" referrerPolicy="no-referrer" crossOrigin="anonymous" />
+                        <img src={formData.signatureURL} alt="Signature" className="max-h-full max-w-full object-contain" referrerPolicy="no-referrer" crossOrigin="anonymous" />
                       ) : (
-                        <span className="text-xs text-gray-500 italic">No Signature</span>
+                        <span className="text-xs text-gray-400 italic">No Signature</span>
                       )}
                     </div>
                     <div className="flex-grow w-full">
-                      <label className="block text-sm font-medium text-gray-400 mb-2">Digital Signature (Upload Image)</label>
+                      <label className="block text-sm font-medium text-gray-500 mb-2">Digital Signature (Upload Image)</label>
                       <ImageUpload
                         value={formData.signatureURL}
                         onChange={(url) => setFormData({ ...formData, signatureURL: url })}
@@ -1111,7 +1111,7 @@ export default function UserDashboard() {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {/* Read-only Identity Fields */}
-                  <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6 p-6 bg-gray-900/50 rounded-2xl border border-gray-800">
+                  <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6 p-6 bg-gray-50 rounded-2xl border border-gray-100">
                     <div className="md:col-span-2 mb-2">
                       <h4 className="text-sm font-bold text-gray-500 uppercase tracking-wider">Identity Information (Locked)</h4>
                     </div>
@@ -1123,7 +1123,7 @@ export default function UserDashboard() {
                         value={formData.displayName}
                         onChange={handleInputChange}
                         disabled={!isOwnProfile}
-                        className={`w-full px-4 py-3 bg-gray-800/50 border border-gray-700 rounded-xl text-white focus:outline-none focus:border-brand-blue ${!isOwnProfile && 'cursor-not-allowed opacity-70'}`}
+                        className={`w-full px-4 py-3 bg-gray-100 border border-gray-200 rounded-xl text-gray-900 focus:outline-none focus:border-brand-blue ${!isOwnProfile && 'cursor-not-allowed opacity-70'}`}
                       />
                     </div>
                     <div>
@@ -1132,7 +1132,7 @@ export default function UserDashboard() {
                         type="text"
                         value={formData.sex}
                         disabled
-                        className="w-full px-4 py-3 bg-gray-800/50 border border-gray-700 rounded-xl text-gray-400 cursor-not-allowed"
+                        className="w-full px-4 py-3 bg-gray-100 border border-gray-200 rounded-xl text-gray-500 cursor-not-allowed"
                       />
                     </div>
                     <div>
@@ -1141,7 +1141,7 @@ export default function UserDashboard() {
                         type="text"
                         value={formData.dob}
                         disabled
-                        className="w-full px-4 py-3 bg-gray-800/50 border border-gray-700 rounded-xl text-gray-400 cursor-not-allowed"
+                        className="w-full px-4 py-3 bg-gray-100 border border-gray-200 rounded-xl text-gray-500 cursor-not-allowed"
                       />
                     </div>
                     <div>
@@ -1150,13 +1150,13 @@ export default function UserDashboard() {
                         type="text"
                         value={formData.bloodGroup}
                         disabled
-                        className="w-full px-4 py-3 bg-gray-800/50 border border-gray-700 rounded-xl text-gray-400 cursor-not-allowed"
+                        className="w-full px-4 py-3 bg-gray-100 border border-gray-200 rounded-xl text-gray-500 cursor-not-allowed"
                       />
                     </div>
                     {!isOwnProfile && (
                       <div className="md:col-span-2">
                         <label className="block text-xs font-medium text-gray-500 mb-1">Address</label>
-                        <div className="w-full px-4 py-3 bg-gray-800/50 border border-gray-700 rounded-xl text-gray-400">
+                        <div className="w-full px-4 py-3 bg-gray-100 border border-gray-200 rounded-xl text-gray-500">
                           {formData.address.house}, {formData.address.village}, {formData.address.postOffice}, {formData.address.upazila}, {formData.address.district}
                         </div>
                       </div>
@@ -1169,19 +1169,19 @@ export default function UserDashboard() {
                   </div>
                   
                   <div>
-                    <label className="block text-sm font-medium text-gray-400 mb-2">Phone Number</label>
+                    <label className="block text-sm font-medium text-gray-500 mb-2">Phone Number</label>
                     <input
                       type="tel"
                       name="phone"
                       value={formData.phone}
                       onChange={handleInputChange}
                       disabled={!isOwnProfile}
-                      className={`w-full px-4 py-3 bg-[#111827] border border-gray-800 rounded-xl text-white focus:outline-none focus:border-brand-blue ${!isOwnProfile && 'cursor-not-allowed opacity-70'}`}
+                      className={`w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 focus:outline-none focus:border-brand-blue ${!isOwnProfile && 'cursor-not-allowed opacity-70'}`}
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-400 mb-2">Occupation</label>
+                    <label className="block text-sm font-medium text-gray-500 mb-2">Occupation</label>
                     <input
                       type="text"
                       name="occupation"
@@ -1189,25 +1189,25 @@ export default function UserDashboard() {
                       onChange={handleInputChange}
                       disabled={!isOwnProfile}
                       placeholder="e.g. Student, Engineer"
-                      className={`w-full px-4 py-3 bg-[#111827] border border-gray-800 rounded-xl text-white focus:outline-none focus:border-brand-blue ${!isOwnProfile && 'cursor-not-allowed opacity-70'}`}
+                      className={`w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 focus:outline-none focus:border-brand-blue ${!isOwnProfile && 'cursor-not-allowed opacity-70'}`}
                     />
                   </div>
 
                   <div className="md:col-span-2">
-                    <label className="block text-sm font-medium text-gray-400 mb-2">Bio / About Me</label>
+                    <label className="block text-sm font-medium text-gray-500 mb-2">Bio / About Me</label>
                     <textarea
                       name="bio"
                       value={formData.bio}
                       onChange={handleInputChange}
                       disabled={!isOwnProfile}
                       rows={4}
-                      className={`w-full px-4 py-3 bg-[#111827] border border-gray-800 rounded-xl text-white focus:outline-none focus:border-brand-blue resize-none ${!isOwnProfile && 'cursor-not-allowed opacity-70'}`}
+                      className={`w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 focus:outline-none focus:border-brand-blue resize-none ${!isOwnProfile && 'cursor-not-allowed opacity-70'}`}
                     />
                   </div>
                 </div>
 
                 {isOwnProfile && (
-                  <div className="pt-6 border-t border-gray-800 flex justify-end">
+                  <div className="pt-6 border-t border-gray-100 flex justify-end">
                     <button
                       type="submit"
                       disabled={saving}

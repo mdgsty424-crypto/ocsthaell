@@ -134,7 +134,7 @@ export default function Checkout() {
 
         <button
           onClick={() => navigate('/shop')}
-          className="w-full max-w-xs bg-gray-900 text-white py-4 rounded-2xl font-black shadow-xl shadow-black/10"
+          className="w-full max-w-xs bg-brand-blue text-white py-4 rounded-2xl font-black shadow-xl shadow-brand-blue/20"
         >
           Back to Shop
         </button>
@@ -306,7 +306,7 @@ export default function Checkout() {
               <button
                 onClick={() => setStep(2)}
                 disabled={!address.fullName || !address.phone || !address.division || !address.district || !address.upazila || !address.detailedAddress}
-                className="w-full bg-gray-900 text-white py-4 rounded-2xl font-black shadow-xl shadow-black/10 disabled:opacity-50 flex items-center justify-center gap-2"
+                className="w-full bg-brand-blue text-white py-4 rounded-2xl font-black shadow-xl shadow-brand-blue/20 disabled:opacity-50 flex items-center justify-center gap-2"
               >
                 Continue to Payment <ChevronRight size={20} />
               </button>
@@ -380,7 +380,7 @@ export default function Checkout() {
 
               <button
                 onClick={() => setStep(3)}
-                className="w-full bg-gray-900 text-white py-4 rounded-2xl font-black shadow-xl shadow-black/10 flex items-center justify-center gap-2"
+                className="w-full bg-brand-blue text-white py-4 rounded-2xl font-black shadow-xl shadow-brand-blue/20 flex items-center justify-center gap-2"
               >
                 Review Order <ChevronRight size={20} />
               </button>

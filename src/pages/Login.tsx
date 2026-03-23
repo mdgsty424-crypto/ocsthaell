@@ -220,11 +220,11 @@ export default function Login() {
 
   if (showOTP) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#05070a] px-4 pt-20">
+      <div className="min-h-screen flex items-center justify-center px-4 pt-20">
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="max-w-md w-full bg-[#0a0f19] rounded-3xl p-10 relative overflow-hidden shadow-2xl border border-gray-800"
+          className="max-w-md w-full bg-white rounded-3xl p-10 relative overflow-hidden shadow-2xl border border-gray-100"
         >
           <div className="absolute top-0 left-0 w-full h-2 bg-gradient-brand"></div>
           
@@ -232,7 +232,7 @@ export default function Login() {
             <div className="flex justify-center mb-6">
               <Hexagon className="w-16 h-16 text-brand-blue drop-shadow-lg" />
             </div>
-            <h2 className="text-3xl font-display font-bold text-white mb-2">
+            <h2 className="text-3xl font-display font-bold text-gray-900 mb-2">
               Verify OTP
             </h2>
             <p className="text-gray-400 text-sm">
@@ -256,7 +256,7 @@ export default function Login() {
                   placeholder="Enter 6-digit OTP"
                   value={otpInput}
                   onChange={(e) => setOtpInput(e.target.value)}
-                  className="w-full bg-[#111827] border border-gray-800 rounded-xl pl-12 pr-4 py-4 text-white placeholder-gray-500 focus:outline-none focus:border-brand-blue transition-colors text-center tracking-widest text-lg"
+                  className="w-full bg-gray-50 border border-gray-200 rounded-xl pl-12 pr-4 py-4 text-gray-900 placeholder-gray-500 focus:outline-none focus:border-brand-blue transition-colors text-center tracking-widest text-lg"
                   maxLength={6}
                 />
               </div>
@@ -274,11 +274,11 @@ export default function Login() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#05070a] px-4 pt-20">
+    <div className="min-h-screen flex items-center justify-center px-4 pt-20">
       <motion.div
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
-        className="max-w-md w-full bg-[#0a0f19] rounded-3xl p-10 relative overflow-hidden shadow-2xl border border-gray-800"
+        className="max-w-md w-full bg-white rounded-3xl p-10 relative overflow-hidden shadow-2xl border border-gray-100"
       >
         <div className="absolute top-0 left-0 w-full h-2 bg-gradient-brand"></div>
         
@@ -286,7 +286,7 @@ export default function Login() {
           <div className="flex justify-center mb-6">
             <Hexagon className="w-16 h-16 text-brand-blue drop-shadow-lg" />
           </div>
-          <h2 className="text-3xl font-display font-bold text-white mb-2">
+          <h2 className="text-3xl font-display font-bold text-gray-900 mb-2">
             Welcome Back
           </h2>
           <p className="text-gray-400 text-sm">
@@ -301,12 +301,12 @@ export default function Login() {
         )}
 
         {/* Login Method Toggle */}
-        <div className="flex bg-[#111827] rounded-xl p-1 mb-6 border border-gray-800">
+        <div className="flex bg-gray-50 rounded-xl p-1 mb-6 border border-gray-200">
           <button
             type="button"
             onClick={() => { setLoginMethod('email'); setIdentifier(''); setError(''); }}
             className={`flex-1 py-2 text-sm font-medium rounded-lg transition-all ${
-              loginMethod === 'email' ? 'bg-brand-blue text-white shadow-md' : 'text-gray-400 hover:text-white'
+              loginMethod === 'email' ? 'bg-brand-blue text-white shadow-md' : 'text-gray-500 hover:text-gray-700'
             }`}
           >
             Email
@@ -315,7 +315,7 @@ export default function Login() {
             type="button"
             onClick={() => { setLoginMethod('ocid'); setIdentifier(''); setError(''); }}
             className={`flex-1 py-2 text-sm font-medium rounded-lg transition-all ${
-              loginMethod === 'ocid' ? 'bg-brand-blue text-white shadow-md' : 'text-gray-400 hover:text-white'
+              loginMethod === 'ocid' ? 'bg-brand-blue text-white shadow-md' : 'text-gray-500 hover:text-gray-700'
             }`}
           >
             OC-ID
@@ -336,20 +336,20 @@ export default function Login() {
                 placeholder={loginMethod === 'email' ? 'Email address' : 'Your OC-ID'}
                 value={identifier}
                 onChange={(e) => setIdentifier(e.target.value)}
-                className="w-full bg-[#111827] border border-gray-800 rounded-xl pl-12 pr-4 py-4 text-white placeholder-gray-500 focus:outline-none focus:border-brand-blue transition-colors"
+                className="w-full bg-gray-50 border border-gray-200 rounded-xl pl-12 pr-4 py-4 text-gray-900 placeholder-gray-500 focus:outline-none focus:border-brand-blue transition-colors"
               />
             </div>
           </div>
           <div>
             <div className="relative">
-              <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
+              <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
               <input
                 type="password"
                 required
                 placeholder="Password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full bg-[#111827] border border-gray-800 rounded-xl pl-12 pr-4 py-4 text-white placeholder-gray-500 focus:outline-none focus:border-brand-blue transition-colors"
+                className="w-full bg-gray-50 border border-gray-200 rounded-xl pl-12 pr-4 py-4 text-gray-900 placeholder-gray-500 focus:outline-none focus:border-brand-blue transition-colors"
               />
             </div>
           </div>
@@ -367,16 +367,16 @@ export default function Login() {
         </form>
 
         <div className="relative flex items-center py-2 mb-6">
-          <div className="flex-grow border-t border-gray-800"></div>
-          <span className="flex-shrink-0 mx-4 text-gray-500 text-sm">or</span>
-          <div className="flex-grow border-t border-gray-800"></div>
+          <div className="flex-grow border-t border-gray-100"></div>
+          <span className="flex-shrink-0 mx-4 text-gray-400 text-sm">or</span>
+          <div className="flex-grow border-t border-gray-100"></div>
         </div>
 
         <button
           type="button"
           onClick={handleGoogleLogin}
           disabled={loading}
-          className="w-full py-4 px-6 rounded-xl bg-[#111827] hover:bg-gray-800 border border-gray-800 text-white font-semibold transition-all flex items-center justify-center group disabled:opacity-50 shadow-sm mb-6"
+          className="w-full py-4 px-6 rounded-xl bg-gray-50 hover:bg-gray-100 border border-gray-200 text-gray-900 font-semibold transition-all flex items-center justify-center group disabled:opacity-50 shadow-sm mb-6"
         >
           <svg className="w-5 h-5 mr-3" viewBox="0 0 24 24">
             <path fill="currentColor" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
