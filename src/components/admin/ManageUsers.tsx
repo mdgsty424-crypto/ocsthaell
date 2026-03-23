@@ -163,14 +163,14 @@ const ManageUsers = () => {
                       ) : (
                         <div className="flex items-center gap-3">
                           <div className="w-10 h-10 rounded-full bg-brand-blue/10 flex items-center justify-center text-brand-blue overflow-hidden">
-                            {user.photoURL ? (
-                              <img src={user.photoURL} alt={user.displayName} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+                            {user.photoURL || (user as any).imageUrl || (user as any).image || (user as any).profilePhoto || (user as any).avatar || (user as any).profilePicture || (user as any).memberPhoto ? (
+                              <img src={user.photoURL || (user as any).imageUrl || (user as any).image || (user as any).profilePhoto || (user as any).avatar || (user as any).profilePicture || (user as any).memberPhoto} alt={user.displayName || (user as any).name} className="w-full h-full object-cover" referrerPolicy="no-referrer" crossOrigin="anonymous" />
                             ) : (
                               <UserIcon size={20} />
                             )}
                           </div>
                           <div>
-                            <p className="font-medium text-gray-800 dark:text-white">{user.displayName || 'Unknown User'}</p>
+                            <p className="font-medium text-gray-800 dark:text-white">{user.displayName || (user as any).name || 'Unknown User'}</p>
                             {user.occupation && <p className="text-xs text-gray-500 dark:text-gray-400">{user.occupation}</p>}
                             <p className="text-xs text-gray-500 dark:text-gray-400 font-mono">{user.id}</p>
                           </div>

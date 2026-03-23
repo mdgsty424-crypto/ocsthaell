@@ -155,7 +155,7 @@ export default function UserDashboard() {
           phone: userData.phone || '',
           occupation: userData.occupation || '',
           nidNumber: userData.nidNumber || '',
-          photoURL: userData.photoURL || '',
+          photoURL: userData.photoURL || userData.imageUrl || userData.image || userData.profilePhoto || userData.avatar || userData.profilePicture || userData.memberPhoto || '',
           signatureURL: userData.signatureURL || '',
           bio: userData.bio || '',
           issueDate: userData.issueDate || '',
@@ -634,11 +634,13 @@ export default function UserDashboard() {
                     {/* Center: Photo */}
                     <div className="flex flex-col items-center justify-center">
                       <div className="w-56 h-72 rounded-[2rem] overflow-hidden shadow-2xl bg-gray-50 relative" style={{ border: `8px solid ${cardDesign.primaryColor}` }}>
-                        {formData.photoURL ? (
+                        {formData.photoURL || (profileUser as any)?.imageUrl || (profileUser as any)?.image || (profileUser as any)?.profilePhoto || (profileUser as any)?.avatar || (profileUser as any)?.profilePicture || (profileUser as any)?.memberPhoto ? (
                           <img 
-                            src={formData.photoURL} 
+                            src={formData.photoURL || (profileUser as any)?.imageUrl || (profileUser as any)?.image || (profileUser as any)?.profilePhoto || (profileUser as any)?.avatar || (profileUser as any)?.profilePicture || (profileUser as any)?.memberPhoto} 
                             alt="ID" 
                             className="w-full h-full object-cover" 
+                            referrerPolicy="no-referrer"
+                            crossOrigin="anonymous"
                           />
                         ) : (
                           <div className="w-full h-full flex items-center justify-center text-gray-300">
@@ -709,7 +711,7 @@ export default function UserDashboard() {
                         <div className="text-center">
                           <div className="w-56 h-20 border-b-4 border-gray-200 mb-2 flex items-center justify-center bg-gray-50 rounded-t-2xl">
                             {formData.signatureURL ? (
-                              <img src={formData.signatureURL} alt="Signature" className="max-h-full max-w-full object-contain" />
+                              <img src={formData.signatureURL} alt="Signature" className="max-h-full max-w-full object-contain" referrerPolicy="no-referrer" crossOrigin="anonymous" />
                             ) : (
                               <span className="italic text-sm text-gray-300">Signature</span>
                             )}
@@ -1011,8 +1013,8 @@ export default function UserDashboard() {
                 className="bg-[#0a0f19] rounded-2xl p-6 border border-gray-800 text-center"
               >
                 <div className="w-24 h-24 rounded-full overflow-hidden mx-auto mb-4 border-4 border-gray-800">
-                  {formData.photoURL ? (
-                    <img src={formData.photoURL} alt="Profile" className="w-full h-full object-cover" />
+                  {formData.photoURL || (profileUser as any)?.imageUrl || (profileUser as any)?.image || (profileUser as any)?.profilePhoto || (profileUser as any)?.avatar || (profileUser as any)?.profilePicture || (profileUser as any)?.memberPhoto ? (
+                    <img src={formData.photoURL || (profileUser as any)?.imageUrl || (profileUser as any)?.image || (profileUser as any)?.profilePhoto || (profileUser as any)?.avatar || (profileUser as any)?.profilePicture || (profileUser as any)?.memberPhoto} alt="Profile" className="w-full h-full object-cover" referrerPolicy="no-referrer" crossOrigin="anonymous" />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center bg-gray-800 text-gray-600">
                       <User className="w-12 h-12" />
@@ -1069,8 +1071,8 @@ export default function UserDashboard() {
                 {isOwnProfile && (
                   <div className="flex flex-col sm:flex-row items-center gap-8 bg-[#111827] p-6 rounded-2xl border border-gray-800">
                     <div className="w-24 h-24 rounded-full overflow-hidden bg-gray-800 border-2 border-brand-blue relative flex-shrink-0">
-                      {formData.photoURL ? (
-                        <img src={formData.photoURL} alt="Profile" className="w-full h-full object-cover" />
+                      {formData.photoURL || (profileUser as any)?.imageUrl || (profileUser as any)?.image || (profileUser as any)?.profilePhoto || (profileUser as any)?.avatar || (profileUser as any)?.profilePicture || (profileUser as any)?.memberPhoto ? (
+                        <img src={formData.photoURL || (profileUser as any)?.imageUrl || (profileUser as any)?.image || (profileUser as any)?.profilePhoto || (profileUser as any)?.avatar || (profileUser as any)?.profilePicture || (profileUser as any)?.memberPhoto} alt="Profile" className="w-full h-full object-cover" referrerPolicy="no-referrer" crossOrigin="anonymous" />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center text-gray-600">
                           <User className="w-10 h-10" />
@@ -1092,7 +1094,7 @@ export default function UserDashboard() {
                   <div className="flex flex-col sm:flex-row items-center gap-8 bg-[#111827] p-6 rounded-2xl border border-gray-800">
                     <div className="w-32 h-16 bg-white/10 border border-gray-700 rounded-xl flex items-center justify-center overflow-hidden flex-shrink-0">
                       {formData.signatureURL ? (
-                        <img src={formData.signatureURL} alt="Signature" className="max-h-full max-w-full object-contain invert brightness-200" />
+                        <img src={formData.signatureURL} alt="Signature" className="max-h-full max-w-full object-contain invert brightness-200" referrerPolicy="no-referrer" crossOrigin="anonymous" />
                       ) : (
                         <span className="text-xs text-gray-500 italic">No Signature</span>
                       )}

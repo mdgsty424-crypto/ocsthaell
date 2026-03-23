@@ -390,9 +390,9 @@ export default function Login() {
         <div className="text-center">
           <p className="text-sm text-gray-400">
             Don't have an account?{' '}
-            <Link to="/registration" className="text-brand-blue hover:text-blue-400 font-medium inline-flex items-center">
+            <a href="https://oc-registration.netlify.app" className="text-brand-blue hover:text-blue-400 font-medium inline-flex items-center">
               Get Started <ArrowRight className="w-4 h-4 ml-1" />
-            </Link>
+            </a>
           </p>
         </div>
       </motion.div>

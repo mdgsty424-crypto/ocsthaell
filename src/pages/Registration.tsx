@@ -6,6 +6,7 @@ import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { useNavigate, Link } from 'react-router-dom';
 import { Hexagon, Mail, Lock, User, ArrowRight, Loader2, Phone } from 'lucide-react';
 import { sendWelcomeMail, sendBonusMail } from '../services/emailService';
+import ImageUpload from '../components/admin/ImageUpload';
 
 export default function Registration() {
   const [step, setStep] = useState(1);
@@ -219,14 +220,11 @@ export default function Registration() {
                     className="w-full bg-[#111827] border border-gray-800 rounded-xl px-4 py-4 text-white placeholder-gray-500 focus:outline-none focus:border-brand-blue transition-colors"
                   />
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-400 mb-2">Profile Picture URL</label>
-                  <input
-                    type="text"
-                    placeholder="Paste image URL"
+                <div className="md:col-span-2">
+                  <ImageUpload 
+                    label="Profile Picture"
                     value={photoURL}
-                    onChange={(e) => setPhotoURL(e.target.value)}
-                    className="w-full bg-[#111827] border border-gray-800 rounded-xl px-4 py-4 text-white placeholder-gray-500 focus:outline-none focus:border-brand-blue transition-colors"
+                    onChange={(url) => setPhotoURL(url)}
                   />
                 </div>
                 <div>
@@ -358,13 +356,10 @@ export default function Registration() {
                   />
                 </div>
                 <div className="md:col-span-2">
-                  <label className="block text-sm font-medium text-gray-400 mb-2">Digital Signature URL (Optional)</label>
-                  <input
-                    type="text"
-                    placeholder="Paste signature image URL"
+                  <ImageUpload 
+                    label="Digital Signature"
                     value={signatureURL}
-                    onChange={(e) => setSignatureURL(e.target.value)}
-                    className="w-full bg-[#111827] border border-gray-800 rounded-xl px-4 py-4 text-white placeholder-gray-500 focus:outline-none focus:border-brand-blue transition-colors"
+                    onChange={(url) => setSignatureURL(url)}
                   />
                 </div>
               </div>

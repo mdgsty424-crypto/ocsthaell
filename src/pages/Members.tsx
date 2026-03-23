@@ -111,15 +111,21 @@ export default function Members() {
               >
                 <div className="p-6 flex flex-col items-center text-center flex-grow">
                   <div className="w-24 h-24 rounded-full overflow-hidden bg-gray-800 mb-4 border-4 border-[#05070a] shadow-sm group-hover:scale-105 transition-transform duration-300">
-                    {member.photoURL ? (
-                      <img src={member.photoURL} alt={member.displayName} className="w-full h-full object-cover" />
+                    {member.photoURL || (member as any).imageUrl || (member as any).image || (member as any).profilePhoto || (member as any).avatar || (member as any).profilePicture || (member as any).memberPhoto ? (
+                      <img 
+                        src={member.photoURL || (member as any).imageUrl || (member as any).image || (member as any).profilePhoto || (member as any).avatar || (member as any).profilePicture || (member as any).memberPhoto} 
+                        alt={member.displayName || (member as any).name || 'Member'} 
+                        className="w-full h-full object-cover" 
+                        referrerPolicy="no-referrer" 
+                        crossOrigin="anonymous" 
+                      />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center text-gray-500 bg-gray-800">
                         <Users className="w-10 h-10" />
                       </div>
                     )}
                   </div>
-                  <h3 className="text-lg font-bold text-white mb-0.5">{member.displayName || 'Anonymous User'}</h3>
+                  <h3 className="text-lg font-bold text-white mb-0.5">{member.displayName || (member as any).name || 'Anonymous User'}</h3>
                   {(member as any).nameBengali && (
                     <p className="text-sm text-gray-400 mb-1 font-medium">{(member as any).nameBengali}</p>
                   )}

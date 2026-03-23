@@ -204,7 +204,7 @@ export default function Home() {
                 <Link to="/services" className="px-10 py-5 bg-gradient-to-r from-brand-blue to-brand-pink text-white font-bold rounded-2xl hover:shadow-[0_0_30px_rgba(59,130,246,0.4)] transition-all hover:-translate-y-1">
                   Our Services
                 </Link>
-                <a href="https://registration.ocsthael.com" target="_blank" rel="noopener noreferrer" className="px-10 py-5 border-2 border-brand-mango/50 text-brand-mango font-bold rounded-2xl hover:bg-brand-mango/10 transition-all hover:-translate-y-1">
+                <a href="https://oc-registration.netlify.app" target="_blank" rel="noopener noreferrer" className="px-10 py-5 border-2 border-brand-mango/50 text-brand-mango font-bold rounded-2xl hover:bg-brand-mango/10 transition-all hover:-translate-y-1">
                   Get Started
                 </a>
               </div>
@@ -597,19 +597,20 @@ export default function Home() {
                     <div className="relative mb-6 mx-auto w-32 h-32 sm:w-40 sm:h-40">
                       <div className="absolute inset-0 bg-gradient-brand rounded-full scale-105 opacity-0 group-hover:opacity-20 transition-opacity duration-500"></div>
                       <div className="relative w-full h-full rounded-full overflow-hidden border-4 border-white shadow-lg group-hover:shadow-xl transition-all duration-500 bg-gray-100 flex items-center justify-center">
-                        {member.photoURL ? (
+                        {member.photoURL || (member as any).imageUrl || (member as any).image || (member as any).profilePhoto || (member as any).avatar || (member as any).profilePicture || (member as any).memberPhoto ? (
                           <img 
-                            src={member.photoURL} 
-                            alt={member.displayName} 
+                            src={member.photoURL || (member as any).imageUrl || (member as any).image || (member as any).profilePhoto || (member as any).avatar || (member as any).profilePicture || (member as any).memberPhoto} 
+                            alt={member.displayName || (member as any).name || 'Member'} 
                             className="w-full h-full object-cover transition-all duration-700"
                             referrerPolicy="no-referrer"
+                            crossOrigin="anonymous"
                           />
                         ) : (
                           <Users className="w-12 h-12 text-gray-400" />
                         )}
                       </div>
                     </div>
-                    <h3 className="text-lg font-bold text-gray-900 mb-1 group-hover:text-brand-pink transition-colors">{member.displayName || 'Anonymous User'}</h3>
+                    <h3 className="text-lg font-bold text-gray-900 mb-1 group-hover:text-brand-pink transition-colors">{member.displayName || (member as any).name || 'Anonymous User'}</h3>
                     {member.occupation && (
                       <p className="text-xs font-bold text-brand-blue uppercase tracking-widest">{member.occupation}</p>
                     )}

@@ -54,6 +54,22 @@ import Transfer from './pages/Transfer';
 import NotFound from './pages/NotFound';
 import AutoLogin from './components/AutoLogin';
 
+import { useEffect } from 'react';
+
+const RegistrationRedirect = () => {
+  useEffect(() => {
+    window.location.href = 'https://oc-registration.netlify.app';
+  }, []);
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-[#05070a]">
+      <div className="text-white text-center">
+        <div className="w-12 h-12 border-4 border-brand-blue border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+        <p className="text-gray-400">Redirecting to registration...</p>
+      </div>
+    </div>
+  );
+};
+
 export default function App() {
   return (
     <ErrorBoundary>
@@ -85,7 +101,7 @@ export default function App() {
                       <Route path="/news/:id" element={<NewsDetails />} />
                       <Route path="/contact" element={<Contact />} />
                       <Route path="/login" element={<Login />} />
-                      <Route path="/registration" element={<Registration />} />
+                      <Route path="/registration" element={<RegistrationRedirect />} />
                       <Route path="/registration-success" element={<RegistrationSuccess />} />
                       <Route path="/dashboard" element={<DashboardRedirect />} />
                       <Route path="/withdraw" element={<ProtectedRoute requireAdmin={false}><Withdraw /></ProtectedRoute>} />
