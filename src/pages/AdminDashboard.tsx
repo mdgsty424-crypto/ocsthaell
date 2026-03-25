@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { auth } from '../firebase';
 import { signOut } from 'firebase/auth';
 import { useNavigate, Routes, Route, Link, useLocation } from 'react-router-dom';
-import { Hexagon, LayoutDashboard, Layers, Image, Users, Newspaper, LogOut, BarChart, MonitorPlay, Image as ImageIcon, Palette, Search } from 'lucide-react';
+import { Hexagon, LayoutDashboard, Layers, Image, Users, Newspaper, LogOut, BarChart, MonitorPlay, Image as ImageIcon, Palette, Search, Bell } from 'lucide-react';
 import ManageBanners from '../components/admin/ManageBanners';
 import ManageHeroBanners from '../components/admin/ManageHeroBanners';
 import ManageHeroBackground from '../components/admin/ManageHeroBackground';
@@ -20,6 +20,7 @@ import ManageSEO from '../components/admin/ManageSEO';
 import ManageUsers from '../components/admin/ManageUsers';
 import ManageLegal from '../components/admin/ManageLegal';
 import ManageSupportTickets from '../components/admin/ManageSupportTickets';
+import ManageNotifications from '../components/admin/ManageNotifications';
 import ManageWithdrawals from '../components/admin/ManageWithdrawals';
 import ManageIDCard from '../components/admin/ManageIDCard';
 import ManageDeposits from '../components/admin/ManageDeposits';
@@ -63,6 +64,7 @@ export default function AdminDashboard() {
     { name: 'Email Settings', path: '/admin/dashboard/email', icon: Mail },
     { name: 'API Keys', path: '/admin/dashboard/api-keys', icon: Key },
     { name: 'Support Tickets', path: '/admin/dashboard/support', icon: HeadphonesIcon },
+    { name: 'Push Notifications', path: '/admin/dashboard/notifications', icon: Bell },
     { name: 'Legal Pages', path: '/admin/dashboard/legal', icon: FileText },
     { name: 'SEO & Scripts', path: '/admin/dashboard/seo', icon: Search },
   ];
@@ -141,6 +143,7 @@ export default function AdminDashboard() {
             <Route path="/email" element={<ManageEmail />} />
             <Route path="/api-keys" element={<ManageAPIKeys />} />
             <Route path="/support" element={<ManageSupportTickets />} />
+            <Route path="/notifications" element={<ManageNotifications />} />
             <Route path="/legal" element={<ManageLegal />} />
             <Route path="/seo" element={<ManageSEO />} />
           </Routes>

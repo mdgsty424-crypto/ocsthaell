@@ -70,3 +70,59 @@ exports.sendChatNotification = functions.firestore
 
     return Promise.all(promises);
   });
+
+/**
+ * Triggers when a new global notification is created in 'global_notifications'.
+ * Sends a push notification to ALL users who have an FCM token.
+ */
+exports.sendGlobalNotification = functions.firestore
+  .document('global_notifications/{notifId}')
+  .onCreate(async (snapshot, context) => {
+    const { title, message, type } = snapshot.data();
+    const notifId = context.params.notifId;
+
+    try {
+      // Fetch all users with an FCM token
+      const usersSnapshot = await admin.firestore()
+        .collection('users')
+        .where('fcmToken', '!=', null)
+        .get();
+
+      const tokens = usersSnapshot.docs
+        .map(doc => doc.data().fcmToken)
+        .filter(token => !!token);
+
+      if (tokens.length === 0) {
+        console.log('No users with FCM tokens found.');
+        return snapshot.ref.update({ status: 'no_tokens' });
+      }
+
+      const payload = {
+        notification: {
+          title: title || 'System Update',
+          body: message || 'You have a new update from OCSTHAEL.',
+          icon: 'https://i.postimg.cc/5NYLFxzG/1000000745-removebg-preview.png',
+        },
+        data: {
+          url: '/',
+          type: type || 'message',
+          global: 'true'
+        }
+      };
+
+      // Send to all tokens (batching if necessary, but sendToDevice handles arrays)
+      const response = await admin.messaging().sendToDevice(tokens, payload);
+      
+      console.log(`Successfully sent global notification to ${tokens.length} users.`);
+      
+      return snapshot.ref.update({ 
+        status: 'sent', 
+        sentCount: tokens.length,
+        successCount: response.successCount,
+        failureCount: response.failureCount
+      });
+    } catch (error) {
+      console.error('Error sending global notification:', error);
+      return snapshot.ref.update({ status: 'error', error: error.message });
+    }
+  });
