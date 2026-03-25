@@ -76,3 +76,26 @@ export const onForegroundMessage = () => {
     }
   });
 };
+
+/**
+ * Sends a push notification via the Vercel API.
+ * This is a "No Computer" alternative to Cloud Functions.
+ */
+export const sendPushNotification = async (tokens: string[], title: string, body: string, data: any = {}) => {
+  if (!tokens || tokens.length === 0) return;
+
+  try {
+    const response = await fetch('/api/notify', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ tokens, title, body, data })
+    });
+    
+    const result = await response.json();
+    console.log('Notification send result:', result);
+    return result;
+  } catch (error) {
+    console.error('Error calling notify API:', error);
+    return null;
+  }
+};
