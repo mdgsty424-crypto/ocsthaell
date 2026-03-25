@@ -2,53 +2,59 @@ import { getToken, onMessage } from 'firebase/messaging';
 import { messaging, db, auth } from '../firebase';
 import { doc, updateDoc, setDoc } from 'firebase/firestore';
 
-const VAPID_PUBLIC_KEY = 'BL3vTMaTtJoxZbr1eode_zPvediWvQDnEuzlff5mvN9TYTjDgFZ7gYKXSEguYGy-3arT_VveRCqZfQ2LEpYrLhU';
+const VAPID_PUBLIC_KEY = import.meta.env.VITE_FIREBASE_VAPID_KEY || 'BL3vTMaTtJoxZbr1eode_zPvediWvQDnEuzlff5mvN9TYTjDgFZ7gYKXSEguYGy-3arT_VveRCqZfQ2LEpYrLhU';
 
 export const requestNotificationPermission = async () => {
   try {
+    console.log('[Messaging] Requesting permission...');
     const permission = await Notification.requestPermission();
     if (permission === 'granted') {
-      console.log('Notification permission granted.');
+      console.log('[Messaging] Permission granted.');
       const token = await generateToken();
       return token;
     } else {
-      console.log('Notification permission denied.');
+      console.warn('[Messaging] Permission denied.');
       return null;
     }
   } catch (error) {
-    console.error('Error requesting notification permission:', error);
+    console.error('[Messaging] Error requesting permission:', error);
     return null;
   }
 };
 
 export const generateToken = async () => {
   try {
+    console.log('[Messaging] Generating token with VAPID key:', VAPID_PUBLIC_KEY);
     const token = await getToken(messaging, {
       vapidKey: VAPID_PUBLIC_KEY
     });
     
     if (token) {
-      console.log('FCM Token:', token);
+      console.log('[Messaging] FCM Token generated:', token);
       // Save token to user profile in Firestore
       if (auth.currentUser) {
+        console.log('[Messaging] Saving token to Firestore for user:', auth.currentUser.uid);
         await updateDoc(doc(db, 'users', auth.currentUser.uid), {
           fcmToken: token,
           updatedAt: new Date()
         }).catch(async (err) => {
-          // If update fails, try set with merge
+          console.warn('[Messaging] updateDoc failed, trying setDoc with merge:', err.message);
           await setDoc(doc(db, 'users', auth.currentUser!.uid), {
             fcmToken: token,
             updatedAt: new Date()
           }, { merge: true });
         });
+        console.log('[Messaging] Token saved successfully.');
+      } else {
+        console.warn('[Messaging] No user logged in. Token not saved to Firestore.');
       }
       return token;
     } else {
-      console.log('No registration token available. Request permission to generate one.');
+      console.warn('[Messaging] No registration token available.');
       return null;
     }
   } catch (error) {
-    console.error('An error occurred while retrieving token:', error);
+    console.error('[Messaging] Error retrieving token:', error);
     return null;
   }
 };

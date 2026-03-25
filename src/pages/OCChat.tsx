@@ -667,8 +667,8 @@ export default function OCChat() {
     // Send Push Notification
     if (activeChat.id !== 'ai_bot') {
       if (activeChat.type === 'user') {
-        const recipientDoc = await getDocs(query(collection(db, 'users'), where('id', '==', activeChat.id)));
-        const recipientData = recipientDoc.docs[0]?.data();
+        const recipientDoc = await getDoc(doc(db, 'users', activeChat.id));
+        const recipientData = recipientDoc.data();
         if (recipientData?.fcmToken) {
           await sendPushNotification(
             [recipientData.fcmToken],
@@ -684,8 +684,8 @@ export default function OCChat() {
           const otherMembers = group.members.filter(m => m !== user.uid);
           const memberTokens: string[] = [];
           for (const memberId of otherMembers) {
-            const memberDoc = await getDocs(query(collection(db, 'users'), where('id', '==', memberId)));
-            const token = memberDoc.docs[0]?.data()?.fcmToken;
+            const memberDoc = await getDoc(doc(db, 'users', memberId));
+            const token = memberDoc.data()?.fcmToken;
             if (token) memberTokens.push(token);
           }
           if (memberTokens.length > 0) {
@@ -872,8 +872,8 @@ export default function OCChat() {
         
         // Send Push Notification
         if (user?.uid) {
-          const userDoc = await getDocs(query(collection(db, 'users'), where('id', '==', user.uid)));
-          const token = userDoc.docs[0]?.data()?.fcmToken;
+          const userDoc = await getDoc(doc(db, 'users', user.uid));
+          const token = userDoc.data()?.fcmToken;
           if (token) {
             await sendPushNotification([token], 'OCSTHAEL AI', response.text, { url: '/oc-chat', type: 'message' });
           }
@@ -947,8 +947,8 @@ export default function OCChat() {
           });
 
           // Send Push Notification for Group Call
-          const memberDoc = await getDocs(query(collection(db, 'users'), where('id', '==', memberId)));
-          const token = memberDoc.docs[0]?.data()?.fcmToken;
+          const memberDoc = await getDoc(doc(db, 'users', memberId));
+          const token = memberDoc.data()?.fcmToken;
           if (token) {
             await sendPushNotification(
               [token],
@@ -974,8 +974,8 @@ export default function OCChat() {
       });
 
       // Send Push Notification for Private Call
-      const recipientDoc = await getDocs(query(collection(db, 'users'), where('id', '==', targetId)));
-      const token = recipientDoc.docs[0]?.data()?.fcmToken;
+      const recipientDoc = await getDoc(doc(db, 'users', targetId));
+      const token = recipientDoc.data()?.fcmToken;
       if (token) {
         await sendPushNotification(
           [token],
