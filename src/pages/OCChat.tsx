@@ -11,6 +11,7 @@ import { Search, Phone, Video, Send, Plus, X, UserPlus, LogOut, MessageSquare, P
 import { format } from 'date-fns';
 import { useDropzone } from 'react-dropzone';
 import { useNavigate } from 'react-router-dom';
+import { sendPushNotification } from '../lib/messaging';
 
 // ZegoCloud Config
 const APP_ID = Number(process.env.ZEGO_APP_ID || 0);
@@ -663,6 +664,42 @@ export default function OCChat() {
 
     await addDoc(collection(db, 'chats', channelId, 'messages'), messageData);
     
+    // Send Push Notification
+    if (activeChat.id !== 'ai_bot') {
+      if (activeChat.type === 'user') {
+        const recipientDoc = await getDocs(query(collection(db, 'users'), where('id', '==', activeChat.id)));
+        const recipientData = recipientDoc.docs[0]?.data();
+        if (recipientData?.fcmToken) {
+          await sendPushNotification(
+            [recipientData.fcmToken],
+            user.displayName || 'New Message',
+            messageText || (fileUrl ? 'Sent an attachment' : ''),
+            { url: '/oc-chat', type: 'message' }
+          );
+        }
+      } else if (activeChat.type === 'group') {
+        // For groups, we'd need to fetch tokens for all members except self
+        const group = groups.find(g => g.id === activeChat.id);
+        if (group) {
+          const otherMembers = group.members.filter(m => m !== user.uid);
+          const memberTokens: string[] = [];
+          for (const memberId of otherMembers) {
+            const memberDoc = await getDocs(query(collection(db, 'users'), where('id', '==', memberId)));
+            const token = memberDoc.docs[0]?.data()?.fcmToken;
+            if (token) memberTokens.push(token);
+          }
+          if (memberTokens.length > 0) {
+            await sendPushNotification(
+              memberTokens,
+              `${group.name}: ${user.displayName}`,
+              messageText || (fileUrl ? 'Sent an attachment' : ''),
+              { url: '/oc-chat', type: 'message' }
+            );
+          }
+        }
+      }
+    }
+
     // Clear typing status
     setIsTyping(false);
     setDoc(doc(db, 'chats', channelId, 'typing', user.uid), { isTyping: false }, { merge: true });
@@ -832,6 +869,15 @@ export default function OCChat() {
           senderPhoto: 'https://api.dicebear.com/7.x/bottts/svg?seed=ocsthael',
           timestamp: serverTimestamp(),
         });
+        
+        // Send Push Notification
+        if (user?.uid) {
+          const userDoc = await getDocs(query(collection(db, 'users'), where('id', '==', user.uid)));
+          const token = userDoc.docs[0]?.data()?.fcmToken;
+          if (token) {
+            await sendPushNotification([token], 'OCSTHAEL AI', response.text, { url: '/oc-chat', type: 'message' });
+          }
+        }
         console.log("AI: Message added to Firestore");
       }
     } catch (error: any) {
@@ -899,6 +945,18 @@ export default function OCChat() {
             isGroup: true,
             groupName: targetName
           });
+
+          // Send Push Notification for Group Call
+          const memberDoc = await getDocs(query(collection(db, 'users'), where('id', '==', memberId)));
+          const token = memberDoc.docs[0]?.data()?.fcmToken;
+          if (token) {
+            await sendPushNotification(
+              [token],
+              `Group ${callType} call from ${user.displayName}`,
+              `Join the call in ${targetName}`,
+              { url: '/oc-chat', type: 'call', roomId }
+            );
+          }
         }
         // Join immediately for group calls
         joinCallRoom(roomId, callType, true);
@@ -914,6 +972,18 @@ export default function OCChat() {
         timestamp: serverTimestamp(),
         isGroup: false
       });
+
+      // Send Push Notification for Private Call
+      const recipientDoc = await getDocs(query(collection(db, 'users'), where('id', '==', targetId)));
+      const token = recipientDoc.docs[0]?.data()?.fcmToken;
+      if (token) {
+        await sendPushNotification(
+          [token],
+          `Incoming ${callType} call from ${user.displayName}`,
+          'Tap to answer',
+          { url: '/oc-chat', type: 'call', roomId }
+        );
+      }
     }
 
     // Log the call

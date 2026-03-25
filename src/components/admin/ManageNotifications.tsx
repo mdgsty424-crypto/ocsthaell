@@ -2,8 +2,9 @@ import React, { useState } from 'react';
 import { motion } from 'motion/react';
 import { Bell, Send, Trash2, Info, Phone, MessageSquare } from 'lucide-react';
 import { db } from '../../firebase';
-import { collection, addDoc, serverTimestamp, query, orderBy, limit, onSnapshot, deleteDoc, doc } from 'firebase/firestore';
+import { collection, addDoc, serverTimestamp, query, orderBy, limit, onSnapshot, deleteDoc, doc, getDocs, where } from 'firebase/firestore';
 import { useEffect } from 'react';
+import { sendPushNotification } from '../../lib/messaging';
 
 export default function ManageNotifications() {
   const [title, setTitle] = useState('');
@@ -26,16 +27,27 @@ export default function ManageNotifications() {
 
     setLoading(true);
     try {
-      await addDoc(collection(db, 'global_notifications'), {
+      // 1. Save to history
+      const docRef = await addDoc(collection(db, 'global_notifications'), {
         title,
         message,
         type,
         createdAt: serverTimestamp(),
-        status: 'pending'
+        status: 'sending'
       });
+
+      // 2. Fetch all user tokens
+      const usersSnapshot = await getDocs(query(collection(db, 'users'), where('fcmToken', '!=', null)));
+      const tokens = usersSnapshot.docs.map(doc => doc.data().fcmToken).filter(t => !!t);
+
+      if (tokens.length > 0) {
+        // 3. Send via Vercel API
+        await sendPushNotification(tokens, title, message, { type, global: 'true' });
+      }
+
       setTitle('');
       setMessage('');
-      alert('Notification queued for sending!');
+      alert(`Notification sent to ${tokens.length} users!`);
     } catch (error) {
       console.error('Error sending notification:', error);
       alert('Failed to send notification.');
