@@ -4,7 +4,8 @@
  */
 
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { AuthProvider } from './context/AuthContext';
+import { AuthProvider, useAuth } from './context/AuthContext';
+import { requestNotificationPermission, onForegroundMessage } from './lib/messaging';
 import { CartProvider } from './context/CartContext';
 import ErrorBoundary from './components/ErrorBoundary';
 import Navbar from './components/Navbar';
@@ -70,10 +71,24 @@ const RegistrationRedirect = () => {
   );
 };
 
+const MessagingInitializer = () => {
+  const { user } = useAuth();
+
+  useEffect(() => {
+    if (user) {
+      requestNotificationPermission();
+      onForegroundMessage();
+    }
+  }, [user]);
+
+  return null;
+};
+
 export default function App() {
   return (
     <ErrorBoundary>
       <AuthProvider>
+        <MessagingInitializer />
         <CartProvider>
           <ThemeWrapper>
             <Router>
