@@ -24,6 +24,7 @@ import { useCart } from '../../context/CartContext';
 import ShopAppLayout from '../../components/shop/ShopAppLayout';
 
 import { BANGLADESH_LOCATIONS, COUNTRIES, CATEGORIES as GLOBAL_CATEGORIES } from '../../constants/locations';
+import { broadcastAutoNotifications } from '../../lib/messaging';
 
 const CATEGORIES = [
   { id: 'All', name: 'All', icon: Grid },
@@ -59,6 +60,10 @@ export default function ShopHome() {
       });
     }, 1000);
     return () => clearInterval(timer);
+  }, []);
+
+  useEffect(() => {
+    broadcastAutoNotifications();
   }, []);
 
   useEffect(() => {

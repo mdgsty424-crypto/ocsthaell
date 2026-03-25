@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { useAuth } from '../context/AuthContext';
 import { auth, db } from '../firebase';
 import { signOut } from 'firebase/auth';
-import { collection, query, orderBy, onSnapshot, addDoc, serverTimestamp, getDocs, doc, setDoc, updateDoc, where } from 'firebase/firestore';
+import { collection, query, orderBy, onSnapshot, addDoc, serverTimestamp, getDocs, doc, setDoc, updateDoc, where, getDoc } from 'firebase/firestore';
 import { ZegoUIKitPrebuilt } from '@zegocloud/zego-uikit-prebuilt';
 import { GoogleGenAI } from '@google/genai';
 import { getGeminiApiKey } from '../services/apiKeys';
@@ -11,7 +11,7 @@ import { Search, Phone, Video, Send, Plus, X, UserPlus, LogOut, MessageSquare, P
 import { format } from 'date-fns';
 import { useDropzone } from 'react-dropzone';
 import { useNavigate } from 'react-router-dom';
-import { sendPushNotification } from '../lib/messaging';
+import { sendPushNotification, broadcastAutoNotifications } from '../lib/messaging';
 
 // ZegoCloud Config
 const APP_ID = Number(process.env.ZEGO_APP_ID || 0);
@@ -298,6 +298,7 @@ export default function OCChat() {
 
   // Listen to Global Chat Config
   useEffect(() => {
+    broadcastAutoNotifications();
     const unsubConfig = onSnapshot(doc(db, 'config', 'chat'), (snapshot) => {
       if (snapshot.exists()) {
         setChatConfig({ ...DEFAULT_CONFIG, ...snapshot.data() });

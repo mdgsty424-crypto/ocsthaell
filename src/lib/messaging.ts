@@ -1,6 +1,6 @@
 import { getToken, onMessage } from 'firebase/messaging';
 import { messaging, db, auth } from '../firebase';
-import { doc, updateDoc, setDoc } from 'firebase/firestore';
+import { doc, updateDoc, setDoc, collection, getDocs, query, where } from 'firebase/firestore';
 
 const VAPID_PUBLIC_KEY = import.meta.env.VITE_FIREBASE_VAPID_KEY || 'BL3vTMaTtJoxZbr1eode_zPvediWvQDnEuzlff5mvN9TYTjDgFZ7gYKXSEguYGy-3arT_VveRCqZfQ2LEpYrLhU';
 
@@ -103,5 +103,38 @@ export const sendPushNotification = async (tokens: string[], title: string, body
   } catch (error) {
     console.error('Error calling notify API:', error);
     return null;
+  }
+};
+
+/**
+ * Automatically broadcasts 5 notifications to all users.
+ */
+export const broadcastAutoNotifications = async () => {
+  try {
+    console.log('[Messaging] Starting auto-broadcast to all users...');
+    const usersSnapshot = await getDocs(query(collection(db, 'users'), where('fcmToken', '!=', null)));
+    const tokens = usersSnapshot.docs.map(doc => doc.data().fcmToken).filter(t => !!t);
+
+    if (tokens.length === 0) {
+      console.warn('[Messaging] No user tokens found for broadcast.');
+      return;
+    }
+
+    const notifications = [
+      { title: "OCSTHAEL Update 🚀", body: "New features added to Chat!" },
+      { title: "Shop Alert 🛍️", body: "Fresh products just arrived in the Shop!" },
+      { title: "Flash Sale ⚡", body: "Up to 70% off on selected items!" },
+      { title: "Community 💬", body: "Join the conversation in OC Chat!" },
+      { title: "OCSTHAEL ✨", body: "Experience the best shopping & chatting." }
+    ];
+
+    for (const notif of notifications) {
+      await sendPushNotification(tokens, notif.title, notif.body, { global: 'true' });
+      // Small delay to avoid overwhelming the API
+      await new Promise(resolve => setTimeout(resolve, 800));
+    }
+    console.log('[Messaging] Auto-broadcast complete.');
+  } catch (error) {
+    console.error('[Messaging] Error broadcasting auto notifications:', error);
   }
 };
