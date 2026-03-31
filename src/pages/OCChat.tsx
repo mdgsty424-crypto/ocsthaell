@@ -10,7 +10,7 @@ import { getGeminiApiKey } from '../services/apiKeys';
 import { Search, Phone, Video, Send, Plus, X, UserPlus, LogOut, MessageSquare, PhoneIncoming, PhoneOff, FileText, Image as ImageIcon, MoreVertical, MessageCircle, Users, UsersRound, CircleDashed, Bot, Settings, ChevronLeft, ArrowLeft, Mic, Smile, Reply, Forward, History, Trash2, Check, CheckCheck, ArrowDownLeft, ArrowUpRight, Play, Pause } from 'lucide-react';
 import { format } from 'date-fns';
 import { useDropzone } from 'react-dropzone';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { sendPushNotification, broadcastAutoNotifications } from '../lib/messaging';
 
 // ZegoCloud Config
@@ -306,10 +306,27 @@ export default function OCChat() {
     });
     return () => unsubConfig();
   }, []);
+  const [searchParams] = useSearchParams();
   const [users, setUsers] = useState<ChatUser[]>([]);
   const [groups, setGroups] = useState<Group[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [activeChat, setActiveChat] = useState<{ id: string, type: 'user' | 'group', name: string, photo?: string } | null>(null);
+
+  // Handle initial chat from query param
+  useEffect(() => {
+    const targetUserId = searchParams.get('userId');
+    if (targetUserId && users.length > 0) {
+      const targetUser = users.find(u => u.id === targetUserId);
+      if (targetUser) {
+        setActiveChat({
+          id: targetUser.id,
+          type: 'user',
+          name: targetUser.displayName,
+          photo: targetUser.photoURL
+        });
+      }
+    }
+  }, [searchParams, users]);
   const [activeTab, setActiveTab] = useState('chats');
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');

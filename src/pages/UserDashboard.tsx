@@ -517,14 +517,24 @@ export default function UserDashboard() {
               {isOwnProfile ? 'Manage your profile, wallet, and settings.' : 'View user information and ID card.'}
             </p>
           </div>
-          {isOwnProfile && (
-            <button
-              onClick={handleSignOut}
-              className="px-4 py-2 bg-red-50 hover:bg-red-100 text-red-600 rounded-lg font-medium transition-colors flex items-center border border-red-100"
-            >
-              <LogOut className="w-4 h-4 mr-2" /> Sign Out
-            </button>
-          )}
+          <div className="flex items-center gap-3">
+            {!isOwnProfile && (
+              <Link
+                to={`/chat?userId=${profileUser.uid}`}
+                className="px-6 py-2 bg-green-600 hover:bg-green-700 text-white rounded-xl font-bold transition-all flex items-center shadow-lg shadow-green-200"
+              >
+                <MessageSquare className="w-5 h-5 mr-2" /> Message
+              </Link>
+            )}
+            {isOwnProfile && (
+              <button
+                onClick={handleSignOut}
+                className="px-4 py-2 bg-red-50 hover:bg-red-100 text-red-600 rounded-lg font-medium transition-colors flex items-center border border-red-100"
+              >
+                <LogOut className="w-4 h-4 mr-2" /> Sign Out
+              </button>
+            )}
+          </div>
         </div>
 
         {/* Digital ID Card Section */}

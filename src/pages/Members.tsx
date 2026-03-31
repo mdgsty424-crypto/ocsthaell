@@ -3,7 +3,7 @@ import { motion } from 'motion/react';
 import { collection, getDocs } from 'firebase/firestore';
 import { db } from '../firebase';
 import { Link } from 'react-router-dom';
-import { Users, Search, Briefcase, Mail, Phone, ExternalLink } from 'lucide-react';
+import { Users, Search, Briefcase, Mail, Phone, ExternalLink, MessageSquare } from 'lucide-react';
 
 interface UserProfile {
   id: string;
@@ -159,13 +159,20 @@ export default function Members() {
                     </div>
                   </div>
                 </div>
-                <div className="p-4 border-t border-gray-100 bg-gray-50/50">
+                <div className="p-4 border-t border-gray-100 bg-gray-50/50 flex gap-2">
                   <Link 
                     to={`/${member.ocId || member.id}/profile`}
-                    className="flex items-center justify-center w-full py-2 px-4 bg-brand-blue/10 text-brand-blue hover:bg-brand-blue hover:text-white rounded-xl transition-colors font-medium text-sm"
+                    className="flex-1 flex items-center justify-center py-2 px-3 bg-brand-blue/10 text-brand-blue hover:bg-brand-blue hover:text-white rounded-xl transition-colors font-medium text-xs"
                   >
-                    <span>View Profile</span>
-                    <ExternalLink className="w-4 h-4 ml-2" />
+                    <span>Profile</span>
+                    <ExternalLink className="w-3 h-3 ml-1.5" />
+                  </Link>
+                  <Link 
+                    to={`/chat?userId=${member.id}`}
+                    className="flex-1 flex items-center justify-center py-2 px-3 bg-green-50 text-green-600 hover:bg-green-600 hover:text-white rounded-xl transition-colors font-medium text-xs border border-green-100"
+                  >
+                    <span>Message</span>
+                    <MessageSquare className="w-3 h-3 ml-1.5" />
                   </Link>
                 </div>
               </motion.div>
