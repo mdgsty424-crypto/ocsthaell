@@ -93,7 +93,10 @@ export default function ImageUpload({ value, onChange, label = 'Media', accept =
       xhr.send(formData);
 
     } catch (err: any) {
-      console.error('Cloudinary upload error:', err);
+      console.error('Cloudinary upload error details:', err);
+      if (err.response) {
+        console.error('Response data:', err.response.data);
+      }
       setError('Upload failed. Please check your Cloudinary configuration or use the URL mode.');
       setUploading(false);
     }

@@ -8,10 +8,28 @@
         "name": { "type": "string", "description": "Name of the app" },
         "description": { "type": "string", "description": "Short description" },
         "iconUrl": { "type": "string", "description": "URL to the app icon" },
-        "link": { "type": "string", "description": "Link to learn more or download" },
+        "apkUrl": { "type": "string", "description": "URL to the APK file" },
+        "galleryImages": { "type": "array", "items": { "type": "string" }, "description": "URLs to gallery images" },
+        "category": { "type": "string", "description": "App category" },
+        "downloadCount": { "type": "number", "description": "Number of downloads" },
+        "videoUrl": { "type": "string", "description": "YouTube video URL" },
+        "videoFileUrl": { "type": "string", "description": "Uploaded video file URL" },
         "createdAt": { "type": "timestamp" }
       },
-      "required": ["name", "description", "iconUrl", "link", "createdAt"]
+      "required": ["name", "description", "iconUrl", "apkUrl", "galleryImages", "category", "downloadCount", "createdAt"]
+    },
+    "Review": {
+      "title": "Review",
+      "description": "A review for an app",
+      "type": "object",
+      "properties": {
+        "appId": { "type": "string" },
+        "userName": { "type": "string" },
+        "comment": { "type": "string" },
+        "rating": { "type": "number" },
+        "createdAt": { "type": "timestamp" }
+      },
+      "required": ["appId", "userName", "comment", "rating", "createdAt"]
     },
     "Service": {
       "title": "Service",
@@ -149,6 +167,10 @@
     "/apps/{appId}": {
       "schema": { "$ref": "#/entities/App" },
       "description": "Collection of apps"
+    },
+    "/reviews/{reviewId}": {
+      "schema": { "$ref": "#/entities/Review" },
+      "description": "Collection of reviews"
     },
     "/services/{serviceId}": {
       "schema": { "$ref": "#/entities/Service" },

@@ -15,13 +15,15 @@ import {
   CheckCircle2,
   Image as ImageIcon,
 } from "lucide-react";
-import { doc, getDoc } from "firebase/firestore";
+import { doc, getDoc, collection, query, where, onSnapshot, addDoc, serverTimestamp, increment, updateDoc } from "firebase/firestore";
 import { db } from "../firebase";
 
 export default function AppDetails() {
   const { id } = useParams<{ id: string }>();
   const [app, setApp] = useState<any>(null);
+  const [reviews, setReviews] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [newReview, setNewReview] = useState({ userName: '', comment: '', rating: 5 });
 
   useEffect(() => {
     const fetchApp = async () => {
@@ -31,8 +33,6 @@ export default function AppDetails() {
         const docSnap = await getDoc(docRef);
         if (docSnap.exists()) {
           setApp({ id: docSnap.id, ...docSnap.data() });
-        } else {
-          console.log("No such document!");
         }
       } catch (error) {
         console.error("Error fetching app details:", error);
@@ -41,8 +41,58 @@ export default function AppDetails() {
       }
     };
 
+    const fetchReviews = () => {
+      if (!id) return;
+      const q = query(collection(db, "reviews"), where("appId", "==", id));
+      return onSnapshot(q, (snapshot) => {
+        setReviews(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+      });
+    };
+
     fetchApp();
+    const unsubscribe = fetchReviews();
+    return () => unsubscribe && unsubscribe();
   }, [id]);
+
+  const handleDownload = async () => {
+    if (!id) return;
+    const url = app.downloadLink || app.apkUrl;
+    if (!url) return;
+
+    try {
+      await updateDoc(doc(db, "apps", id), {
+        downloadCount: increment(1)
+      });
+      
+      // Force download
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `${app.name || 'app'}.apk`);
+      link.setAttribute('target', '_blank');
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch (error) {
+      console.error("Error incrementing download count:", error);
+      // Fallback
+      window.open(url, '_blank');
+    }
+  };
+
+  const handleAddReview = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!id) return;
+    try {
+      await addDoc(collection(db, "reviews"), {
+        appId: id,
+        ...newReview,
+        createdAt: serverTimestamp()
+      });
+      setNewReview({ userName: '', comment: '', rating: 5 });
+    } catch (error) {
+      console.error("Error adding review:", error);
+    }
+  };
 
   if (loading) {
     return (
@@ -112,22 +162,22 @@ export default function AppDetails() {
             </p>
 
             <div className="flex flex-wrap gap-4">
-              <a
-                href={app.link}
-                target="_blank"
-                rel="noopener noreferrer"
+              <button
+                onClick={handleDownload}
                 className="px-8 py-4 rounded-xl bg-brand-blue text-white font-bold hover:bg-brand-blue/90 transition-all flex items-center shadow-lg"
               >
-                <Download className="w-5 h-5 mr-2" /> Download App
-              </a>
-              <a
-                href={app.link}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="px-8 py-4 rounded-xl border border-gray-200 text-gray-700 font-bold hover:bg-gray-50 transition-all flex items-center"
-              >
-                <Globe className="w-5 h-5 mr-2" /> Open Web Version
-              </a>
+                <Download className="w-5 h-5 mr-2" /> Download APK
+              </button>
+              {app.link && (
+                <a
+                  href={app.link}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="px-8 py-4 rounded-xl border border-gray-200 text-gray-700 font-bold hover:bg-gray-50 transition-all flex items-center"
+                >
+                  <Globe className="w-5 h-5 mr-2" /> Open Web Version
+                </a>
+              )}
             </div>
           </motion.div>
 
@@ -141,6 +191,10 @@ export default function AppDetails() {
             </h3>
             <div className="space-y-4">
               <div className="flex justify-between items-center pb-4 border-b border-gray-200">
+                <span className="text-gray-500">Category</span>
+                <span className="text-gray-900 font-bold">{app.category || "N/A"}</span>
+              </div>
+              <div className="flex justify-between items-center pb-4 border-b border-gray-200">
                 <span className="text-gray-500">Rating</span>
                 <span className="text-gray-900 font-bold flex items-center">
                   <Star className="w-4 h-4 text-yellow-500 mr-1 fill-yellow-500" />{" "}
@@ -150,7 +204,7 @@ export default function AppDetails() {
               <div className="flex justify-between items-center pb-4 border-b border-gray-200">
                 <span className="text-gray-500">Downloads</span>
                 <span className="text-gray-900 font-bold">
-                  {app.downloads || "N/A"}
+                  {app.downloadCount || 0}
                 </span>
               </div>
               <div className="flex justify-between items-center pb-4 border-b border-gray-200">
@@ -159,19 +213,29 @@ export default function AppDetails() {
                   <Shield className="w-4 h-4 mr-1" /> Verified
                 </span>
               </div>
-              {app.publishDate && (
-                <div className="flex justify-between items-center pb-4 border-b border-gray-200">
-                  <span className="text-gray-500">Expected Launch</span>
-                  <span className="text-gray-900 font-bold">
-                    {app.publishDate}
-                  </span>
-                </div>
-              )}
             </div>
           </motion.div>
         </div>
 
-        {/* Features & Gallery */}
+        {/* Video Section */}
+        {(app.videoUrl || app.videoFileUrl) && (
+          <div className="mb-16">
+            <h2 className="text-3xl font-bold text-gray-900 mb-8">Video Preview</h2>
+            {app.videoUrl ? (
+              <div className="aspect-video">
+                <iframe
+                  src={app.videoUrl.replace("watch?v=", "embed/")}
+                  className="w-full h-full rounded-2xl"
+                  allowFullScreen
+                />
+              </div>
+            ) : (
+              <video src={app.videoFileUrl} controls className="w-full rounded-2xl" />
+            )}
+          </div>
+        )}
+
+        {/* Features & Gallery & Reviews */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
           {app.features && app.features.length > 0 && (
             <motion.div
@@ -220,6 +284,52 @@ export default function AppDetails() {
               </div>
             </motion.div>
           )}
+        </div>
+
+        <div className="mt-16">
+          <h2 className="text-3xl font-bold text-gray-900 mb-8">Reviews</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div className="bg-gray-50 p-6 rounded-2xl border border-gray-100">
+              <h3 className="text-xl font-bold mb-4">Add a Review</h3>
+              <form onSubmit={handleAddReview} className="space-y-4">
+                <input
+                  type="text"
+                  placeholder="Your Name"
+                  required
+                  value={newReview.userName}
+                  onChange={e => setNewReview({...newReview, userName: e.target.value})}
+                  className="w-full p-3 rounded-lg border border-gray-200"
+                />
+                <textarea
+                  placeholder="Your Comment"
+                  required
+                  value={newReview.comment}
+                  onChange={e => setNewReview({...newReview, comment: e.target.value})}
+                  className="w-full p-3 rounded-lg border border-gray-200"
+                />
+                <input
+                  type="number"
+                  min="1"
+                  max="5"
+                  value={newReview.rating}
+                  onChange={e => setNewReview({...newReview, rating: Number(e.target.value)})}
+                  className="w-full p-3 rounded-lg border border-gray-200"
+                />
+                <button type="submit" className="w-full py-3 bg-brand-blue text-white rounded-lg font-bold">Submit Review</button>
+              </form>
+            </div>
+            <div className="space-y-4">
+              {reviews.map(review => (
+                <div key={review.id} className="p-4 bg-white rounded-xl border border-gray-100 shadow-sm">
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="font-bold">{review.userName}</span>
+                    <span className="text-yellow-500">{review.rating} stars</span>
+                  </div>
+                  <p className="text-gray-600">{review.comment}</p>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
       </div>
     </div>

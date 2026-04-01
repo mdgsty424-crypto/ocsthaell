@@ -15,19 +15,24 @@ async function startServer() {
 
   // Firebase Admin Initialization
   if (!admin.apps.length) {
-    try {
-      const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT || '{}');
-      if (serviceAccount.project_id) {
-        admin.initializeApp({
-          credential: admin.credential.cert(serviceAccount),
-          projectId: process.env.FIREBASE_PROJECT_ID || serviceAccount.project_id
-        });
-        console.log("Firebase Admin Initialized");
-      } else {
-        console.warn("FIREBASE_SERVICE_ACCOUNT not set or invalid");
+    const serviceAccountEnv = process.env.FIREBASE_SERVICE_ACCOUNT;
+    if (serviceAccountEnv) {
+      try {
+        const serviceAccount = JSON.parse(serviceAccountEnv);
+        if (serviceAccount.project_id) {
+          admin.initializeApp({
+            credential: admin.credential.cert(serviceAccount),
+            projectId: process.env.FIREBASE_PROJECT_ID || serviceAccount.project_id
+          });
+          console.log("Firebase Admin Initialized");
+        } else {
+          console.warn("FIREBASE_SERVICE_ACCOUNT is set but missing project_id");
+        }
+      } catch (error) {
+        console.error("Firebase Admin Init Error: Invalid JSON in FIREBASE_SERVICE_ACCOUNT", error);
       }
-    } catch (error) {
-      console.error("Firebase Admin Init Error:", error);
+    } else {
+      console.warn("FIREBASE_SERVICE_ACCOUNT not set");
     }
   }
 

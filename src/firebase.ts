@@ -2,6 +2,7 @@ import { initializeApp, getApps, getApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 import { getMessaging } from 'firebase/messaging';
+import { getStorage } from 'firebase/storage';
 import firebaseConfigJson from '../firebase-applet-config.json';
 
 // Fallback to environment variables if the JSON file is missing or has placeholder values
@@ -21,3 +22,12 @@ const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
 export const db = getFirestore(app);
 export const auth = getAuth(app);
 export const messaging = getMessaging(app);
+
+let storage;
+try {
+  storage = getStorage(app);
+} catch (error) {
+  console.error("Error initializing Firebase Storage:", error);
+  storage = null;
+}
+export { storage };

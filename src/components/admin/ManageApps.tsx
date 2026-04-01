@@ -3,6 +3,7 @@ import { collection, onSnapshot, addDoc, updateDoc, deleteDoc, doc, serverTimest
 import { db } from '../../firebase';
 import { Plus, Edit2, Trash2, X, Image as ImageIcon } from 'lucide-react';
 import ImageUpload from './ImageUpload';
+import FileUpload from './FileUpload';
 
 interface AppData {
   id: string;
@@ -10,6 +11,7 @@ interface AppData {
   tagline: string;
   description: string;
   iconUrl: string;
+  apkUrl: string;
   link: string;
   color: string;
   features: string[];
@@ -17,6 +19,11 @@ interface AppData {
   rating: number;
   downloads: string;
   publishDate?: string;
+  category: string;
+  downloadCount: number;
+  videoUrl?: string;
+  videoFileUrl?: string;
+  downloadLink?: string;
 }
 
 export default function ManageApps() {
@@ -42,6 +49,7 @@ export default function ManageApps() {
         tagline: currentApp.tagline || '',
         description: currentApp.description || '',
         iconUrl: currentApp.iconUrl || '',
+        apkUrl: currentApp.apkUrl || '',
         link: currentApp.link || '',
         color: currentApp.color || 'from-blue-500 to-cyan-400',
         features: currentApp.features?.filter(f => f.trim() !== '') || [],
@@ -49,6 +57,11 @@ export default function ManageApps() {
         rating: Number(currentApp.rating) || 0,
         downloads: currentApp.downloads || '0',
         publishDate: currentApp.publishDate || '',
+        category: currentApp.category || 'General',
+        downloadCount: Number(currentApp.downloadCount) || 0,
+        videoUrl: currentApp.videoUrl || '',
+        videoFileUrl: currentApp.videoFileUrl || '',
+        downloadLink: currentApp.downloadLink || '',
       };
 
       if (currentApp.id) {
@@ -168,14 +181,67 @@ export default function ManageApps() {
                 />
               </div>
 
+              <div className="md:col-span-2">
+                <FileUpload
+                  label="APK File"
+                  value={currentApp.apkUrl || ''}
+                  onChange={(url) => setCurrentApp({ ...currentApp, apkUrl: url })}
+                />
+              </div>
+
               <div>
-                <label className="block text-sm font-medium text-gray-600 mb-1">Link URL (Web Version / Download)</label>
+                <label className="block text-sm font-medium text-gray-600 mb-1">Web Version Link</label>
                 <input
                   type="url"
-                  required
                   value={currentApp.link || ''}
                   onChange={e => setCurrentApp({ ...currentApp, link: e.target.value })}
+                  placeholder="https://..."
                   className="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-gray-900 focus:outline-none focus:border-brand-blue transition-colors"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-600 mb-1">Download Link (External)</label>
+                <input
+                  type="url"
+                  value={currentApp.downloadLink || ''}
+                  onChange={e => setCurrentApp({ ...currentApp, downloadLink: e.target.value })}
+                  placeholder="https://..."
+                  className="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-gray-900 focus:outline-none focus:border-brand-blue transition-colors"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-600 mb-1">Category</label>
+                <input
+                  type="text"
+                  required
+                  value={currentApp.category || ''}
+                  onChange={e => setCurrentApp({ ...currentApp, category: e.target.value })}
+                  className="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-gray-900 focus:outline-none focus:border-brand-blue transition-colors"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-600 mb-1">Download Count</label>
+                <input
+                  type="number"
+                  value={currentApp.downloadCount || 0}
+                  onChange={e => setCurrentApp({ ...currentApp, downloadCount: Number(e.target.value) })}
+                  className="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-gray-900 focus:outline-none focus:border-brand-blue transition-colors"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-600 mb-1">YouTube Video URL</label>
+                <input
+                  type="url"
+                  value={currentApp.videoUrl || ''}
+                  onChange={e => setCurrentApp({ ...currentApp, videoUrl: e.target.value })}
+                  className="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-gray-900 focus:outline-none focus:border-brand-blue transition-colors"
+                />
+              </div>
+              <div className="md:col-span-2">
+                <FileUpload
+                  label="Video File Upload"
+                  value={currentApp.videoFileUrl || ''}
+                  onChange={(url) => setCurrentApp({ ...currentApp, videoFileUrl: url })}
                 />
               </div>
               <div>
