@@ -140,10 +140,13 @@ async function startServer() {
 
   // Robots.txt
   app.get("/robots.txt", (req, res) => {
+    const protocol = req.protocol === 'http' && req.get('x-forwarded-proto') === 'https' ? 'https' : req.protocol;
+    const host = req.get('host');
+    const baseUrl = `${protocol}://${host}`;
     res.type("text/plain");
     res.send(`User-agent: *
 Allow: /
-Sitemap: https://ocsthael.com/sitemap.xml
+Sitemap: ${baseUrl}/sitemap.xml
 Disallow: /admin
 Disallow: /profile/settings
 `);
@@ -151,11 +154,16 @@ Disallow: /profile/settings
 
   // Main Sitemap Endpoint
   app.get("/sitemap.xml", async (req, res) => {
-    const baseUrl = "https://ocsthael.com";
+    const protocol = req.protocol === 'http' && req.get('x-forwarded-proto') === 'https' ? 'https' : req.protocol;
+    const host = req.get('host');
+    const baseUrl = `${protocol}://${host}`;
+    
+    console.log(`[Sitemap] Generating for ${baseUrl}`);
+    
     const today = new Date().toISOString().split('T')[0];
     const staticPages = [
       '', '/about', '/services', '/news', '/gallery', '/team', '/apps', 
-      '/members', '/contact', '/registration', '/shop'
+      '/members', '/contact', '/registration', '/shop', '/terms', '/privacy'
     ];
     
     res.header("Content-Type", "application/xml");
@@ -176,12 +184,10 @@ Disallow: /profile/settings
   </url>`;
     });
 
-    // 2. Add Dynamic Content with Images
+    // 2. Add Dynamic Content
     if (admin.apps.length) {
       try {
         const db = admin.firestore();
-        
-        // Helper to fetch and add to XML
         const collections = [
           { name: 'news', prefix: '/news', priority: '0.9', freq: 'daily' },
           { name: 'products', prefix: '/shop/product', priority: '0.9', freq: 'daily' },
@@ -189,60 +195,45 @@ Disallow: /profile/settings
           { name: 'staff', prefix: '/staff', priority: '0.7', freq: 'monthly' },
           { name: 'services', prefix: '/services', priority: '0.8', freq: 'weekly' },
           { name: 'apps', prefix: '/apps', priority: '0.8', freq: 'weekly' },
-          { name: 'ads', prefix: '/ads', priority: '0.6', freq: 'daily' },
           { name: 'gallery', prefix: '/gallery', priority: '0.6', freq: 'weekly' },
         ];
 
         for (const col of collections) {
-          const snap = await db.collection(col.name).get();
-          snap.forEach(doc => {
-            const data = doc.data();
-            const images: string[] = [];
-            const videos: { url: string; title: string; description: string; thumbnail: string }[] = [];
-            
-            // Extract images
-            if (data.imageUrl) images.push(data.imageUrl);
-            if (data.photoUrl) images.push(data.photoUrl);
-            if (data.iconUrl) images.push(data.iconUrl);
-            if (data.image) images.push(data.image);
-            if (Array.isArray(data.images)) images.push(...data.images);
+          try {
+            const snap = await db.collection(col.name).get();
+            snap.forEach(doc => {
+              try {
+                const data = doc.data();
+                const images: string[] = [];
+                
+                // Extract images safely
+                if (data.imageUrl) images.push(data.imageUrl);
+                if (data.photoUrl) images.push(data.photoUrl);
+                if (data.image) images.push(data.image);
+                if (Array.isArray(data.images)) images.push(...data.images.filter(i => typeof i === 'string'));
 
-            // Extract videos
-            const title = data.headline || data.title || data.name || 'OCSTHAEL Content';
-            const desc = (data.content || data.description || data.bio || title).substring(0, 200).replace(/[<>&'"]/g, '');
-            const rawTitle = title.replace(/[<>&'"]/g, '');
-            const thumb = images[0] || "https://ocsthael.com/og-image.jpg";
+                const title = data.headline || data.title || data.name || 'OCSTHAEL';
+                const rawTitle = title.toString().replace(/[<>&'"]/g, '');
 
-            if (data.videoUrl || data.youtubeUrl || data.clipUrl) {
-              videos.push({
-                url: data.videoUrl || data.youtubeUrl || data.clipUrl,
-                title: rawTitle,
-                description: desc,
-                thumbnail: thumb
-              });
-            }
-
-            xml += `
+                xml += `
   <url>
     <loc>${baseUrl}${col.prefix}/${doc.id}</loc>
     <lastmod>${today}</lastmod>
     <changefreq>${col.freq}</changefreq>
     <priority>${col.priority}</priority>
-    ${images.length > 0 ? [...new Set(images)].map(img => `
+    ${images.length > 0 ? [...new Set(images)].slice(0, 5).map(img => `
     <image:image>
-      <image:loc>${img}</image:loc>
+      <image:loc>${img.replace(/[<>&'"]/g, '')}</image:loc>
       <image:title>${rawTitle}</image:title>
     </image:image>`).join('') : ''}
-    ${videos.length > 0 ? videos.map(v => `
-    <video:video>
-      <video:thumbnail_loc>${v.thumbnail}</video:thumbnail_loc>
-      <video:title>${v.title}</video:title>
-      <video:description>${v.description}</video:description>
-      <video:content_loc>${v.url}</video:content_loc>
-      <video:publication_date>${today}T00:00:00Z</video:publication_date>
-    </video:video>`).join('') : ''}
   </url>`;
-          });
+              } catch (innerErr) {
+                console.error(`[Sitemap] Inner item error for ${col.name}:`, innerErr);
+              }
+            });
+          } catch (colErr) {
+            console.error(`[Sitemap] Collection error for ${col.name}:`, colErr);
+          }
         }
       } catch (error) {
         console.error("Sitemap Dynamic Fetch Error:", error);
@@ -250,12 +241,16 @@ Disallow: /profile/settings
     }
 
     xml += `\n</urlset>`;
-    res.send(xml);
+    res.status(200).send(xml);
   });
 
   // Image Sitemap Endpoint
   app.get('/sitemap-images.xml', async (req, res) => {
     try {
+      const protocol = req.protocol === 'http' && req.get('x-forwarded-proto') === 'https' ? 'https' : req.protocol;
+      const host = req.get('host');
+      const baseUrl = `${protocol}://${host}`;
+
       if (!admin.apps.length) return res.status(500).send("Firebase Admin not initialized");
       const db = admin.firestore();
       const gallerySnap = await db.collection('gallery').get();
@@ -265,8 +260,6 @@ Disallow: /profile/settings
       let imagesXml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
         xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">`;
-
-      const baseUrl = "https://ocsthael.com";
 
       gallerySnap.forEach(doc => {
         const data = doc.data();
