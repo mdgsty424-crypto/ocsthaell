@@ -3,7 +3,6 @@ import { collection, onSnapshot, addDoc, updateDoc, deleteDoc, doc, serverTimest
 import { db } from '../../firebase';
 import { Plus, Edit2, Trash2, X } from 'lucide-react';
 import ImageUpload from './ImageUpload';
-import { pingGoogleSearchConsole } from '../../lib/seo-utils';
 
 interface NewsItem {
   id: string;
@@ -46,25 +45,6 @@ export default function ManageNews() {
       }
       setIsEditing(false);
       setCurrentItem({});
-      
-      // Indexing API Notification
-      try {
-        const baseUrl = window.location.origin;
-        const targetId = currentItem.id || 'new'; // If new, we'll need to wait for snapshot but for now index the news list
-        fetch(`${baseUrl}/api/index-url`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ 
-            url: `${baseUrl}/news/${targetId}`,
-            type: 'URL_UPDATED' 
-          })
-        });
-      } catch (err) {
-        console.warn('Indexing notify failed:', err);
-      }
-
-      // Alert Search Engines (Sitemap Ping)
-      pingGoogleSearchConsole();
     } catch (error) {
       console.error("Error saving news:", error);
       alert("Failed to save news");

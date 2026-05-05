@@ -3,7 +3,6 @@ import { collection, onSnapshot, addDoc, updateDoc, deleteDoc, doc, serverTimest
 import { db } from '../../firebase';
 import { Plus, Edit2, Trash2, X } from 'lucide-react';
 import ImageUpload from './ImageUpload';
-import { pingGoogleSearchConsole } from '../../lib/seo-utils';
 
 interface GalleryImage {
   id: string;
@@ -40,7 +39,6 @@ export default function ManageGallery() {
       }
       setIsEditing(false);
       setCurrentImage({});
-      pingGoogleSearchConsole();
     } catch (error) {
       console.error("Error saving image:", error);
       alert("Failed to save image");

@@ -4,7 +4,6 @@ import { motion } from "motion/react";
 import { ArrowLeft, Calendar, Share2, MessageSquare, User } from "lucide-react";
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "../firebase";
-import SEO from "../components/SEO";
 
 export default function NewsDetails() {
   const { id } = useParams<{ id: string }>();
@@ -38,31 +37,6 @@ export default function NewsDetails() {
     return new Intl.DateTimeFormat('en-US', { month: 'long', day: 'numeric', year: 'numeric' }).format(date);
   };
 
-  const handleShare = async () => {
-    const shareUrl = `${window.location.origin}/share/news/${id}`;
-    const title = article?.title || "News Article";
-    
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          title: title,
-          text: article?.description || title,
-          url: shareUrl,
-        });
-      } catch (err) {
-        console.warn('Share cancelled or failed:', err);
-      }
-    } else {
-      // Fallback: Copy to clipboard
-      try {
-        await navigator.clipboard.writeText(shareUrl);
-        alert('Link copied to clipboard!');
-      } catch (err) {
-        console.error('Failed to copy link:', err);
-      }
-    }
-  };
-
   if (loading) {
     return (
       <div className="min-h-screen pt-32 px-4 flex justify-center items-center bg-white">
@@ -82,31 +56,8 @@ export default function NewsDetails() {
     );
   }
 
-  const newsSchema = {
-    "@context": "https://schema.org",
-    "@type": "NewsArticle",
-    "headline": article.title,
-    "image": [article.imageUrl],
-    "datePublished": article.date?.toDate ? article.date.toDate().toISOString() : new Date(article.date).toISOString(),
-    "author": [{
-      "@type": "Organization",
-      "name": "OCSTHAEL Editorial",
-      "url": window.location.origin
-    }]
-  };
-
-  const dynamicOgImage = `${window.location.origin}/newsphoto/${id}?t=${Date.now()}`;
-
   return (
     <div className="min-h-screen pt-24 pb-24 bg-white">
-      <SEO 
-        title={article.title}
-        description={article.content ? article.content.substring(0, 160) + '...' : ''}
-        image={dynamicOgImage}
-        url={window.location.href}
-        type="article"
-        schema={newsSchema}
-      />
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -149,10 +100,7 @@ export default function NewsDetails() {
 
           <div className="mt-16 pt-8 border-t border-gray-100 flex flex-wrap items-center justify-between gap-6">
             <div className="flex items-center gap-4">
-              <button 
-                onClick={handleShare}
-                className="flex items-center gap-2 px-6 py-3 bg-gray-50 rounded-xl text-gray-700 hover:bg-gray-100 transition-all active:scale-95"
-              >
+              <button className="flex items-center gap-2 px-6 py-3 bg-gray-50 rounded-xl text-gray-700 hover:bg-gray-100 transition-all">
                 <Share2 className="w-4 h-4" /> Share
               </button>
               <button className="flex items-center gap-2 px-6 py-3 bg-gray-50 rounded-xl text-gray-700 hover:bg-gray-100 transition-all">
