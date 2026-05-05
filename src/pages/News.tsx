@@ -5,6 +5,7 @@ import { db } from '../firebase';
 import { Calendar, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import SEO from '../components/SEO';
+import { generateImgAlt } from '../lib/seo-utils';
 
 interface NewsItem {
   id: string;
@@ -68,7 +69,8 @@ export default function News() {
                 <div className="aspect-video overflow-hidden relative">
                   <img 
                     src={item.imageUrl} 
-                    alt={item.title} 
+                    alt={generateImgAlt(item.title, 'News')} 
+                    title={item.title}
                     className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                     referrerPolicy="no-referrer"
                   />

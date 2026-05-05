@@ -4,6 +4,7 @@ import { collection, onSnapshot } from 'firebase/firestore';
 import { db } from '../firebase';
 import { Share2 } from 'lucide-react';
 import SEO from '../components/SEO';
+import { generateImgAlt } from '../lib/seo-utils';
 
 interface GalleryImage {
   id: string;
@@ -96,7 +97,8 @@ export default function Gallery() {
               >
                 <img 
                   src={image.imageUrl} 
-                  alt={image.title} 
+                  alt={generateImgAlt(image.title, 'Gallery')} 
+                  title={image.title}
                   className="w-full h-auto object-cover transition-transform duration-700 group-hover:scale-105"
                   referrerPolicy="no-referrer"
                 />

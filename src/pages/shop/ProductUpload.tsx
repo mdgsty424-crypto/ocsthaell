@@ -7,6 +7,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import MultiImageUpload from '../../components/shop/MultiImageUpload';
 import { Loader2, ArrowLeft, Package, Tag, Info, DollarSign, Layers, CheckCircle, Globe } from 'lucide-react';
 import { COUNTRIES, CATEGORIES } from '../../constants/locations';
+import { pingGoogleSearchConsole } from '../../lib/seo-utils';
 
 export default function ProductUpload() {
   const { user, isAdmin } = useAuth();
@@ -101,6 +102,7 @@ export default function ProductUpload() {
         alert('Product uploaded successfully!');
       }
       
+      pingGoogleSearchConsole();
       navigate('/shop');
     } catch (err: any) {
       console.error("Product operation error details:", err);

@@ -5,6 +5,7 @@ import { db } from '../../firebase';
 import { Product, Review } from '../../types';
 import { useAuth } from '../../context/AuthContext';
 import { useCart } from '../../context/CartContext';
+import { generateImgAlt } from '../../lib/seo-utils';
 import { 
   ArrowLeft, 
   ShoppingCart, 
@@ -184,7 +185,8 @@ export default function ProductDetail() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             src={product.images[currentImage] || 'https://picsum.photos/seed/product/800/800'}
-            alt={product.name}
+            alt={generateImgAlt(product.name, 'Shop')}
+            title={product.name}
             className="w-full h-full object-cover"
             referrerPolicy="no-referrer"
           />

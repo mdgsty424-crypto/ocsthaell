@@ -4,6 +4,7 @@ import path from "path";
 import fs from "fs";
 import { fileURLToPath } from "url";
 import admin from "firebase-admin";
+import { generateOGImage } from "./src/lib/og-service";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -37,46 +38,52 @@ async function startServer() {
     }
   }
 
-  // API Routes
+  // OG Image API
+  app.get("/api/og", async (req, res) => {
+    try {
+      const title = (req.query.title as string) || "OCSTHAEL News";
+      const img = (req.query.img as string) || "https://i.postimg.cc/05ZcC2b1/14.jpg";
+      
+      const buffer = await generateOGImage(title, img);
+      
+      res.setHeader("Content-Type", "image/png");
+      res.setHeader("Cache-Control", "public, max-age=604800, immutable");
+      res.send(buffer);
+    } catch (err) {
+      console.error("OG Generation Error:", err);
+      res.status(500).send("Error generating image");
+    }
+  });
+
+  // Robots.txt
   app.get("/robots.txt", (req, res) => {
     res.type("text/plain");
     res.send(`User-agent: *
 Allow: /
 Sitemap: ${req.protocol}://${req.get('host')}/sitemap.xml
+Disallow: /admin
+Disallow: /profile/settings
 `);
   });
 
+  // Main Sitemap Endpoint
   app.get("/sitemap.xml", async (req, res) => {
     const baseUrl = `${req.protocol}://${req.get('host')}`;
+    const staticPages = ['', '/about', '/services', '/news', '/gallery', '/team', '/apps', '/members'];
     res.header("Content-Type", "application/xml");
     
     let xml = `<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">`;
+
+    // Static Pages
+    staticPages.forEach(page => {
+      xml += `
   <url>
-    <loc>${baseUrl}/</loc>
-    <changefreq>daily</changefreq>
-    <priority>1.0</priority>
-  </url>
-  <url>
-    <loc>${baseUrl}/about</loc>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>${baseUrl}/services</loc>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>${baseUrl}/shop</loc>
-    <priority>0.9</priority>
-  </url>
-  <url>
-    <loc>${baseUrl}/news</loc>
-    <priority>0.9</priority>
-  </url>
-  <url>
-    <loc>${baseUrl}/gallery</loc>
-    <priority>0.7</priority>
+    <loc>${baseUrl}${page}</loc>
+    <changefreq>${page === '' ? 'daily' : 'weekly'}</changefreq>
+    <priority>${page === '' ? '1.0' : '0.8'}</priority>
   </url>`;
+    });
 
     if (admin.apps.length) {
       try {
@@ -119,9 +126,75 @@ Sitemap: ${req.protocol}://${req.get('host')}/sitemap.xml
       }
     }
 
-    xml += `
-</urlset>`;
+    xml += `\n</urlset>`;
     res.send(xml);
+  });
+
+  // Image Sitemap Endpoint
+  app.get('/sitemap-images.xml', async (req, res) => {
+    try {
+      if (!admin.apps.length) return res.status(500).send("Firebase Admin not initialized");
+      const db = admin.firestore();
+      const gallerySnap = await db.collection('gallery').get();
+      const newsSnap = await db.collection('news').get();
+      const productsSnap = await db.collection('products').get();
+
+      let imagesXml = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">`;
+
+      const baseUrl = `${req.protocol}://${req.get('host')}`;
+
+      gallerySnap.forEach(doc => {
+        const data = doc.data();
+        if (data.imageUrl) {
+          imagesXml += `
+<url>
+  <loc>${baseUrl}/gallery</loc>
+  <image:image>
+    <image:loc>${data.imageUrl}</image:loc>
+    <image:title>${data.title || 'OCSTHAEL Gallery'}</image:title>
+  </image:image>
+</url>`;
+        }
+      });
+
+      newsSnap.forEach(doc => {
+        const data = doc.data();
+        if (data.imageUrl) {
+          imagesXml += `
+<url>
+  <loc>${baseUrl}/news/${doc.id}</loc>
+  <image:image>
+    <image:loc>${data.imageUrl}</image:loc>
+    <image:title>${data.title || 'OCSTHAEL News'}</image:title>
+  </image:image>
+</url>`;
+        }
+      });
+
+      productsSnap.forEach(doc => {
+        const data = doc.data();
+        if (data.images && data.images.length > 0) {
+          imagesXml += `
+<url>
+  <loc>${baseUrl}/shop/product/${doc.id}</loc>
+  ${data.images.map((img: string) => `
+  <image:image>
+    <image:loc>${img}</image:loc>
+    <image:title>${data.name || 'OCSTHAEL Shop'}</image:title>
+  </image:image>`).join('')}
+</url>`;
+        }
+      });
+
+      imagesXml += `\n</urlset>`;
+      res.header('Content-Type', 'application/xml');
+      res.send(imagesXml);
+    } catch (err) {
+      console.error("Sitemap Image Error:", err);
+      res.status(500).send("Error generating image sitemap");
+    }
   });
 
   app.post("/api/notify", async (req, res) => {
@@ -187,6 +260,9 @@ Sitemap: ${req.protocol}://${req.get('host')}/sitemap.xml
 
     app.get('*', async (req, res) => {
       const url = req.originalUrl;
+      const host = `${req.protocol}://${req.get('host')}`;
+      const fullUrl = `${host}${url}`;
+      
       let title = "OCSTHAEL | Digital Ecosystem";
       let description = "Empowering your digital future through a unified ecosystem.";
       let image = "https://i.postimg.cc/05ZcC2b1/14.jpg";
@@ -196,49 +272,50 @@ Sitemap: ${req.protocol}://${req.get('host')}/sitemap.xml
           const db = admin.firestore();
           
           if (url.startsWith('/news/')) {
-            const id = url.split('/news/')[1];
+            const id = url.split('/news/')[1].split('?')[0];
             const doc = await db.collection('news').doc(id).get();
             if (doc.exists) {
               const data = doc.data();
-              title = `${data?.title} | OCSTHAEL News`;
-              description = data?.content?.substring(0, 160) || description;
-              image = data?.imageUrl || image;
+              title = `${data?.headline || data?.title} | OCSTHAEL News`;
+              description = (data?.content || data?.description || description).substring(0, 160);
+              const newsImg = data?.imageUrl || data?.photoUrl || data?.image || "https://i.postimg.cc/05ZcC2b1/14.jpg";
+              image = `${host}/api/og?title=${encodeURIComponent(data?.headline || data?.title)}&img=${encodeURIComponent(newsImg)}`;
             }
           } else if (url.startsWith('/shop/product/')) {
-            const id = url.split('/shop/product/')[1];
+            const id = url.split('/shop/product/')[1].split('?')[0];
             const doc = await db.collection('products').doc(id).get();
             if (doc.exists) {
               const data = doc.data();
-              title = `${data?.name} | OCSTHAEL Shop`;
-              description = data?.description?.substring(0, 160) || description;
-              image = data?.images?.[0] || image;
+              title = `${data?.name} | OCSTHAEL Store`;
+              description = (data?.description || description).substring(0, 160);
+              image = data?.images?.[0] || data?.imageUrl || data?.image || image;
             }
           } else if (url.startsWith('/team/') || url.startsWith('/staff/')) {
-            const id = url.split('/').pop() || '';
+            const id = url.split('/').pop()?.split('?')[0] || '';
             const doc = await db.collection('team').doc(id).get();
             if (doc.exists) {
               const data = doc.data();
               title = `${data?.name} - ${data?.role} | OCSTHAEL Team`;
-              description = data?.bio?.substring(0, 160) || description;
-              image = data?.imageUrl || data?.image || image;
+              description = (data?.bio || description).substring(0, 160);
+              image = data?.imageUrl || data?.image || data?.photoUrl || image;
             }
           } else if (url.startsWith('/services/')) {
-            const id = url.split('/services/')[1];
+            const id = url.split('/services/')[1].split('?')[0];
             const doc = await db.collection('services').doc(id).get();
             if (doc.exists) {
               const data = doc.data();
               title = `${data?.title} | OCSTHAEL Services`;
-              description = data?.description?.substring(0, 160) || description;
-              image = data?.imageUrl || image;
+              description = (data?.description || description).substring(0, 160);
+              image = data?.imageUrl || data?.image || image;
             }
           } else if (url.startsWith('/apps/')) {
-            const id = url.split('/apps/')[1];
+            const id = url.split('/apps/')[1].split('?')[0];
             const doc = await db.collection('apps').doc(id).get();
             if (doc.exists) {
               const data = doc.data();
               title = `${data?.name} | OCSTHAEL Apps`;
-              description = data?.description?.substring(0, 160) || description;
-              image = data?.iconUrl || image;
+              description = (data?.description || description).substring(0, 160);
+              image = data?.iconUrl || data?.image || image;
             }
           } else if (url === '/gallery') {
             title = "Gallery | OCSTHAEL";
@@ -255,9 +332,11 @@ Sitemap: ${req.protocol}://${req.get('host')}/sitemap.xml
         .replace(/<meta property="og:title" content=".*?" \/>/, `<meta property="og:title" content="${title}" />`)
         .replace(/<meta property="og:description" content=".*?" \/>/, `<meta property="og:description" content="${description}" />`)
         .replace(/<meta property="og:image" content=".*?" \/>/, `<meta property="og:image" content="${image}" />`)
+        .replace(/<meta property="og:url" content=".*?" \/>/, `<meta property="og:url" content="${fullUrl}" />`)
         .replace(/<meta name="twitter:title" content=".*?" \/>/, `<meta name="twitter:title" content="${title}" />`)
         .replace(/<meta name="twitter:description" content=".*?" \/>/, `<meta name="twitter:description" content="${description}" />`)
-        .replace(/<meta name="twitter:image" content=".*?" \/>/, `<meta name="twitter:image" content="${image}" />`);
+        .replace(/<meta name="twitter:image" content=".*?" \/>/, `<meta name="twitter:image" content="${image}" />`)
+        .replace(/<meta name="twitter:url" content=".*?" \/>/, `<meta name="twitter:url" content="${fullUrl}" />`);
 
       res.send(finalHtml);
     });

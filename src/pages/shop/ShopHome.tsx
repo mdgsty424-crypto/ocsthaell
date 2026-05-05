@@ -23,6 +23,7 @@ import { Link } from 'react-router-dom';
 import { useCart } from '../../context/CartContext';
 import ShopAppLayout from '../../components/shop/ShopAppLayout';
 import SEO from '../../components/SEO';
+import { generateImgAlt } from '../../lib/seo-utils';
 
 import { BANGLADESH_LOCATIONS, COUNTRIES, CATEGORIES as GLOBAL_CATEGORIES } from '../../constants/locations';
 import { broadcastAutoNotifications } from '../../lib/messaging';
@@ -200,7 +201,8 @@ function ProductCard({ product, onAddToCart }: { product: Product, onAddToCart: 
         <div className="aspect-square relative overflow-hidden bg-gray-50">
           <img
             src={product.images[0] || 'https://picsum.photos/seed/product/400/400'}
-            alt={product.name}
+            alt={generateImgAlt(product.name, 'Shop')}
+            title={product.name}
             className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
             referrerPolicy="no-referrer"
           />
