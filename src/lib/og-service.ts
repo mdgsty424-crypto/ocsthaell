@@ -5,15 +5,16 @@ import React from 'react';
 // Helper to convert image buffer to Base64
 async function imageToBase64(url: string) {
   try {
+    if (!url) return null;
     const response = await fetch(url);
-    if (!response.ok) throw new Error(`Failed to fetch image: ${response.statusText}`);
+    if (!response.ok) return null;
     const buffer = await response.arrayBuffer();
     const base64 = Buffer.from(buffer).toString('base64');
     const contentType = response.headers.get('content-type') || 'image/jpeg';
     return `data:${contentType};base64,${base64}`;
   } catch (error) {
     console.error(`Error converting image to base64: ${url}`, error);
-    return null; // Return null to fall back if necessary
+    return null;
   }
 }
 
@@ -30,9 +31,9 @@ export async function generateOGImage(title: string, newsImage: string) {
   const favicon = "https://i.postimg.cc/05ZcC2b1/14.jpg";
 
   // Prepare images as Data URIs
-  const newsImageData = await imageToBase64(newsImage) || '';
-  const profilePicData = await imageToBase64(profilePic) || '';
-  const faviconData = await imageToBase64(favicon) || '';
+  const newsImageData = await imageToBase64(newsImage);
+  const profilePicData = await imageToBase64(profilePic);
+  const faviconData = await imageToBase64(favicon);
 
   const svg = await satori(
     React.createElement(

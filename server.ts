@@ -89,7 +89,7 @@ async function startServer() {
       const db = admin.firestore();
       const doc = await db.collection('news').doc(id).get();
       
-      const baseUrl = "https://ocsthael.com";
+      const baseUrl = `${req.protocol}://${req.get('host')}`;
       const newsUrl = `${baseUrl}/news/${id}`;
       const imageUrl = `${baseUrl}/newsphoto/${id}?t=${Date.now()}`;
       let title = "OCSTHAEL News";
@@ -404,7 +404,7 @@ Disallow: /profile/settings
               title = `${h} | OCSTHAEL News`;
               description = (data?.content || data?.description || description).substring(0, 160);
               const newsImg = data?.imageUrl || data?.photoUrl || data?.image || "https://i.postimg.cc/05ZcC2b1/14.jpg";
-              image = `https://ocsthael.com/newsphoto/${id}?t=${Date.now()}`;
+              image = `${host}/newsphoto/${id}?t=${Date.now()}`;
               
               jsonLd = JSON.stringify({
                 "@context": "https://schema.org",

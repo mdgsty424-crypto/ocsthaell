@@ -39,7 +39,7 @@ export default function NewsDetails() {
   };
 
   const handleShare = async () => {
-    const url = window.location.href;
+    const shareUrl = `${window.location.origin}/share/news/${id}`;
     const title = article?.title || "News Article";
     
     if (navigator.share) {
@@ -47,7 +47,7 @@ export default function NewsDetails() {
         await navigator.share({
           title: title,
           text: article?.description || title,
-          url: url,
+          url: shareUrl,
         });
       } catch (err) {
         console.warn('Share cancelled or failed:', err);
@@ -55,7 +55,7 @@ export default function NewsDetails() {
     } else {
       // Fallback: Copy to clipboard
       try {
-        await navigator.clipboard.writeText(url);
+        await navigator.clipboard.writeText(shareUrl);
         alert('Link copied to clipboard!');
       } catch (err) {
         console.error('Failed to copy link:', err);
@@ -95,12 +95,14 @@ export default function NewsDetails() {
     }]
   };
 
+  const dynamicOgImage = `${window.location.origin}/newsphoto/${id}?t=${Date.now()}`;
+
   return (
     <div className="min-h-screen pt-24 pb-24 bg-white">
       <SEO 
         title={article.title}
         description={article.content ? article.content.substring(0, 160) + '...' : ''}
-        image={article.imageUrl}
+        image={dynamicOgImage}
         url={window.location.href}
         type="article"
         schema={newsSchema}
