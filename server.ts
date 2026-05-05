@@ -152,6 +152,20 @@ Disallow: /profile/settings
 `);
   });
 
+  // Helper to escape XML special characters
+  const escapeXml = (unsafe: string) => {
+    return unsafe.replace(/[<>&'"]/g, (c) => {
+      switch (c) {
+        case '<': return '&lt;';
+        case '>': return '&gt;';
+        case '&': return '&amp;';
+        case '\'': return '&apos;';
+        case '"': return '&quot;';
+        default: return c;
+      }
+    });
+  };
+
   // Main Sitemap Endpoint
   app.get("/sitemap.xml", async (req, res) => {
     const protocol = req.protocol === 'http' && req.get('x-forwarded-proto') === 'https' ? 'https' : req.protocol;
@@ -170,8 +184,7 @@ Disallow: /profile/settings
     
     let xml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
-        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1"
-        xmlns:video="http://www.google.com/schemas/sitemap-video/1.1">`;
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">`;
 
     // 1. Add Static Pages
     staticPages.forEach(page => {
@@ -213,7 +226,7 @@ Disallow: /profile/settings
                 if (Array.isArray(data.images)) images.push(...data.images.filter(i => typeof i === 'string'));
 
                 const title = data.headline || data.title || data.name || 'OCSTHAEL';
-                const rawTitle = title.toString().replace(/[<>&'"]/g, '');
+                const xmlTitle = escapeXml(title.toString());
 
                 xml += `
   <url>
@@ -223,8 +236,8 @@ Disallow: /profile/settings
     <priority>${col.priority}</priority>
     ${images.length > 0 ? [...new Set(images)].slice(0, 5).map(img => `
     <image:image>
-      <image:loc>${img.replace(/[<>&'"]/g, '')}</image:loc>
-      <image:title>${rawTitle}</image:title>
+      <image:loc>${escapeXml(img)}</image:loc>
+      <image:title>${xmlTitle}</image:title>
     </image:image>`).join('') : ''}
   </url>`;
               } catch (innerErr) {
@@ -268,8 +281,8 @@ Disallow: /profile/settings
 <url>
   <loc>${baseUrl}/gallery</loc>
   <image:image>
-    <image:loc>${data.imageUrl}</image:loc>
-    <image:title>${data.title || 'OCSTHAEL Gallery'}</image:title>
+    <image:loc>${escapeXml(data.imageUrl)}</image:loc>
+    <image:title>${escapeXml(data.title || 'OCSTHAEL Gallery')}</image:title>
   </image:image>
 </url>`;
         }
@@ -282,8 +295,8 @@ Disallow: /profile/settings
 <url>
   <loc>${baseUrl}/news/${doc.id}</loc>
   <image:image>
-    <image:loc>${data.imageUrl}</image:loc>
-    <image:title>${data.title || 'OCSTHAEL News'}</image:title>
+    <image:loc>${escapeXml(data.imageUrl)}</image:loc>
+    <image:title>${escapeXml(data.headline || data.title || 'OCSTHAEL News')}</image:title>
   </image:image>
 </url>`;
         }
@@ -297,8 +310,8 @@ Disallow: /profile/settings
   <loc>${baseUrl}/shop/product/${doc.id}</loc>
   ${data.images.map((img: string) => `
   <image:image>
-    <image:loc>${img}</image:loc>
-    <image:title>${data.name || 'OCSTHAEL Shop'}</image:title>
+    <image:loc>${escapeXml(img)}</image:loc>
+    <image:title>${escapeXml(data.name || 'OCSTHAEL Shop')}</image:title>
   </image:image>`).join('')}
 </url>`;
         }
