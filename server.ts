@@ -56,6 +56,74 @@ async function startServer() {
     }
   });
 
+  // OG Image Generation Proxy
+  app.get("/newsphoto/:id", async (req, res) => {
+    try {
+      const id = req.params.id;
+      const db = admin.firestore();
+      const doc = await db.collection('news').doc(id).get();
+      
+      let title = "OCSTHAEL News";
+      let img = "https://i.postimg.cc/05ZcC2b1/14.jpg";
+      
+      if (doc.exists) {
+        const data = doc.data();
+        title = data?.headline || data?.title || title;
+        img = data?.imageUrl || data?.photoUrl || data?.image || img;
+      }
+      
+      const buffer = await generateOGImage(title, img);
+      res.setHeader("Content-Type", "image/png");
+      res.setHeader("Cache-Control", "public, max-age=604800, immutable");
+      res.send(buffer);
+    } catch (err) {
+      console.error("OG Image Proxy Error:", err);
+      res.status(500).send("Error generating image");
+    }
+  });
+
+  // Sharing Route with Meta Tag and Redirection
+  app.get("/share/news/:id", async (req, res) => {
+    try {
+      const id = req.params.id;
+      const db = admin.firestore();
+      const doc = await db.collection('news').doc(id).get();
+      
+      const baseUrl = "https://ocsthael.com";
+      const newsUrl = `${baseUrl}/news/${id}`;
+      const imageUrl = `${baseUrl}/newsphoto/${id}?t=${Date.now()}`;
+      let title = "OCSTHAEL News";
+      let description = "Check out this update from OCSTHAEL.";
+
+      if (doc.exists) {
+        const data = doc.data();
+        title = data?.headline || data?.title || title;
+        description = (data?.content || data?.description || description).substring(0, 160);
+        
+        // Trigger Indexing
+        await notifyGoogle(newsUrl, 'URL_UPDATED');
+      }
+
+      // Render meta page with refresh
+      res.send(`
+        <html>
+          <head>
+            <meta property="og:title" content="${title}" />
+            <meta property="og:description" content="${description}" />
+            <meta property="og:image" content="${imageUrl}" />
+            <meta property="og:url" content="${newsUrl}" />
+            <meta name="twitter:card" content="summary_large_image" />
+            <meta http-equiv="refresh" content="0;url=${newsUrl}" />
+          </head>
+          <body>Redirecting to news...</body>
+        </html>
+      `);
+    } catch (err) {
+      console.error("Sharing Route Error:", err);
+      res.redirect("https://ocsthael.com/news");
+    }
+  });
+
   // Google Indexing API
   app.post("/api/index-url", async (req, res) => {
     const { url, type } = req.body;
