@@ -12,9 +12,11 @@ import {
   Award,
   TrendingUp,
   Users,
+  Share2
 } from "lucide-react";
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "../firebase";
+import SEO from "../components/SEO";
 
 export default function TeamMemberDetails() {
   const { id } = useParams<{ id: string }>();
@@ -42,6 +44,30 @@ export default function TeamMemberDetails() {
     fetchMember();
   }, [id]);
 
+  const handleShare = async () => {
+    const url = window.location.href;
+    const title = `${member?.name} - ${member?.role || "Team Member"}`;
+    
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: title,
+          text: member?.bio || title,
+          url: url,
+        });
+      } catch (err) {
+        console.warn('Share cancelled or failed:', err);
+      }
+    } else {
+      try {
+        await navigator.clipboard.writeText(url);
+        alert('Link copied to clipboard!');
+      } catch (err) {
+        console.error('Failed to copy link:', err);
+      }
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen pt-32 px-4 flex justify-center items-center bg-white">
@@ -63,8 +89,26 @@ export default function TeamMemberDetails() {
     );
   }
 
+  const personSchema = {
+    "@context": "https://schema.org",
+    "@type": "Person",
+    "name": member.name,
+    "jobTitle": member.role,
+    "image": member.imageUrl || member.image,
+    "description": member.bio,
+    "url": window.location.href
+  };
+
   return (
     <div className="min-h-screen bg-white text-gray-900 overflow-hidden relative">
+      <SEO 
+        title={`${member.name} | ${member.role || 'Executive'}`}
+        description={member.bio ? member.bio.substring(0, 160) : `Meet ${member.name}, our ${member.role || 'Executive'}.`}
+        image={member.imageUrl || member.image}
+        url={window.location.href}
+        type="article"
+        schema={personSchema}
+      />
       {/* Organic Liquid Blobs (Matching Image Template) */}
       <div className="absolute inset-0 z-0 pointer-events-none">
         <motion.div 
@@ -88,12 +132,20 @@ export default function TeamMemberDetails() {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 pt-32 pb-20">
-        <Link
-          to="/"
-          className="inline-flex items-center text-gray-500 hover:text-brand-blue mb-12 transition-colors group"
-        >
-          <ArrowLeft className="w-5 h-5 mr-2 group-hover:-translate-x-1 transition-transform" /> Back to Home
-        </Link>
+        <div className="flex justify-between items-center mb-12">
+          <Link
+            to="/"
+            className="inline-flex items-center text-gray-500 hover:text-brand-blue transition-colors group"
+          >
+            <ArrowLeft className="w-5 h-5 mr-2 group-hover:-translate-x-1 transition-transform" /> Back to Home
+          </Link>
+          <button 
+            onClick={handleShare}
+            className="p-4 bg-gray-50 rounded-2xl text-gray-700 hover:bg-gray-100 transition-all flex items-center gap-2 font-bold"
+          >
+            <Share2 className="w-5 h-5" /> Share
+          </button>
+        </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
           {/* Left Content (Matching Template Layout) */}

@@ -37,6 +37,92 @@ async function startServer() {
   }
 
   // API Routes
+  app.get("/robots.txt", (req, res) => {
+    res.type("text/plain");
+    res.send(`User-agent: *
+Allow: /
+Sitemap: ${req.protocol}://${req.get('host')}/sitemap.xml
+`);
+  });
+
+  app.get("/sitemap.xml", async (req, res) => {
+    const baseUrl = `${req.protocol}://${req.get('host')}`;
+    res.header("Content-Type", "application/xml");
+    
+    let xml = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>${baseUrl}/</loc>
+    <changefreq>daily</changefreq>
+    <priority>1.0</priority>
+  </url>
+  <url>
+    <loc>${baseUrl}/about</loc>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>${baseUrl}/services</loc>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>${baseUrl}/shop</loc>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>${baseUrl}/news</loc>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>${baseUrl}/gallery</loc>
+    <priority>0.7</priority>
+  </url>`;
+
+    if (admin.apps.length) {
+      try {
+        const db = admin.firestore();
+        
+        // Fetch News
+        const newsSnap = await db.collection('news').get();
+        newsSnap.forEach(doc => {
+          xml += `
+  <url>
+    <loc>${baseUrl}/news/${doc.id}</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>`;
+        });
+
+        // Fetch Products
+        const productsSnap = await db.collection('products').get();
+        productsSnap.forEach(doc => {
+          xml += `
+  <url>
+    <loc>${baseUrl}/shop/product/${doc.id}</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>`;
+        });
+
+        // Fetch Team
+        const teamSnap = await db.collection('team').get();
+        teamSnap.forEach(doc => {
+          xml += `
+  <url>
+    <loc>${baseUrl}/team/${doc.id}</loc>
+    <priority>0.5</priority>
+  </url>`;
+        });
+
+      } catch (error) {
+        console.error("Sitemap Fetch Error:", error);
+      }
+    }
+
+    xml += `
+</urlset>`;
+    res.send(xml);
+  });
+
   app.post("/api/notify", async (req, res) => {
     const { tokens, title, body, data } = req.body;
     console.log(`[API/Notify] Attempting to send to ${tokens?.length || 0} tokens. Title: ${title}`);

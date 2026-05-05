@@ -22,6 +22,7 @@ import {
   Share2
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
+import SEO from '../../components/SEO';
 
 export default function ProductDetail() {
   const { id } = useParams();
@@ -82,6 +83,30 @@ export default function ProductDetail() {
     }
   };
 
+  const handleShare = async () => {
+    const url = window.location.href;
+    const title = product?.name || "Product";
+    
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: title,
+          text: product?.description || title,
+          url: url,
+        });
+      } catch (err) {
+        console.warn('Share cancelled or failed:', err);
+      }
+    } else {
+      try {
+        await navigator.clipboard.writeText(url);
+        alert('Link copied to clipboard!');
+      } catch (err) {
+        console.error('Failed to copy link:', err);
+      }
+    }
+  };
+
   if (loading) return (
     <div className="min-h-screen flex items-center justify-center bg-white">
       <div className="w-12 h-12 border-4 border-brand-blue border-t-transparent rounded-full animate-spin" />
@@ -98,8 +123,37 @@ export default function ProductDetail() {
     </div>
   );
 
+  const productSchema = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    "name": product.name,
+    "image": product.images || [product.image],
+    "description": product.description,
+    "sku": product.id,
+    "offers": {
+      "@type": "Offer",
+      "url": window.location.href,
+      "priceCurrency": "BDT",
+      "price": product.discountPrice || product.price,
+      "availability": "https://schema.org/InStock"
+    },
+    "aggregateRating": reviews.length > 0 ? {
+      "@type": "AggregateRating",
+      "ratingValue": product.rating || "5.0",
+      "reviewCount": reviews.length
+    } : undefined
+  };
+
   return (
     <div className="min-h-screen bg-gray-50/50 pb-32">
+      <SEO 
+        title={product.name}
+        description={product.description.substring(0, 160)}
+        image={product.images[0]}
+        url={window.location.href}
+        type="product"
+        schema={productSchema}
+      />
       {/* Top Header */}
       <div className="fixed top-0 left-0 right-0 z-50 px-4 py-4 flex justify-between items-center pointer-events-none">
         <button 
@@ -109,7 +163,10 @@ export default function ProductDetail() {
           <ArrowLeft size={20} />
         </button>
         <div className="flex gap-2">
-          <button className="p-3 bg-white/80 backdrop-blur-md rounded-2xl shadow-lg pointer-events-auto active:scale-90 transition-all">
+          <button 
+            onClick={handleShare}
+            className="p-3 bg-white/80 backdrop-blur-md rounded-2xl shadow-lg pointer-events-auto active:scale-90 transition-all"
+          >
             <Share2 size={20} />
           </button>
           <button className="p-3 bg-white/80 backdrop-blur-md rounded-2xl shadow-lg pointer-events-auto active:scale-90 transition-all">
@@ -119,7 +176,7 @@ export default function ProductDetail() {
       </div>
 
       {/* Image Slider */}
-      <div className="relative aspect-square bg-white overflow-hidden">
+<div className="relative aspect-square bg-white overflow-hidden">
         <AnimatePresence mode="wait">
           <motion.img
             key={currentImage}

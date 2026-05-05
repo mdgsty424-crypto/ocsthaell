@@ -4,6 +4,7 @@ import { ArrowRight, Youtube, Facebook, Image as ImageIcon, MousePointer2, Chevr
 import { Link } from 'react-router-dom';
 import { collection, onSnapshot, query, limit, where } from 'firebase/firestore';
 import { db } from '../firebase';
+import SEO from '../components/SEO';
 
 export default function Home() {
   const [apps, setApps] = useState<any[]>([]);
@@ -135,6 +136,13 @@ export default function Home() {
 
   return (
     <div className="bg-white text-gray-900 min-h-screen relative">
+      <SEO 
+        title="OCSTHAEL | Building a New Bangladesh"
+        description="Empowering your digital future through a unified ecosystem. We connect communication, social networking, and online income in one seamless experience."
+        image="https://i.postimg.cc/05ZcC2b1/14.jpg"
+        url={window.location.origin}
+        type="website"
+      />
       {/* Hero Background Video */}
       {heroBackground && (heroBackground.mediaType === 'video' || isVideoUrl(heroBackground.mediaUrl)) && heroBackground.active && (
         <div className="absolute inset-0 w-full h-screen overflow-hidden z-0">
