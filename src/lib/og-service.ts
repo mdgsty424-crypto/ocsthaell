@@ -2,16 +2,37 @@ import satori from 'satori';
 import { Resvg } from '@resvg/resvg-js';
 import React from 'react';
 
+// Helper to convert image buffer to Base64
+async function imageToBase64(url: string) {
+  try {
+    const response = await fetch(url);
+    if (!response.ok) throw new Error(`Failed to fetch image: ${response.statusText}`);
+    const buffer = await response.arrayBuffer();
+    const base64 = Buffer.from(buffer).toString('base64');
+    const contentType = response.headers.get('content-type') || 'image/jpeg';
+    return `data:${contentType};base64,${base64}`;
+  } catch (error) {
+    console.error(`Error converting image to base64: ${url}`, error);
+    return null; // Return null to fall back if necessary
+  }
+}
+
 /**
  * OG Image Generator for OCSTHAEL
- * Logic based on Vercel OG but adapted for Node.js Express
  */
 export async function generateOGImage(title: string, newsImage: string) {
-  // We need a font for satori
-  const fontData = await fetch('https://raw.githubusercontent.com/googlefonts/roboto/main/src/hinted/Roboto-Bold.ttf').then(res => res.arrayBuffer());
+  // Fetch Font
+  const fontResponse = await fetch('https://raw.githubusercontent.com/googlefonts/roboto/main/src/hinted/Roboto-Bold.ttf');
+  if (!fontResponse.ok) throw new Error('Failed to fetch font');
+  const fontData = await fontResponse.arrayBuffer();
 
   const profilePic = "https://res.cloudinary.com/dxiolmmdv/image/upload/v1777981994/IMG-20260213-WA0001_g98bsm.jpg";
-  const favicon = "https://i.postimg.cc/05ZcC2b1/14.jpg"; // Using the postimg logo as favicon fallback
+  const favicon = "https://i.postimg.cc/05ZcC2b1/14.jpg";
+
+  // Prepare images as Data URIs
+  const newsImageData = await imageToBase64(newsImage) || '';
+  const profilePicData = await imageToBase64(profilePic) || '';
+  const faviconData = await imageToBase64(favicon) || '';
 
   const svg = await satori(
     React.createElement(
@@ -22,7 +43,8 @@ export async function generateOGImage(title: string, newsImage: string) {
           width: '100%',
           display: 'flex',
           flexDirection: 'column',
-          backgroundImage: `linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.85)), url(${newsImage})`,
+          backgroundImage: newsImageData ? `linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.85)), url(${newsImageData})` : undefined,
+          backgroundColor: newsImageData ? undefined : '#333',
           backgroundSize: 'cover',
           padding: '50px',
           color: 'white',
@@ -36,10 +58,10 @@ export async function generateOGImage(title: string, newsImage: string) {
           'div',
           { style: { display: 'flex', alignItems: 'center' } },
           [
-            React.createElement('img', {
-              src: profilePic,
+            profilePicData ? React.createElement('img', {
+              src: profilePicData,
               style: { width: '80px', height: '80px', borderRadius: '40px', border: '3px solid white', marginRight: '20px' },
-            }),
+            }) : null,
             React.createElement(
               'span',
               { style: { fontSize: '32px', fontWeight: 'bold' } },
@@ -62,10 +84,10 @@ export async function generateOGImage(title: string, newsImage: string) {
                   { style: { fontSize: '60px', margin: 0, fontWeight: '900', letterSpacing: '-2px' } },
                   'OCSTHAEL NEWS'
                 ),
-                React.createElement('img', {
-                  src: favicon,
+                faviconData ? React.createElement('img', {
+                  src: faviconData,
                   style: { width: '50px', height: '50px', borderRadius: '25px', marginLeft: '20px' },
-                }),
+                }) : null,
               ]
             ),
             React.createElement(
