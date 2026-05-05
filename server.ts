@@ -5,6 +5,7 @@ import fs from "fs";
 import { fileURLToPath } from "url";
 import admin from "firebase-admin";
 import { generateOGImage } from "./src/lib/og-service";
+import { notifyGoogle } from "./src/lib/indexing-service";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -55,12 +56,26 @@ async function startServer() {
     }
   });
 
+  // Google Indexing API
+  app.post("/api/index-url", async (req, res) => {
+    const { url, type } = req.body;
+    if (!url) return res.status(400).json({ error: "URL is required" });
+    
+    // Safety check: Only allow indexing our own domain
+    if (!url.includes("ocsthael.com")) {
+       return res.status(403).json({ error: "Only ocsthael.com URLs are allowed" });
+    }
+
+    const result = await notifyGoogle(url, type || 'URL_UPDATED');
+    res.json(result);
+  });
+
   // Robots.txt
   app.get("/robots.txt", (req, res) => {
     res.type("text/plain");
     res.send(`User-agent: *
 Allow: /
-Sitemap: ${req.protocol}://${req.get('host')}/sitemap.xml
+Sitemap: https://ocsthael.com/sitemap.xml
 Disallow: /admin
 Disallow: /profile/settings
 `);
@@ -68,61 +83,101 @@ Disallow: /profile/settings
 
   // Main Sitemap Endpoint
   app.get("/sitemap.xml", async (req, res) => {
-    const baseUrl = `${req.protocol}://${req.get('host')}`;
-    const staticPages = ['', '/about', '/services', '/news', '/gallery', '/team', '/apps', '/members'];
+    const baseUrl = "https://ocsthael.com";
+    const today = new Date().toISOString().split('T')[0];
+    const staticPages = [
+      '', '/about', '/services', '/news', '/gallery', '/team', '/apps', 
+      '/members', '/contact', '/registration', '/shop'
+    ];
+    
     res.header("Content-Type", "application/xml");
     
     let xml = `<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">`;
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1"
+        xmlns:video="http://www.google.com/schemas/sitemap-video/1.1">`;
 
-    // Static Pages
+    // 1. Add Static Pages
     staticPages.forEach(page => {
       xml += `
   <url>
     <loc>${baseUrl}${page}</loc>
+    <lastmod>${today}</lastmod>
     <changefreq>${page === '' ? 'daily' : 'weekly'}</changefreq>
     <priority>${page === '' ? '1.0' : '0.8'}</priority>
   </url>`;
     });
 
+    // 2. Add Dynamic Content with Images
     if (admin.apps.length) {
       try {
         const db = admin.firestore();
         
-        // Fetch News
-        const newsSnap = await db.collection('news').get();
-        newsSnap.forEach(doc => {
-          xml += `
-  <url>
-    <loc>${baseUrl}/news/${doc.id}</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>`;
-        });
+        // Helper to fetch and add to XML
+        const collections = [
+          { name: 'news', prefix: '/news', priority: '0.9', freq: 'daily' },
+          { name: 'products', prefix: '/shop/product', priority: '0.9', freq: 'daily' },
+          { name: 'team', prefix: '/team', priority: '0.7', freq: 'monthly' },
+          { name: 'staff', prefix: '/staff', priority: '0.7', freq: 'monthly' },
+          { name: 'services', prefix: '/services', priority: '0.8', freq: 'weekly' },
+          { name: 'apps', prefix: '/apps', priority: '0.8', freq: 'weekly' },
+          { name: 'ads', prefix: '/ads', priority: '0.6', freq: 'daily' },
+          { name: 'gallery', prefix: '/gallery', priority: '0.6', freq: 'weekly' },
+        ];
 
-        // Fetch Products
-        const productsSnap = await db.collection('products').get();
-        productsSnap.forEach(doc => {
-          xml += `
-  <url>
-    <loc>${baseUrl}/shop/product/${doc.id}</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>`;
-        });
+        for (const col of collections) {
+          const snap = await db.collection(col.name).get();
+          snap.forEach(doc => {
+            const data = doc.data();
+            const images: string[] = [];
+            const videos: { url: string; title: string; description: string; thumbnail: string }[] = [];
+            
+            // Extract images
+            if (data.imageUrl) images.push(data.imageUrl);
+            if (data.photoUrl) images.push(data.photoUrl);
+            if (data.iconUrl) images.push(data.iconUrl);
+            if (data.image) images.push(data.image);
+            if (Array.isArray(data.images)) images.push(...data.images);
 
-        // Fetch Team
-        const teamSnap = await db.collection('team').get();
-        teamSnap.forEach(doc => {
-          xml += `
-  <url>
-    <loc>${baseUrl}/team/${doc.id}</loc>
-    <priority>0.5</priority>
-  </url>`;
-        });
+            // Extract videos
+            const title = data.headline || data.title || data.name || 'OCSTHAEL Content';
+            const desc = (data.content || data.description || data.bio || title).substring(0, 200).replace(/[<>&'"]/g, '');
+            const rawTitle = title.replace(/[<>&'"]/g, '');
+            const thumb = images[0] || "https://ocsthael.com/og-image.jpg";
 
+            if (data.videoUrl || data.youtubeUrl || data.clipUrl) {
+              videos.push({
+                url: data.videoUrl || data.youtubeUrl || data.clipUrl,
+                title: rawTitle,
+                description: desc,
+                thumbnail: thumb
+              });
+            }
+
+            xml += `
+  <url>
+    <loc>${baseUrl}${col.prefix}/${doc.id}</loc>
+    <lastmod>${today}</lastmod>
+    <changefreq>${col.freq}</changefreq>
+    <priority>${col.priority}</priority>
+    ${images.length > 0 ? [...new Set(images)].map(img => `
+    <image:image>
+      <image:loc>${img}</image:loc>
+      <image:title>${rawTitle}</image:title>
+    </image:image>`).join('') : ''}
+    ${videos.length > 0 ? videos.map(v => `
+    <video:video>
+      <video:thumbnail_loc>${v.thumbnail}</video:thumbnail_loc>
+      <video:title>${v.title}</video:title>
+      <video:description>${v.description}</video:description>
+      <video:content_loc>${v.url}</video:content_loc>
+      <video:publication_date>${today}T00:00:00Z</video:publication_date>
+    </video:video>`).join('') : ''}
+  </url>`;
+          });
+        }
       } catch (error) {
-        console.error("Sitemap Fetch Error:", error);
+        console.error("Sitemap Dynamic Fetch Error:", error);
       }
     }
 
@@ -143,7 +198,7 @@ Disallow: /profile/settings
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
         xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">`;
 
-      const baseUrl = `${req.protocol}://${req.get('host')}`;
+      const baseUrl = "https://ocsthael.com";
 
       gallerySnap.forEach(doc => {
         const data = doc.data();
@@ -266,6 +321,7 @@ Disallow: /profile/settings
       let title = "OCSTHAEL | Digital Ecosystem";
       let description = "Empowering your digital future through a unified ecosystem.";
       let image = "https://i.postimg.cc/05ZcC2b1/14.jpg";
+      let jsonLd = "";
 
       try {
         if (admin.apps.length) {
@@ -276,10 +332,24 @@ Disallow: /profile/settings
             const doc = await db.collection('news').doc(id).get();
             if (doc.exists) {
               const data = doc.data();
-              title = `${data?.headline || data?.title} | OCSTHAEL News`;
+              const h = data?.headline || data?.title || "News";
+              title = `${h} | OCSTHAEL News`;
               description = (data?.content || data?.description || description).substring(0, 160);
               const newsImg = data?.imageUrl || data?.photoUrl || data?.image || "https://i.postimg.cc/05ZcC2b1/14.jpg";
-              image = `${host}/api/og?title=${encodeURIComponent(data?.headline || data?.title)}&img=${encodeURIComponent(newsImg)}`;
+              image = `${host}/api/og?title=${encodeURIComponent(h)}&img=${encodeURIComponent(newsImg)}`;
+              
+              jsonLd = JSON.stringify({
+                "@context": "https://schema.org",
+                "@type": "NewsArticle",
+                "headline": h,
+                "image": [newsImg],
+                "datePublished": data?.createdAt?.toDate ? data.createdAt.toDate().toISOString() : new Date().toISOString(),
+                "author": [{
+                  "@type": "Person",
+                  "name": "SAKIBUL HASSAN",
+                  "url": "https://ocsthael.com/team"
+                }]
+              });
             }
           } else if (url.startsWith('/shop/product/')) {
             const id = url.split('/shop/product/')[1].split('?')[0];
@@ -289,6 +359,20 @@ Disallow: /profile/settings
               title = `${data?.name} | OCSTHAEL Store`;
               description = (data?.description || description).substring(0, 160);
               image = data?.images?.[0] || data?.imageUrl || data?.image || image;
+
+              jsonLd = JSON.stringify({
+                "@context": "https://schema.org",
+                "@type": "Product",
+                "name": data?.name,
+                "image": data?.images || [image],
+                "description": description,
+                "offers": {
+                  "@type": "Offer",
+                  "price": data?.price,
+                  "priceCurrency": "BDT",
+                  "availability": "https://schema.org/InStock"
+                }
+              });
             }
           } else if (url.startsWith('/team/') || url.startsWith('/staff/')) {
             const id = url.split('/').pop()?.split('?')[0] || '';
@@ -298,6 +382,15 @@ Disallow: /profile/settings
               title = `${data?.name} - ${data?.role} | OCSTHAEL Team`;
               description = (data?.bio || description).substring(0, 160);
               image = data?.imageUrl || data?.image || data?.photoUrl || image;
+
+              jsonLd = JSON.stringify({
+                "@context": "https://schema.org",
+                "@type": "Person",
+                "name": data?.name,
+                "jobTitle": data?.role,
+                "image": image,
+                "description": description
+              });
             }
           } else if (url.startsWith('/services/')) {
             const id = url.split('/services/')[1].split('?')[0];
@@ -326,6 +419,16 @@ Disallow: /profile/settings
         console.error("Meta Injection Error:", err);
       }
 
+      // Add default WebSite schema if none exists
+      if (!jsonLd) {
+        jsonLd = JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "WebSite",
+          "name": "OCSTHAEL",
+          "url": "https://ocsthael.com"
+        });
+      }
+
       const finalHtml = indexHtml
         .replace(/<title>.*?<\/title>/, `<title>${title}</title>`)
         .replace(/<meta name="description" content=".*?" \/>/, `<meta name="description" content="${description}" />`)
@@ -336,7 +439,8 @@ Disallow: /profile/settings
         .replace(/<meta name="twitter:title" content=".*?" \/>/, `<meta name="twitter:title" content="${title}" />`)
         .replace(/<meta name="twitter:description" content=".*?" \/>/, `<meta name="twitter:description" content="${description}" />`)
         .replace(/<meta name="twitter:image" content=".*?" \/>/, `<meta name="twitter:image" content="${image}" />`)
-        .replace(/<meta name="twitter:url" content=".*?" \/>/, `<meta name="twitter:url" content="${fullUrl}" />`);
+        .replace(/<meta name="twitter:url" content=".*?" \/>/, `<meta name="twitter:url" content="${fullUrl}" />`)
+        .replace('</head>', `<script type="application/ld+json">${jsonLd}</script></head>`);
 
       res.send(finalHtml);
     });
