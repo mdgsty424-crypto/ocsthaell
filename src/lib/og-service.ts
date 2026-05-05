@@ -43,64 +43,96 @@ export async function generateOGImage(title: string, newsImage: string) {
           width: '100%',
           display: 'flex',
           flexDirection: 'column',
-          backgroundImage: newsImageData ? `linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.85)), url(${newsImageData})` : undefined,
-          backgroundColor: newsImageData ? undefined : '#333',
-          backgroundSize: 'cover',
+          backgroundColor: '#222',
           padding: '50px',
           color: 'white',
           justifyContent: 'space-between',
           fontFamily: 'Roboto',
+          position: 'relative',
         },
       },
       [
-        // Top Left: Profile Circle & Name
-        React.createElement(
-          'div',
-          { style: { display: 'flex', alignItems: 'center' } },
-          [
-            profilePicData ? React.createElement('img', {
-              src: profilePicData,
-              style: { width: '80px', height: '80px', borderRadius: '40px', border: '3px solid white', marginRight: '20px' },
-            }) : null,
-            React.createElement(
-              'span',
-              { style: { fontSize: '32px', fontWeight: 'bold' } },
-              'SAKIBUL HASSAN'
-            ),
-          ]
-        ),
+        // Background Layer
+        newsImageData ? React.createElement('img', {
+          src: newsImageData,
+          style: {
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: '100%',
+            objectFit: 'cover',
+            zIndex: 0,
+          },
+        }) : null,
+        // Overlay for readability
+        React.createElement('div', {
+          style: {
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: '100%',
+            backgroundColor: 'rgba(0,0,0,0.6)',
+            zIndex: 1,
+          },
+        }),
 
-        // Bottom Section: Branding & Title
+        // Content Layer (zIndex > 1)
         React.createElement(
           'div',
-          { style: { display: 'flex', flexDirection: 'column' } },
+          { style: { display: 'flex', flexDirection: 'column', width: '100%', height: '100%', zIndex: 2, justifyContent: 'space-between' } },
           [
+            // Top: Profile Circle & Name
             React.createElement(
               'div',
-              { style: { display: 'flex', alignItems: 'center', marginBottom: '15px' } },
+              { style: { display: 'flex', alignItems: 'center' } },
               [
-                React.createElement(
-                  'h1',
-                  { style: { fontSize: '60px', margin: 0, fontWeight: '900', letterSpacing: '-2px' } },
-                  'OCSTHAEL NEWS'
-                ),
-                faviconData ? React.createElement('img', {
-                  src: faviconData,
-                  style: { width: '50px', height: '50px', borderRadius: '25px', marginLeft: '20px' },
+                profilePicData ? React.createElement('img', {
+                  src: profilePicData,
+                  style: { width: '80px', height: '80px', borderRadius: '40px', border: '3px solid white', marginRight: '20px' },
                 }) : null,
+                React.createElement(
+                  'span',
+                  { style: { fontSize: '32px', fontWeight: 'bold' } },
+                  'SAKIBUL HASSAN'
+                ),
               ]
             ),
+            // Bottom: Title & Branding
             React.createElement(
-              'p',
-              {
-                style: {
-                  fontSize: '40px',
-                  color: '#fff',
-                  fontWeight: '600',
-                  lineHeight: '1.2',
-                },
-              },
-              title
+              'div',
+              { style: { display: 'flex', flexDirection: 'column' } },
+              [
+                React.createElement(
+                  'div',
+                  { style: { display: 'flex', alignItems: 'center', marginBottom: '10px' } },
+                  [
+                    React.createElement(
+                      'h1',
+                      { style: { fontSize: '50px', margin: 0, fontWeight: '900', letterSpacing: '-1px' } },
+                      'OCSTHAEL NEWS'
+                    ),
+                    faviconData ? React.createElement('img', {
+                      src: faviconData,
+                      style: { width: '40px', height: '40px', borderRadius: '20px', marginLeft: '20px' },
+                    }) : null,
+                  ]
+                ),
+                React.createElement(
+                  'p',
+                  {
+                    style: {
+                      fontSize: '36px',
+                      color: '#fff',
+                      fontWeight: '600',
+                      lineHeight: '1.2',
+                      margin: 0,
+                    },
+                  },
+                  title
+                ),
+              ]
             ),
           ]
         ),

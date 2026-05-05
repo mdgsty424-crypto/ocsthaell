@@ -336,7 +336,7 @@ Disallow: /profile/settings
               title = `${h} | OCSTHAEL News`;
               description = (data?.content || data?.description || description).substring(0, 160);
               const newsImg = data?.imageUrl || data?.photoUrl || data?.image || "https://i.postimg.cc/05ZcC2b1/14.jpg";
-              image = `${host}/api/og?title=${encodeURIComponent(h)}&img=${encodeURIComponent(newsImg)}`;
+              image = `${host}/api/og?title=${encodeURIComponent(h)}&img=${encodeURIComponent(newsImg)}&t=${Date.now()}`;
               
               jsonLd = JSON.stringify({
                 "@context": "https://schema.org",
