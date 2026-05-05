@@ -18,6 +18,8 @@ import {
 import { doc, getDoc, collection, query, where, onSnapshot, addDoc, serverTimestamp, increment, updateDoc } from "firebase/firestore";
 import { db } from "../firebase";
 
+import SEO from "../components/SEO";
+
 export default function AppDetails() {
   const { id } = useParams<{ id: string }>();
   const [app, setApp] = useState<any>(null);
@@ -113,8 +115,34 @@ export default function AppDetails() {
     );
   }
 
+  const appSchema = {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": app.name,
+    "operatingSystem": "Android",
+    "applicationCategory": app.category || "UtilitiesApplication",
+    "aggregateRating": {
+      "@type": "AggregateRating",
+      "ratingValue": app.rating || "5.0",
+      "reviewCount": app.downloadCount || "0"
+    },
+    "offer": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "BDT"
+    }
+  };
+
   return (
     <div className="min-h-screen pt-24 pb-12 bg-white">
+      <SEO 
+        title={app.name}
+        description={app.description?.substring(0, 160)}
+        image={app.iconUrl}
+        url={window.location.href}
+        type="website"
+        schema={appSchema}
+      />
       {/* Hero Section */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <Link

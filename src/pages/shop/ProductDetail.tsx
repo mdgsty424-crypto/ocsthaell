@@ -127,7 +127,7 @@ export default function ProductDetail() {
     "@context": "https://schema.org",
     "@type": "Product",
     "name": product.name,
-    "image": product.images || [product.image],
+    "image": product.images && product.images.length > 0 ? product.images : [],
     "description": product.description,
     "sku": product.id,
     "offers": {

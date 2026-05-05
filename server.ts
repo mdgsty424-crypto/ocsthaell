@@ -213,8 +213,8 @@ Sitemap: ${req.protocol}://${req.get('host')}/sitemap.xml
               description = data?.description?.substring(0, 160) || description;
               image = data?.images?.[0] || image;
             }
-          } else if (url.startsWith('/team/')) {
-            const id = url.split('/team/')[1];
+          } else if (url.startsWith('/team/') || url.startsWith('/staff/')) {
+            const id = url.split('/').pop() || '';
             const doc = await db.collection('team').doc(id).get();
             if (doc.exists) {
               const data = doc.data();
@@ -222,6 +222,27 @@ Sitemap: ${req.protocol}://${req.get('host')}/sitemap.xml
               description = data?.bio?.substring(0, 160) || description;
               image = data?.imageUrl || data?.image || image;
             }
+          } else if (url.startsWith('/services/')) {
+            const id = url.split('/services/')[1];
+            const doc = await db.collection('services').doc(id).get();
+            if (doc.exists) {
+              const data = doc.data();
+              title = `${data?.title} | OCSTHAEL Services`;
+              description = data?.description?.substring(0, 160) || description;
+              image = data?.imageUrl || image;
+            }
+          } else if (url.startsWith('/apps/')) {
+            const id = url.split('/apps/')[1];
+            const doc = await db.collection('apps').doc(id).get();
+            if (doc.exists) {
+              const data = doc.data();
+              title = `${data?.name} | OCSTHAEL Apps`;
+              description = data?.description?.substring(0, 160) || description;
+              image = data?.iconUrl || image;
+            }
+          } else if (url === '/gallery') {
+            title = "Gallery | OCSTHAEL";
+            description = "A visual journey through the OCSTHAEL ecosystem, events, and technological milestones.";
           }
         }
       } catch (err) {
