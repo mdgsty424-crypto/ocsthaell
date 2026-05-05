@@ -1,9 +1,16 @@
 import { motion } from 'motion/react';
 import { Target, Eye, Zap, ShieldCheck, Globe, Smartphone, Briefcase, MessageSquare, ShoppingCart, DollarSign, Cloud, BookOpen, Music, Video, Map, Bot } from 'lucide-react';
+import SEO from '../components/SEO';
 
 export default function About() {
   return (
     <div className="pt-32 pb-24 min-h-screen">
+      <SEO 
+        title="About OCSTHAEL"
+        description="Learn about our mission to build a unified digital ecosystem in Bangladesh, connecting social media, chat, and online income."
+        url={window.location.href}
+        type="website"
+      />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Hero Section */}
         <motion.div

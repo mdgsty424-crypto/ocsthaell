@@ -4,6 +4,7 @@ import { motion } from "motion/react";
 import { ArrowLeft, Hexagon, Layers, Zap, Shield, Code, Smartphone, Globe, Cloud, CheckCircle2 } from "lucide-react";
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "../firebase";
+import SEO from "../components/SEO";
 
 export default function ServiceDetails() {
   const { id } = useParams<{ id: string }>();
@@ -58,6 +59,12 @@ export default function ServiceDetails() {
 
   return (
     <div className="min-h-screen pt-24 pb-24 bg-white text-gray-900 overflow-hidden relative">
+      <SEO 
+        title={`${service.title} | OCSTHAEL Services`}
+        description={service.description}
+        url={window.location.href}
+        type="article"
+      />
       {/* Organic Liquid Blobs */}
       <div className="absolute inset-0 z-0 pointer-events-none">
         <motion.div 

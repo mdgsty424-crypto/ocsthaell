@@ -4,6 +4,7 @@ import { collection, onSnapshot } from 'firebase/firestore';
 import { db } from '../firebase';
 import { Link } from 'react-router-dom';
 import { Hexagon, Layers, Zap, Shield, Code, Smartphone, Globe, Cloud, ArrowRight } from 'lucide-react';
+import SEO from '../components/SEO';
 
 interface ServiceData {
   id: string;
@@ -30,6 +31,12 @@ export default function Services() {
 
   return (
     <div className="pt-32 pb-24 min-h-screen">
+      <SEO 
+        title="Our Services"
+        description="Explore the core services of OCSTHAEL ecosystem: Social Media, Chat, Online Income, and E-commerce."
+        url={window.location.href}
+        type="website"
+      />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <motion.div
           initial={{ opacity: 0, y: 20 }}

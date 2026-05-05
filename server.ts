@@ -1,6 +1,7 @@
 import express from "express";
 import { createServer as createViteServer } from "vite";
 import path from "path";
+import fs from "fs";
 import { fileURLToPath } from "url";
 import admin from "firebase-admin";
 
@@ -180,9 +181,64 @@ Sitemap: ${req.protocol}://${req.get('host')}/sitemap.xml
     app.use(vite.middlewares);
   } else {
     const distPath = path.join(process.cwd(), 'dist');
-    app.use(express.static(distPath));
-    app.get('*', (req, res) => {
-      res.sendFile(path.join(distPath, 'index.html'));
+    const indexHtml = fs.readFileSync(path.join(distPath, 'index.html'), 'utf-8');
+
+    app.use(express.static(distPath, { index: false }));
+
+    app.get('*', async (req, res) => {
+      const url = req.originalUrl;
+      let title = "OCSTHAEL | Digital Ecosystem";
+      let description = "Empowering your digital future through a unified ecosystem.";
+      let image = "https://i.postimg.cc/05ZcC2b1/14.jpg";
+
+      try {
+        if (admin.apps.length) {
+          const db = admin.firestore();
+          
+          if (url.startsWith('/news/')) {
+            const id = url.split('/news/')[1];
+            const doc = await db.collection('news').doc(id).get();
+            if (doc.exists) {
+              const data = doc.data();
+              title = `${data?.title} | OCSTHAEL News`;
+              description = data?.content?.substring(0, 160) || description;
+              image = data?.imageUrl || image;
+            }
+          } else if (url.startsWith('/shop/product/')) {
+            const id = url.split('/shop/product/')[1];
+            const doc = await db.collection('products').doc(id).get();
+            if (doc.exists) {
+              const data = doc.data();
+              title = `${data?.name} | OCSTHAEL Shop`;
+              description = data?.description?.substring(0, 160) || description;
+              image = data?.images?.[0] || image;
+            }
+          } else if (url.startsWith('/team/')) {
+            const id = url.split('/team/')[1];
+            const doc = await db.collection('team').doc(id).get();
+            if (doc.exists) {
+              const data = doc.data();
+              title = `${data?.name} - ${data?.role} | OCSTHAEL Team`;
+              description = data?.bio?.substring(0, 160) || description;
+              image = data?.imageUrl || data?.image || image;
+            }
+          }
+        }
+      } catch (err) {
+        console.error("Meta Injection Error:", err);
+      }
+
+      const finalHtml = indexHtml
+        .replace(/<title>.*?<\/title>/, `<title>${title}</title>`)
+        .replace(/<meta name="description" content=".*?" \/>/, `<meta name="description" content="${description}" />`)
+        .replace(/<meta property="og:title" content=".*?" \/>/, `<meta property="og:title" content="${title}" />`)
+        .replace(/<meta property="og:description" content=".*?" \/>/, `<meta property="og:description" content="${description}" />`)
+        .replace(/<meta property="og:image" content=".*?" \/>/, `<meta property="og:image" content="${image}" />`)
+        .replace(/<meta name="twitter:title" content=".*?" \/>/, `<meta name="twitter:title" content="${title}" />`)
+        .replace(/<meta name="twitter:description" content=".*?" \/>/, `<meta name="twitter:description" content="${description}" />`)
+        .replace(/<meta name="twitter:image" content=".*?" \/>/, `<meta name="twitter:image" content="${image}" />`);
+
+      res.send(finalHtml);
     });
   }
 

@@ -4,6 +4,7 @@ import { collection, onSnapshot } from 'firebase/firestore';
 import { db } from '../firebase';
 import { Linkedin, Twitter, ArrowRight, Mail, Facebook, Youtube, Globe, Award, TrendingUp, Users } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import SEO from '../components/SEO';
 
 interface TeamMember {
   id: string;
@@ -35,6 +36,12 @@ export default function Team() {
 
   return (
     <div className="pt-32 pb-24 min-h-screen bg-white text-gray-900 overflow-hidden relative">
+      <SEO 
+        title="Our Team"
+        description="Meet the leadership and visionaries behind OCSTHAEL digital ecosystem."
+        url={window.location.href}
+        type="website"
+      />
       {/* Organic Liquid Blobs (Matching Image Template) */}
       <div className="absolute inset-0 z-0 pointer-events-none">
         <motion.div 

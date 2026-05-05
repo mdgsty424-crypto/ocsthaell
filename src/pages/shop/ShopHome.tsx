@@ -22,6 +22,7 @@ import { motion } from 'motion/react';
 import { Link } from 'react-router-dom';
 import { useCart } from '../../context/CartContext';
 import ShopAppLayout from '../../components/shop/ShopAppLayout';
+import SEO from '../../components/SEO';
 
 import { BANGLADESH_LOCATIONS, COUNTRIES, CATEGORIES as GLOBAL_CATEGORIES } from '../../constants/locations';
 import { broadcastAutoNotifications } from '../../lib/messaging';
@@ -96,6 +97,12 @@ export default function ShopHome() {
 
   return (
     <ShopAppLayout onSearch={setSearchQuery}>
+      <SEO 
+        title="OCSTHAEL Shopping"
+        description="Shop the latest gadgets, electronics, fashion and global imports from OCSTHAEL Shopping."
+        url={window.location.href}
+        type="website"
+      />
       {/* Category Wrap Fix */}
       <div className="px-4 py-6 flex flex-wrap gap-4 justify-center">
         {CATEGORIES.map((cat) => (

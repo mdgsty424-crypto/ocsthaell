@@ -4,6 +4,7 @@ import { collection, onSnapshot } from 'firebase/firestore';
 import { db } from '../firebase';
 import { Calendar, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import SEO from '../components/SEO';
 
 interface NewsItem {
   id: string;
@@ -31,6 +32,12 @@ export default function News() {
 
   return (
     <div className="pt-32 pb-24 min-h-screen">
+      <SEO 
+        title="News & Updates"
+        description="Stay updated with the latest news, announcements and product releases from OCSTHAEL."
+        url={window.location.href}
+        type="website"
+      />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <motion.div
           initial={{ opacity: 0, y: 20 }}

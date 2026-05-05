@@ -22,7 +22,7 @@ export default function SEO({
 }: SEOProps) {
   return (
     <Helmet>
-      <title>{title} | Digital Ecosystem</title>
+      <title>{title} | OCSTHAEL</title>
       <meta name="description" content={description} />
       <link rel="canonical" href={url} />
       
@@ -31,7 +31,16 @@ export default function SEO({
       <meta property="og:url" content={url} />
       <meta property="og:title" content={title} />
       <meta property="og:description" content={description} />
-      {image && <meta property="og:image" content={image} />}
+      <meta property="og:site_name" content="OCSTHAEL" />
+      {image && (
+        <>
+          <meta property="og:image" content={image} />
+          <meta property="og:image:secure_url" content={image} />
+          <meta property="og:image:width" content="1200" />
+          <meta property="og:image:height" content="630" />
+          <meta property="og:image:alt" content={title} />
+        </>
+      )}
       {video && <meta property="og:video" content={video} />}
       
       {/* JSON-LD Structured Data */}
